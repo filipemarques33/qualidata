@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "qualidata-62edd": {
+      "hosting": {
+        "qualidata": [
+          "qualidata-62edd"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "qualidata-62edd"
+  }
+}
