@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { firestore } from 'firebase';
+import firestore from 'firebase';
 import { File } from 'src/app/models/file';
 
 @Injectable({

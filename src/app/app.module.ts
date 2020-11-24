@@ -10,15 +10,21 @@ import { ImportsModule } from 'src/app/common/imports.module';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { environment } from 'src/environments/environment';
-import { ComposeComponent } from './containers/compose/compose.component';
-import { TemplateComponent } from './templates/template/template.component';
+
+import { ComposeComponent } from './components/compose/compose.component';
+import { NavBarComponent } from './components/navbar/navbar.component';
+import { NetworkComponent } from './components/network/network.component';
+import { NetworkSidebarComponent } from './components/network-sidebar/network-sidebar.component';
+
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
     AppComponent,
     ComposeComponent,
-    TemplateComponent
+    NavBarComponent,
+    NetworkComponent,
+    NetworkSidebarComponent
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebaseConfig),

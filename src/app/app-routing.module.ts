@@ -1,10 +1,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { ComposeComponent } from './containers/compose/compose.component';
+import { ComposeComponent } from './components/compose/compose.component';
+import { NetworkComponent } from './components/network/network.component';
 
 const routes: Routes = [
-  { path: '', component: ComposeComponent }
+  { path: '', component: ComposeComponent },
+  { path: 'network', component: NetworkComponent}
 ];
 
 @NgModule({
