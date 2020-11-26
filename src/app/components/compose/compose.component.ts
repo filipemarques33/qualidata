@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 
-import { FileService } from 'src/app/services/file.service';
 import { File } from 'src/app/models/file';
 
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -19,7 +18,6 @@ export class ComposeComponent implements OnInit {
   };
 
   constructor(
-    private fileService: FileService,
     private snackbar: MatSnackBar,
   ) { }
 
@@ -29,10 +27,8 @@ export class ComposeComponent implements OnInit {
   saveFile(): void {
     console.log('Button clicked');
     const file = this.newFile;
-    this.fileService.saveFile(file).then(() => {
-      this.snackbar.open('Documento salvo', null, {
+    this.snackbar.open('Documento salvo', null, {
         duration: 2000,
-      });
     });
   }
 

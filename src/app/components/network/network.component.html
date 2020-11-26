@@ -1,6 +1,29 @@
 <mat-sidenav-container class='network-wrapper'>
-  <mat-sidenav [opened]="true" [mode]="'side'" class='network-sidebar'>Hello there</mat-sidenav>
+  <mat-sidenav #sidenav [opened]="true" [mode]="'over'" disableClose>
+    <div class='toggle-sidenav' (click)="sidenav.toggle()">
+      <mat-icon>home</mat-icon>
+    </div>
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Categories
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <p class='teste'>Category 1</p>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Categories
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <p>Category 1</p>
+    </mat-expansion-panel>
+  </mat-sidenav>
+
   <mat-sidenav-content>
-    <canvas width="100px" height="100px" id='canvas'></canvas>
+    <canvas #canvas></canvas>
   </mat-sidenav-content>
+
 </mat-sidenav-container>

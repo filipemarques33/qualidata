@@ -1,7 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { AngularFireModule } from '@angular/fire';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { EditorModule, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
@@ -9,12 +7,10 @@ import { ImportsModule } from 'src/app/common/imports.module';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { environment } from 'src/environments/environment';
 
 import { ComposeComponent } from './components/compose/compose.component';
 import { NavBarComponent } from './components/navbar/navbar.component';
 import { NetworkComponent } from './components/network/network.component';
-import { NetworkSidebarComponent } from './components/network-sidebar/network-sidebar.component';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -24,11 +20,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     ComposeComponent,
     NavBarComponent,
     NetworkComponent,
-    NetworkSidebarComponent
   ],
   imports: [
-    AngularFireModule.initializeApp(environment.firebaseConfig),
-    AngularFirestoreModule,
     BrowserModule,
     HttpClientModule,
     AppRoutingModule,

@@ -3,3 +3,42 @@
   height: 100%;
   width: 100%;
 }
+
+.network-wrapper .mat-sidenav {
+  width: 140px;
+  z-index: 10;
+  overflow: visible;
+  visibility: visible !important;
+}
+
+.network-wrapper .mat-sidenav .mat-expansion-panel {
+  border-radius: 0;
+}
+
+.network-wrapper .mat-sidenav .mat-expansion-panel .mat-expanded {
+  height: 48px;
+}
+
+.network-wrapper .mat-sidenav .mat-expansion-panel .mat-expansion-panel-body {
+  padding: 12px 24px 0;
+}
+
+.network-wrapper .mat-sidenav .mat-expansion-panel-header.mat-expanded:hover {
+  background: rgba(0,0,0,.04);
+}
+
+.network-wrapper .toggle-sidenav {
+  position: absolute;
+  top: 0;
+  left: 140px;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.network-wrapper .mat-sidenav-content {
+  overflow: visible;
+}
+
+.network-wrapper .mat-drawer-backdrop.mat-drawer-shown {
+  visibility: hidden;
+}
