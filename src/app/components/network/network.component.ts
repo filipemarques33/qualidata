@@ -1,5 +1,14 @@
-import { Component, AfterViewInit, ViewChild, ElementRef, ViewEncapsulation, HostListener } from '@angular/core';
+import { NestedTreeControl } from '@angular/cdk/tree';
+import { Component, ViewChild, ElementRef, ViewEncapsulation, HostListener, OnInit } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
+import { MatTreeNestedDataSource } from '@angular/material/tree';
+import CanvasCategory from 'src/app/data/Canvas/CanvasCategory';
+import { NetworkService } from "../../services/network-service";
+
+interface VertexNode {
+  name: string;
+  children?: VertexNode[];
+}
 
 @Component({
   selector: 'app-network',
@@ -7,37 +16,56 @@ import { MatSidenav } from '@angular/material/sidenav';
   styleUrls: ['./network.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class NetworkComponent implements AfterViewInit {
+export class NetworkComponent implements OnInit {
 
-  @ViewChild('canvas') canvasRef: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvas', {static: true}) canvasRef: ElementRef<HTMLCanvasElement>;
   @ViewChild('sidenav') sidenavRef: MatSidenav;
+
+  treeControl = new NestedTreeControl<VertexNode>(node => node.children);
+  dataSource = new MatTreeNestedDataSource<VertexNode>();
 
   canvas: HTMLCanvasElement;
   canvasContext: CanvasRenderingContext2D;
+  sidebarVertexTree: VertexNode[] = [];
 
-  constructor() { }
+  sidenavHover = false;
+  isNetworkLoaded = false;
 
-  ngAfterViewInit(): void {
+  constructor(public networkService: NetworkService) { }
+
+  ngOnInit(): void {
     this.canvas = this.canvasRef.nativeElement;
-
-    this.canvas.width = document.body.clientWidth;
-    this.canvas.height = document.body.clientHeight - 65;
-    this.canvas.style.height = '100%';
-
-    this.canvasContext = this.canvas.getContext("2d");
-    this.canvasContext.fillStyle = "gray";
-    this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
+    this.networkService.setupCanvasStage(this.canvas);
+    this.setupTree();
+    this.isNetworkLoaded = true;
   }
 
   @HostListener('window:resize')
   onResize() {
-    this.canvas.width = document.body.clientWidth;
-    this.canvas.height = document.body.clientHeight - 65;
-    this.canvas.style.height = '100%';
+    this.networkService.redraw();
+  }
 
-    this.canvasContext.fillStyle = "gray";
-    this.canvasContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  hasChildren(_: any, node: VertexNode) {return !!node.children && node.children.length > 0}
+
+  private setupTree() {
+    this.sidebarVertexTree = this.networkService.network.canvasCategories.map(canvasCategory => {
+      return this.getCategoryTree(canvasCategory);
+    });
+
+    this.sidebarVertexTree.push(...this.networkService.network.canvasCodes.map(canvasCode => ({
+      name: canvasCode.name
+    })));
+
+    this.dataSource.data = this.sidebarVertexTree;
+  }
+
+  private getCategoryTree(canvasCategory: CanvasCategory): VertexNode {
+    let children = canvasCategory.categories.map(subCategory => this.getCategoryTree(subCategory));
+    children.push(...canvasCategory.codes.map(canvasCode => ({name: canvasCode.name})));
+    return {
+      name: canvasCategory.name,
+      children: children
+    }
   }
 
 }

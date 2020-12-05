@@ -1,4 +1,4 @@
-import colorNames from "../utils/colors";
+import colorNames from "../../utils/colors";
 import * as createjs from 'createjs-module';
 
 export default class Vertex extends createjs.Container {
@@ -69,7 +69,7 @@ export default class Vertex extends createjs.Container {
 
     //the text vertical placement should be in the middle of the lines
     //so if there are 3 lines the y axis will be shifted one line up
-    this.containerText.y = -this.containerText.getMeasuredLineHeight()*(lines-1)/2;
+    this.containerText.y = -Math.round(this.containerText.getMeasuredLineHeight()*(lines-1)/2);
 
     //define initial container size based on the text
     this.width = bounds.width + 30;

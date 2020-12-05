@@ -13,24 +13,6 @@ MIT
 @angular/router
 MIT
 
-@firebase/app
-Apache-2.0
-
-@firebase/component
-Apache-2.0
-
-@firebase/firestore
-Apache-2.0
-
-@firebase/logger
-Apache-2.0
-
-@firebase/util
-Apache-2.0
-
-@firebase/webchannel-wrapper
-Apache-2.0
-
 css-loader
 MIT
 Copyright JS Foundation and other contributors
@@ -262,7 +244,7 @@ Apache-2.0
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
- 
+
 
 
 tslib

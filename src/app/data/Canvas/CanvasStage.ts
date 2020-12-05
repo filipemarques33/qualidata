@@ -11,8 +11,12 @@ export default class CanvasStage {
     this._stage.enableMouseOver();
     this._stage.mouseMoveOutside = true;
     this._canvas = this._stage.canvas as HTMLCanvasElement;
-    this._context = this._canvas.getContext('2d') as CanvasRenderingContext2D;
-    this._devicePixelRatio = window.devicePixelRatio || 1;
+    this._context = this._canvas.getContext('2d', {alpha: true}) as CanvasRenderingContext2D;
+    this._context.translate(0.5, 0.5);
+    this._context.imageSmoothingEnabled = false;
+    this._canvas.style.height = '100%';
+    this._canvas.style.width = '100%';
+
     createjs.Touch.enable(this._stage);
 
     this.redraw();
@@ -31,10 +35,9 @@ export default class CanvasStage {
   }
 
   redraw() {
-    this._canvas.width = window.innerWidth*0.85*this._devicePixelRatio;
-    this._canvas.height = window.innerHeight*this._devicePixelRatio;
-    this._canvas.style.width = `85%`;
-    this._canvas.style.height = `100%`;
+    this._devicePixelRatio = window.devicePixelRatio || 1;
+    this._canvas.width = window.innerWidth*this._devicePixelRatio;
+    this._canvas.height = (window.innerHeight - 65)*this._devicePixelRatio;
     this._context.scale(this._devicePixelRatio, this._devicePixelRatio);
   }
 

@@ -1,26 +1,17 @@
-import CanvasStage from './CanvasStage';
-import CodeType from './CodeType';
-import VertexCategory from './VertexCategory'
+import Structure from './Structure';
 
-export default class Code extends VertexCategory {
-  private _codeType: CodeType;
-  private _quotations: string[];
-
-  constructor(stage: CanvasStage, name: string, type: CodeType) {
-    super(stage.stage, type.name + ': ' + name, 'Code', type.color);
-    this._codeType = type;
-    this._quotations = [];
+export default class Code extends Structure {
+  constructor(
+    id: number,
+    name: string,
+    color?: string,
+    private _codeType?: number,
+    private _quotations?: string[]
+  ) {
+    super(id, name, color);
   }
 
-  addQuotation(quotation: string) {
-
-  }
-
-  removeQuotation(quotation: string) {
-
-  }
-
-  get type() {
+  get codeType(): number {
     return this._codeType;
   }
 }

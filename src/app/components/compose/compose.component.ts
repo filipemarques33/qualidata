@@ -4,6 +4,7 @@ import { File } from 'src/app/models/file';
 
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Content } from '@angular/compiler/src/render3/r3_ast';
+import { NetworkService } from 'src/app/services/network-service';
 
 @Component({
   selector: 'app-compose',
@@ -19,6 +20,7 @@ export class ComposeComponent implements OnInit {
 
   constructor(
     private snackbar: MatSnackBar,
+    private networkService: NetworkService
   ) { }
 
   ngOnInit(): void {

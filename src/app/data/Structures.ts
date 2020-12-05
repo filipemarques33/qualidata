@@ -1,12 +1,12 @@
 import Category from "./Category";
 import Code from "./Code";
-import Quotation from "./Quotation";
+import CodeType from "./CodeType";
 
 export default class Structures {
   categories: Category[];
   codes: Code[];
-  quotations: Quotation[];
-  codeTypes: any[];
+  quotations: [];
+  codeTypes: CodeType[];
 
   constructor () {
     this.categories = [];
@@ -15,19 +15,22 @@ export default class Structures {
     this.codeTypes = [];
   }
 
-  createCategory(name: string, color: string) {
-
+  createCategory(id: number, name: string, color: string, categories?: number[], codes?: number[]) {
+    this.categories.push(new Category(id, name, color, categories, codes));
   }
 
-  createCode(name: string, color: string, type: any) {
-
+  createCode(id:number, name: string, color: string, type?: number) {
+    this.codes.push(new Code(id, name, color, type));
   }
 
-  createNodeType(name: string, color: string) {
-
+  createCodeType(id:number, name: string, color: string) {
+    let codeType: CodeType = {
+      id: id,
+      name: name,
+      color: color
+    };
+    this.codeTypes.push(codeType);
   }
 
-  createQuotation(text: string) {
-
-  }
+  createQuotation(text: string) {}
 }

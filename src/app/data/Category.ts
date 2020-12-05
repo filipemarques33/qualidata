@@ -1,20 +1,34 @@
-import CanvasStage from './CanvasStage';
-import Code from './Code';
-import VertexCategory from './VertexCategory'
+import Structure from "./Structure";
 
-export default class Category extends VertexCategory {
-  codes: Code[];
+export default class Category extends Structure {
+  private _codes: Set<number>;
+  private _categories: Set<number>;
 
-  constructor(stage: CanvasStage, name: string, color: string) {
-    super(stage.stage, name, 'Category', color);
-    this.codes = [];
+  constructor(
+    id: number,
+    name: string,
+    color: string,
+    categories?:  number[],
+    codes?: number[],
+  ) {
+    super(id, name, color);
+    this._codes = codes ? new Set(codes) : new Set();
+    this._categories = categories ? new Set(categories) : new Set();
   }
 
-  addCode(code: Code) {
-
+  get codes(): Set<number> {
+    return this._codes;
   }
 
-  removeCode(code: Code) {
+  get categories(): Set<number> {
+    return this._categories;
+  }
 
+  addCode(codeId: number) {
+    this._codes.add(codeId);
+  }
+
+  addCategory(codeId: number) {
+    this._categories.add(codeId);
   }
 }

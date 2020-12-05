@@ -1,6 +1,8 @@
 <div class='content-wrapper'>
   <mat-toolbar color='primary' class='navbar'>
     <h1 class='my-auto ml-3'>Qualidata</h1>
+    <button *ngIf="router.url === '/'" class="router-button" mat-flat-button type='button' routerLink='/network'>Go to Network</button>
+    <button *ngIf="router.url === '/network'" class="router-button" mat-flat-button type='button' routerLink='/'>Go to Editor</button>
   </mat-toolbar>
   <div class='content'>
     <ng-content></ng-content>

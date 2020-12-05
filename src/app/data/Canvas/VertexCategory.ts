@@ -2,6 +2,7 @@ import Vertex from "./Vertex";
 import * as createjs from 'createjs-module'
 
 export default class VertexCategory {
+  private _id: number;
   private _color: string;
   private _name: string;
   private _stage: createjs.Stage;
@@ -9,7 +10,8 @@ export default class VertexCategory {
   private _isRendered: boolean;
   private _type: string;
 
-  constructor(stage: createjs.Stage, name: string, type: string, color: string = 'white') {
+  constructor(stage: createjs.Stage, id: number, name: string, type: string, color: string = 'white') {
+    this._id = id;
     this._color = color;
     this._name = name;
     this._stage = stage;
@@ -18,6 +20,10 @@ export default class VertexCategory {
     this._vertex.name = `vertex${Math.random()*100000}`
     this._vertex.visible = false;
     this._isRendered = false;
+  }
+
+  get id() {
+    return this._id;
   }
 
   get isVertexRendered() {

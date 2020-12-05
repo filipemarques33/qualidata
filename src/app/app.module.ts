@@ -13,13 +13,14 @@ import { NavBarComponent } from './components/navbar/navbar.component';
 import { NetworkComponent } from './components/network/network.component';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NetworkService } from './services/network-service';
 
 @NgModule({
   declarations: [
     AppComponent,
     ComposeComponent,
     NavBarComponent,
-    NetworkComponent,
+    NetworkComponent
   ],
   imports: [
     BrowserModule,
@@ -31,7 +32,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     NgbModule
   ],
   providers: [
-    {provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js'}
+    {provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js'},
+    NetworkService
   ],
   bootstrap: [AppComponent]
 })

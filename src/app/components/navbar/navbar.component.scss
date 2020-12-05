@@ -8,6 +8,29 @@
   right: 0;
 }
 
+.content-wrapper .navbar {
+  position: sticky;
+  top: 0;
+  height: 60px;
+}
+
+.content-wrapper .navbar .router-button {
+  //#3f51b5
+  background: white;
+  width: 150px;
+  color: #333;
+  transition: all 150ms;
+  box-shadow: none;
+}
+
+.content-wrapper .navbar .router-button:hover {
+  box-shadow: -2px 2px 3px 0px #333;
+}
+
+.content-wrapper .navbar .router-button:active {
+  box-shadow: -1px 1px 3px 0px #333;
+}
+
 .content-wrapper .content {
-  height: 100%;
+  height: calc(100% - 60px);
 }

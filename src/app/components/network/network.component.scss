@@ -1,7 +1,8 @@
-.network-wrapper {
+app-network .network-wrapper {
   display: flex;
   height: 100%;
   width: 100%;
+  z-index: 11;
 }
 
 .network-wrapper .mat-sidenav {
@@ -20,25 +21,84 @@
 }
 
 .network-wrapper .mat-sidenav .mat-expansion-panel .mat-expansion-panel-body {
-  padding: 12px 24px 0;
+  padding: 0;
 }
 
 .network-wrapper .mat-sidenav .mat-expansion-panel-header.mat-expanded:hover {
   background: rgba(0,0,0,.04);
 }
 
-.network-wrapper .toggle-sidenav {
+.network-wrapper .mat-sidenav .toggle-sidenav {
   position: absolute;
   top: 0;
-  left: 140px;
-  z-index: 10;
+  left: 116px;
+  z-index: 0;
   cursor: pointer;
+  transition: all 250ms;
+  transition-delay: 1s;
+}
+
+.network-wrapper .mat-sidenav .toggle-sidenav.hovered,
+.network-wrapper .mat-sidenav:hover .toggle-sidenav {
+  left: 140px;
+  transition-delay: 0s;
 }
 
 .network-wrapper .mat-sidenav-content {
   overflow: visible;
+  z-index: 0;
 }
 
 .network-wrapper .mat-drawer-backdrop.mat-drawer-shown {
   visibility: hidden;
+}
+
+.network-wrapper .mat-sidenav-content .toggle-trigger {
+  position: fixed;
+  height: calc(100% - 60px);
+  width: 140px;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+}
+
+.network-wrapper .example-tree-invisible {
+  display: none;
+}
+
+.network-wrapper mat-nested-tree-node {
+  display: block;
+}
+
+.network-wrapper mat-tree > mat-nested-tree-node,
+.network-wrapper mat-tree > mat-tree-node {
+  border-bottom: 1px solid #333;
+}
+
+.network-wrapper mat-tree-node,
+.network-wrapper ul,
+.network-wrapper mat-nested-tree-node {
+  cursor: pointer;
+  transition: all 150ms;
+}
+
+.network-wrapper mat-tree-node:hover,
+.network-wrapper mat-nested-tree-node li span:hover {
+  background: #eee;
+}
+
+.network-wrapper span.mat-tree-node {
+  padding-left: 10px;
+}
+
+.network-wrapper ul {
+  margin-block-start: 0;
+  padding-inline-start: 20px;
+}
+
+.network-wrapper ul,
+.network-wrapper li {
+  margin-top: 0;
+  margin-bottom: 0;
+  list-style-type: none;
 }
