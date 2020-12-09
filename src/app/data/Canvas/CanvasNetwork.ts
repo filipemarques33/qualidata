@@ -2,20 +2,33 @@ import Structures from '../Structures';
 import CanvasCategory from "./CanvasCategory";
 import CanvasCode from "./CanvasCode";
 import CanvasStage from './CanvasStage';
+import VertexCategory from './VertexCategory';
 
 export default class CanvasNetwork {
-  canvasCategories: CanvasCategory[];
-  canvasCodes: CanvasCode[];
+  private codes: CanvasCode[];
+  private categories: CanvasCategory[];
+
+  canvasCategories: CanvasCategory[] = [];
+  canvasCodes: CanvasCode[] = [];
   quotations: string[];
   visibleRelationships: any[];
+
+  private typeMap: {[key: string]: (id: number) => VertexCategory} = {
+    'Code': (id: number) => this.findCanvasCode(id),
+    'Category': (id: number) => this.findCanvasCategory(id)
+  };
 
   constructor(structures: Structures, canvasStage: CanvasStage) {
     let categoriesMap = new Map<number, {category: CanvasCategory, isRoot: boolean}>();
 
-    this.canvasCodes = structures.codes.map(code => new CanvasCode(canvasStage, code.id, code.name, {
+    this.codes = structures.codes.map(code => new CanvasCode(canvasStage, code.id, code.name, {
       color: code.color,
       type: structures.codeTypes.find(codeType => codeType.id === code.codeType)
     }));
+
+    this.canvasCodes = this.codes.slice(0);
+
+    this.categories = [];
 
     structures.categories.forEach(category => {
       let newCategory = new CanvasCategory(canvasStage, category.id, category.name, category.color);
@@ -26,6 +39,7 @@ export default class CanvasNetwork {
           this.canvasCodes = this.canvasCodes.filter(cCode => cCode.id !== canvasCode.id);
         });
       }
+      this.categories.push(newCategory);
       categoriesMap.set(newCategory.id, {category: newCategory, isRoot: true});
     });
 
@@ -44,5 +58,21 @@ export default class CanvasNetwork {
 
     this.quotations = structures.quotations;
     this.visibleRelationships = [];
+
+  }
+
+  renderVertex(type: string, id: number, x: number, y: number) {
+    let vertex = this.typeMap[type](id);
+    if (vertex && !vertex.isVertexRendered) {
+      vertex.renderVertex(x, y);
+    }
+  }
+
+  private findCanvasCode(id: number) {
+    return this.codes.find(vertex => vertex.id === id);
+  }
+
+  private findCanvasCategory(id: number) {
+    return this.categories.find(vertex => vertex.id === id);
   }
 }

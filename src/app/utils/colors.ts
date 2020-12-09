@@ -1,4 +1,4 @@
-function hexToHSL(H: string): {h: number, s: number, l: number} {
+function hexToHSL(H: string): {h: number, s: number, l: number, luma: number} {
   let r = 0, g = 0, b = 0;
   if (H.length === 4) {
     r = Number("0x" + H[1] + H[1]);
@@ -9,6 +9,7 @@ function hexToHSL(H: string): {h: number, s: number, l: number} {
     g = Number("0x" + H[3] + H[4]);
     b = Number("0x" + H[5] + H[6]);
   }
+  let luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
   // Then to HSL
   r /= 255;
   g /= 255;
@@ -43,11 +44,12 @@ function hexToHSL(H: string): {h: number, s: number, l: number} {
   return {
     h,
     s,
-    l
+    l,
+    luma
   };
 }
 
-function colourNameToHex(colour: string): {h: number, s: number, l: number}
+function colourNameToHex(colour: string): {h: number, s: number, l: number, luma: number}
 {
     const colours: {[key: string]: string} = {"aliceblue":"#f0f8ff","antiquewhite":"#faebd7","aqua":"#00ffff","aquamarine":"#7fffd4","azure":"#f0ffff",
     "beige":"#f5f5dc","bisque":"#ffe4c4","black":"#000000","blanchedalmond":"#ffebcd","blue":"#0000ff","blueviolet":"#8a2be2","brown":"#a52a2a","burlywood":"#deb887",
@@ -77,7 +79,7 @@ function colourNameToHex(colour: string): {h: number, s: number, l: number}
     if (/^#[0-9A-F]{6}$/i.test(colour)) return hexToHSL(colour);
     if (typeof colours[colour.toLowerCase()] != 'undefined')
         return hexToHSL(colours[colour.toLowerCase()]);
-    return {h: 0, s: 0, l: 0};
+    return {h: 0, s: 0, l: 0, luma: 0};
 }
 
 export default colourNameToHex;

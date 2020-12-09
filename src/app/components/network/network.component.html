@@ -1,13 +1,14 @@
 <mat-sidenav-container class='network-wrapper'>
   <mat-sidenav #sidenav [opened]="true" [mode]="'over'" disableClose>
     <div class='toggle-sidenav' [class.hovered]="sidenavHover" (click)="sidenav.toggle()">
-      <mat-icon>home</mat-icon>
+      <mat-icon>{{sidenav.opened ? 'arrow_back_ios' : 'arrow_forward_ios'}}</mat-icon>
     </div>
     <span *ngIf="!isNetworkLoaded">No categories or codes created</span>
     <mat-tree *ngIf="isNetworkLoaded" [dataSource]="dataSource" [treeControl]="treeControl">
       <!-- This is the tree node template for leaf nodes -->
       <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
-        <span class="mat-tree-node">
+        <span class="mat-tree-node" draggable="true" (dragstart)="hideGhost($event, node)"
+          (drag)="changeDragElement($event)" (dragend)="hideDragElement($event, node)">
           <!-- use a disabled button to provide padding for tree leaf -->
           {{node.name}}
         </span>
@@ -15,7 +16,8 @@
       <!-- This is the tree node template for expandable nodes -->
       <mat-nested-tree-node matTreeNodeToggle *matTreeNodeDef="let node; when: hasChildren">
         <li>
-          <span class="mat-tree-node">
+          <span draggable="true" class="mat-tree-node" (dragstart)="hideGhost($event, node)"
+            (drag)="changeDragElement($event)" (dragend)="hideDragElement($event, node)">
             {{node.name}}
           </span>
           <ul [class.example-tree-invisible]="!treeControl.isExpanded(node)">
@@ -32,3 +34,6 @@
   </mat-sidenav-content>
 
 </mat-sidenav-container>
+<div #dragger class="dragger">
+  <span>Drag element</span>
+</div>

@@ -38,6 +38,10 @@ export default class VertexCategory {
     return this._name;
   }
 
+  get color() {
+    return this._color;
+  }
+
   renderVertex(x: number, y: number) {
     if (!this._stage.contains(this._vertex)) {
       this._vertex.x = x;
@@ -45,6 +49,8 @@ export default class VertexCategory {
       this._vertex.visible = true;
       this._stage.addChild(this._vertex);
       this._isRendered = true;
+
+      console.log();
     }
   }
 

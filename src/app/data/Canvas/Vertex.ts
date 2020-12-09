@@ -3,7 +3,8 @@ import * as createjs from 'createjs-module';
 
 export default class Vertex extends createjs.Container {
   text: string;
-  color: {h: number, s: number, l: number};
+  color: {h: number, s: number, l: number, luma: number};
+  textColor: string;
   isPressed: boolean;
   isHooked: boolean;
   radius: number;
@@ -56,8 +57,8 @@ export default class Vertex extends createjs.Container {
 
   setup() {
     //creating container text
-    const textColor = this.type === 'Quotation' ? 'black' : 'white';
-    this.containerText = new createjs.Text(this.text, "12px Arial", textColor);
+    this.textColor = this.color.luma > 120 ? "black" : "white";
+    this.containerText = new createjs.Text(this.text, "12px Arial", this.textColor);
     this.containerText.textAlign = 'center';
     this.containerText.textBaseline = 'middle';
     this.containerText.name = 'text';
@@ -101,7 +102,7 @@ export default class Vertex extends createjs.Container {
 
     //create on hover hook
     this.containerHook = new createjs.Shape();
-    this.containerHook.graphics.beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l+30}%)`).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
+    this.containerHook.graphics.beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.luma < 120 ? this.color.l + 50 : this.color.l - 10}%)`).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
     this.containerHook.cursor = 'pointer';
     this.containerHook.visible = false;
     this.containerHook.x = this.x;
@@ -118,11 +119,11 @@ export default class Vertex extends createjs.Container {
     this.container.addChild(this.containerShape, this.containerDiff, this.containerText, this.containerHook, this.containerOutline);
 
     this.containerHook.on("mouseover", () => {
-      if (!this.isHooked) this.containerHook.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l+10}%)`).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
+      if (!this.isHooked) this.containerHook.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.luma < 120 ? this.color.l + 30 : this.color.l - 20}%)`).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
     });
 
     this.containerHook.on("mouseout", () => {
-      if (!this.isHooked) this.containerHook.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l+30}%)`).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
+      if (!this.isHooked) this.containerHook.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.luma < 120 ? this.color.l + 50 : this.color.l - 10}%)`).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
     });
 
     this.containerHook.on('mousedown', (evt) => {
@@ -198,7 +199,7 @@ export default class Vertex extends createjs.Container {
         this.height,
         this.radius);
       this.containerOutline.graphics.clear().setStrokeStyle(2).beginStroke(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l}%)`).drawRoundRect(this.outlineCenter.x, this.outlineCenter.y, this.width + 7, this.height + 7, this.radius);
-      this.containerHook.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l+10}%)`).drawCircle(hookCenter.x, hookCenter.y, 5);
+      this.containerHook.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.luma < 120 ? this.color.l + 30 : this.color.l - 20}%)`).drawCircle(hookCenter.x, hookCenter.y, 5);
       if (this.type === 'Category') {
         this.containerDiff.mask.graphics.clear().drawRect(-this.originalBounds.w/2 - 1, -this.originalBounds.h/2, 10, this.height);
         this.containerDiff.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l-30}%)`).drawRoundRect(-this.originalBounds.w/2-1, -this.originalBounds.h/2, 20, this.height, this.radius);

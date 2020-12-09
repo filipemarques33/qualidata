@@ -32,7 +32,6 @@ export class NetworkService {
 
     this.network = new CanvasNetwork(this.structures, this.canvasStage);
 
-    // const codeType = new CodeType('Type 1', 'red');
     const codeType: CodeType = {id: -1, name: 'Type 1', color: 'red'};
     const code = new CanvasCode(this.canvasStage, -1, 'Code 1', {type: codeType});
     code.renderVertex(500, 500);
@@ -48,7 +47,9 @@ export class NetworkService {
     this.structures.createCategory(7, 'Category 7', 'black', [8]);
     this.structures.createCategory(8, 'Category 8', 'black');
 
-    this.structures.createCode(6, 'Node 1', 'red');
+    this.structures.createCodeType(12, 'Type 1', 'black');
+
+    this.structures.createCode(6, 'Node 1', 'red', 12);
     this.structures.createCode(7, 'Node 2', 'red');
     this.structures.createCode(8, 'Node 3', 'red');
     this.structures.createCode(9, 'Node 4', 'red');
