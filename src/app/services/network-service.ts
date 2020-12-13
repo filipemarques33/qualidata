@@ -16,12 +16,14 @@ export class NetworkService {
   canvas: HTMLCanvasElement;
   structures: Structures = new Structures();
   network: CanvasNetwork;
+  detailsCallback: Function;
 
   constructor() {
     this.setupStructures();
   }
 
-  setupCanvasStage(canvasRef: HTMLCanvasElement) {
+  setupCanvasStage(canvasRef: HTMLCanvasElement, detailCallback: Function) {
+    this.detailsCallback = detailCallback;
     this.canvasStage = new CanvasStage(canvasRef);
     this.canvas = canvasRef;
     this.canvasStage.stage.update();
@@ -30,10 +32,10 @@ export class NetworkService {
       this.canvasStage?.stage.update();
     });
 
-    this.network = new CanvasNetwork(this.structures, this.canvasStage);
+    this.network = new CanvasNetwork(this.structures, this.canvasStage, this.detailsCallback);
 
     const codeType: CodeType = {id: -1, name: 'Type 1', color: 'red'};
-    const code = new CanvasCode(this.canvasStage, -1, 'Code 1', {type: codeType});
+    const code = new CanvasCode(this.canvasStage, -1, 'Code 1', {type: codeType}, this.detailsCallback);
     code.renderVertex(500, 500);
   }
 

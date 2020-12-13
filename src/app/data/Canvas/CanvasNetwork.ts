@@ -18,20 +18,20 @@ export default class CanvasNetwork {
     'Category': (id: number) => this.findCanvasCategory(id)
   };
 
-  constructor(structures: Structures, canvasStage: CanvasStage) {
+  constructor(structures: Structures, canvasStage: CanvasStage, detailsCallback: Function) {
     let categoriesMap = new Map<number, {category: CanvasCategory, isRoot: boolean}>();
 
     this.codes = structures.codes.map(code => new CanvasCode(canvasStage, code.id, code.name, {
       color: code.color,
       type: structures.codeTypes.find(codeType => codeType.id === code.codeType)
-    }));
+    }, detailsCallback));
 
     this.canvasCodes = this.codes.slice(0);
 
     this.categories = [];
 
     structures.categories.forEach(category => {
-      let newCategory = new CanvasCategory(canvasStage, category.id, category.name, category.color);
+      let newCategory = new CanvasCategory(canvasStage, category.id, category.name, category.color, detailsCallback);
       if (category.codes.size) {
         [...category.codes].forEach(code => {
           let canvasCode = this.canvasCodes.find(canvasCode => canvasCode.id === code);

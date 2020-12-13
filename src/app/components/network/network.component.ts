@@ -3,6 +3,7 @@ import { Component, ViewChild, ElementRef, ViewEncapsulation, HostListener, OnIn
 import { MatSidenav } from '@angular/material/sidenav';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import CanvasCategory from 'src/app/data/Canvas/CanvasCategory';
+import VertexCategory from 'src/app/data/Canvas/VertexCategory';
 import { NetworkService } from "../../services/network-service";
 
 interface VertexNode {
@@ -41,7 +42,7 @@ export class NetworkComponent implements OnInit {
 
   ngOnInit(): void {
     this.canvas = this.canvasRef.nativeElement;
-    this.networkService.setupCanvasStage(this.canvas);
+    this.networkService.setupCanvasStage(this.canvas, this.openDetailsSidenav);
     this.setupTree();
     this.isNetworkLoaded = true;
 
@@ -82,6 +83,10 @@ export class NetworkComponent implements OnInit {
     this.draggerRef.nativeElement.style.display = 'none';
 
     if (event.x > this.sidenavRef._getWidth()) this.networkService.network.renderVertex(node.type, node.id, event.x, event.y - 60);
+  }
+
+  openDetailsSidenav(vertex: VertexCategory) {
+    console.log(vertex);
   }
 
   private setupTree() {

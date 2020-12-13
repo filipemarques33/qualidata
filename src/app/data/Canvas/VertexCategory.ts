@@ -9,17 +9,19 @@ export default class VertexCategory {
   private _vertex: Vertex;
   private _isRendered: boolean;
   private _type: string;
+  private _detailsCallback: Function;
 
-  constructor(stage: createjs.Stage, id: number, name: string, type: string, color: string = 'white') {
+  constructor(stage: createjs.Stage, id: number, name: string, type: string, color: string = 'white', detailsCallback: Function) {
     this._id = id;
     this._color = color;
     this._name = name;
     this._stage = stage;
     this._type = type;
-    this._vertex = new Vertex(this._name, this._color, this._type);
+    this._isRendered = false;
+    this._detailsCallback = detailsCallback;
+    this._vertex = new Vertex(this._name, this._color, this._type, () => this._detailsCallback(this));
     this._vertex.name = `vertex${Math.random()*100000}`
     this._vertex.visible = false;
-    this._isRendered = false;
   }
 
   get id() {

@@ -1,14 +1,15 @@
-import colorNames from "../../utils/colors";
+import {colourNameToHex, Colors} from "../../utils/colors";
 import * as createjs from 'createjs-module';
 
 export default class Vertex extends createjs.Container {
   text: string;
-  color: {h: number, s: number, l: number, luma: number};
+  colors: Colors;
   textColor: string;
   isPressed: boolean;
   isHooked: boolean;
   radius: number;
   type: string;
+  detailsTimeout?: number;
 
   containerText!: createjs.Text;
   container!: createjs.Container;
@@ -16,6 +17,7 @@ export default class Vertex extends createjs.Container {
   containerShape!: createjs.Shape;
   containerHook!: createjs.Shape;
   containerDiff!: createjs.Shape;
+  detailsContainer!: createjs.Container;
 
   width!: number;
   initialWidth!: number;
@@ -29,6 +31,7 @@ export default class Vertex extends createjs.Container {
   maxHeight!: number;
   heightRamp!: number;
   containerEventListener!: Function;
+  detailsCallback: Function;
 
   mouseOffset: {x: number, y: number} = {x: 0, y: 0};
   originalMousePosition: {x: number, y: number} = {x: 0, y: 0};
@@ -38,11 +41,11 @@ export default class Vertex extends createjs.Container {
   hookCenter: {x: number, y: number} = {x: 0, y: 0};
   originalTextPosition: {x: number, y: number} = {x: 0, y: 0};
 
-  constructor(text: string, color: string, type: string) {
+  constructor(text: string, color: string, type: string, detailsCallback: Function) {
     super();
 
     this.text = text;
-    this.color = colorNames(color);
+    this.colors = colourNameToHex(color);
     this.type = type;
     //flag to check if container is clicked
     this.isPressed = false;
@@ -51,13 +54,14 @@ export default class Vertex extends createjs.Container {
     this.radius = 5;
     this.x = 0;
     this.y = 0;
+    this.detailsCallback = detailsCallback;
 
     this.setup();
   }
 
   setup() {
     //creating container text
-    this.textColor = this.color.luma > 120 ? "black" : "white";
+    this.textColor = this.colors.textColor;
     this.containerText = new createjs.Text(this.text, "12px Arial", this.textColor);
     this.containerText.textAlign = 'center';
     this.containerText.textBaseline = 'middle';
@@ -87,22 +91,42 @@ export default class Vertex extends createjs.Container {
 
     //create rounded rectangle
     this.containerShape = new createjs.Shape();
-    this.containerShape.graphics.beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l}%)`).drawRoundRect(-this.width/ 2, -this.height/2, this.width, this.height, this.radius);
+    this.containerShape.graphics.beginFill(this.colors.mainColor).drawRoundRect(-this.width/ 2, -this.height/2, this.width, this.height, this.radius);
     this.containerShape.cursor = "pointer";
     this.containerShape.x = this.x;
     this.containerShape.y = this.y;
     this.containerShape.name = 'rRect';
+    this.containerShape.shadow = new createjs.Shadow('#666', 3, 3, 10);
 
     //create on hover outline
     this.containerOutline = new createjs.Shape();
-    this.containerOutline.graphics.setStrokeStyle(2).beginStroke(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l}%)`).drawRoundRect(-(this.width/ 2 + 3.5), -(this.height/2 + 3.5), this.width + 7, this.height + 7, this.radius);
+    this.containerOutline.graphics.setStrokeStyle(2).beginStroke(this.colors.mainColor).drawRoundRect(-(this.width/ 2 + 3.5), -(this.height/2 + 3.5), this.width + 7, this.height + 7, this.radius);
     this.containerOutline.x = this.x;
     this.containerOutline.y = this.y;
     this.containerOutline.visible = false;
+    this.containerOutline.shadow = new createjs.Shadow('#666', 3, 3, 10);
+
+    this.detailsContainer = new createjs.Container();
+    let circleRadius = 8;
+    let circleDistance = 15;
+    let plusSize = 4;
+    let diff = circleRadius - plusSize;
+    let width = - (this.width/2 - circleRadius);
+    let height = -(this.height/2 + circleDistance);
+
+    let detailsCircle = new createjs.Shape();
+    let plusSign = new createjs.Shape();
+    detailsCircle.graphics.beginFill(this.colors.mainColor).drawCircle(width, height, circleRadius);
+    plusSign.graphics.beginStroke(this.colors.textColor).setStrokeStyle(2, 1)
+      .moveTo(width - diff, height).lineTo(width + diff, height)
+      .moveTo(width, height - diff).lineTo(width, height + diff);
+
+    this.detailsContainer.addChild(detailsCircle, plusSign);
+    this.detailsContainer.cursor = 'pointer';
 
     //create on hover hook
     this.containerHook = new createjs.Shape();
-    this.containerHook.graphics.beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.luma < 120 ? this.color.l + 50 : this.color.l - 10}%)`).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
+    this.containerHook.graphics.beginFill(this.colors.highlightColor).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
     this.containerHook.cursor = 'pointer';
     this.containerHook.visible = false;
     this.containerHook.x = this.x;
@@ -112,18 +136,88 @@ export default class Vertex extends createjs.Container {
       this.containerDiff = new createjs.Shape();
       this.containerDiff.mask = new createjs.Shape();
       this.containerDiff.mask.graphics.drawRect(-this.width/2 - 1, -this.height/2, 10, this.height);
-      this.containerDiff.graphics.beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l-30}%)`).drawRoundRect(-this.width/2 - 1, -this.height/2, 20, this.height, this.radius);
+      this.containerDiff.graphics.beginFill(this.colors.activeColor).drawRoundRect(-this.width/2 - 1, -this.height/2, 20, this.height, this.radius);
     }
 
     this.container = new createjs.Container();
+
     this.container.addChild(this.containerShape, this.containerDiff, this.containerText, this.containerHook, this.containerOutline);
 
+    this.setupHookMouse();
+    this.setupContainerMouse();
+    this.setupDetailsMouse();
+
+    this.addChild(this.container, this.detailsContainer);
+
+  }
+
+  setupContainerMouse() {
+    this.container.on("mouseover", () => {
+      this.containerOutline.visible = true;
+      this.containerHook.visible = true;
+      this.detailsContainer.visible = true;
+      if (this.detailsTimeout !== null) {
+        clearTimeout(this.detailsTimeout);
+        this.detailsTimeout = null;
+      }
+    });
+
+    this.container.on("mouseout", () => {
+      if (!this.isPressed) {
+        this.containerOutline.visible = false;
+        this.containerHook.visible = false;
+        if (this.detailsTimeout !== null) {
+          clearTimeout(this.detailsTimeout);
+        }
+        this.detailsTimeout = setTimeout(() => {
+          this.detailsContainer.visible = false
+          this.detailsTimeout = null;
+        }, 300);
+      }
+    });
+
+    this.container.on("mousedown", (evt) => {
+      //changing the child index so the selected container is on the front
+      this.parent.setChildIndex(this, this.parent.numChildren-1);
+      if (!this.isHooked) {
+        const mouseEvent = evt as createjs.MouseEvent;
+
+        this.mouseOffset = {x: this.x - mouseEvent.stageX, y: this.y - mouseEvent.stageY};
+        this.isPressed = true;
+        //if there is an event listener still going turn it off
+        if (this.containerEventListener && this.containerEventListener.name === 'done') this.container.off("tick", this.containerEventListener);
+        //set a new event listener to animate the rectangle
+        this.containerEventListener = this.container.on("tick", this.handleMouseDown);
+      }
+    });
+
+    this.container.on("pressmove", (evt) => {
+      if (!this.isHooked) {
+        const mouseEvent = evt as createjs.MouseEvent;
+        this.x = mouseEvent.stageX + this.mouseOffset.x;
+        this.y = mouseEvent.stageY + this.mouseOffset.y;
+      }
+    });
+
+    this.container.on("pressup", () => {
+      this.isPressed = false;
+      //if the mouse is outside the canvas when "declicking" remove the containerOutline and hook
+      if (!this.parent.stage.mouseInBounds) {
+        this.containerOutline.visible = false;
+        this.containerHook.visible = false;
+      }
+      if (this.containerEventListener && this.containerEventListener.name === 'done') this.container.off("tick", this.containerEventListener);
+      this.containerEventListener = this.container.on("tick", this.handleMouseUp);
+    });
+  }
+
+  setupHookMouse() {
     this.containerHook.on("mouseover", () => {
-      if (!this.isHooked) this.containerHook.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.luma < 120 ? this.color.l + 30 : this.color.l - 20}%)`).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
+      if (!this.isHooked) this.containerHook.graphics.clear().beginFill(this.colors.hoverColor).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
     });
 
     this.containerHook.on("mouseout", () => {
-      if (!this.isHooked) this.containerHook.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.luma < 120 ? this.color.l + 50 : this.color.l - 10}%)`).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
+      if (!this.isHooked) this.containerHook.graphics.clear().beginFill(this.colors.highlightColor).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
     });
 
     this.containerHook.on('mousedown', (evt) => {
@@ -192,17 +286,17 @@ export default class Vertex extends createjs.Container {
         hookCenter.y = this.hookCenter.y + diffY;
       }
       //finally, we update the rectangle, outline and hook graphics
-      this.containerShape.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l}%)`).drawRoundRect(
+      this.containerShape.graphics.clear().beginFill(this.colors.mainColor).drawRoundRect(
         this.containerShapeCenter.x,
         this.containerShapeCenter.y,
         this.width,
         this.height,
         this.radius);
-      this.containerOutline.graphics.clear().setStrokeStyle(2).beginStroke(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l}%)`).drawRoundRect(this.outlineCenter.x, this.outlineCenter.y, this.width + 7, this.height + 7, this.radius);
-      this.containerHook.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.luma < 120 ? this.color.l + 30 : this.color.l - 20}%)`).drawCircle(hookCenter.x, hookCenter.y, 5);
+      this.containerOutline.graphics.clear().setStrokeStyle(2).beginStroke(this.colors.mainColor).drawRoundRect(this.outlineCenter.x, this.outlineCenter.y, this.width + 7, this.height + 7, this.radius);
+      this.containerHook.graphics.clear().beginFill(this.colors.activeColor).drawCircle(hookCenter.x, hookCenter.y, 5);
       if (this.type === 'Category') {
         this.containerDiff.mask.graphics.clear().drawRect(-this.originalBounds.w/2 - 1, -this.originalBounds.h/2, 10, this.height);
-        this.containerDiff.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l-30}%)`).drawRoundRect(-this.originalBounds.w/2-1, -this.originalBounds.h/2, 20, this.height, this.radius);
+        this.containerDiff.graphics.clear().beginFill(this.colors.activeColor).drawRoundRect(-this.originalBounds.w/2-1, -this.originalBounds.h/2, 20, this.height, this.radius);
       }
     });
 
@@ -220,11 +314,11 @@ export default class Vertex extends createjs.Container {
       const vertex = this.parent.getChildByName(this.name);
       vertex.x += (this.width - this.originalBounds.w)/2;
       vertex.y += (this.height - this.originalBounds.h)/2;
-      this.containerOutline.graphics.clear().setStrokeStyle(2).beginStroke(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l}%)`).drawRoundRect(-(this.width/ 2 + 3.5), -(this.height/2 + 3.5), this.width + 7, this.height + 7, this.radius);
-      this.containerHook.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l+30}%)`).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
+      this.containerOutline.graphics.clear().setStrokeStyle(2).beginStroke(this.colors.mainColor).drawRoundRect(-(this.width/ 2 + 3.5), -(this.height/2 + 3.5), this.width + 7, this.height + 7, this.radius);
+      this.containerHook.graphics.clear().beginFill(this.colors.highlightColor).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
       if (this.type === 'Category') {
         this.containerDiff.mask.graphics.clear().drawRect(-this.width/2 - 1, -this.height/2, 10, this.height);
-      this.containerDiff.graphics.clear().beginFill(`hsl(${this.color.h}, ${this.color.s}%, ${this.color.l-30}%)`).drawRoundRect(-this.width/2 - 1, -this.height/2, 20, this.height, this.radius);
+        this.containerDiff.graphics.clear().beginFill(this.colors.activeColor).drawRoundRect(-this.width/2 - 1, -this.height/2, 20, this.height, this.radius);
       }
 
       //since the container x and y positions changed we can now rever the original text positions
@@ -234,85 +328,63 @@ export default class Vertex extends createjs.Container {
       this.isHooked = false;
       this.isPressed = false;
     });
-
-    this.container.on("mouseover", () => {
-      this.containerOutline.visible = true;
-      this.containerHook.visible = true;
-    });
-
-    this.container.on("mouseout", () => {
-      if (!this.isPressed) {
-        this.containerOutline.visible = false;
-        this.containerHook.visible = false;
-      }
-    });
-
-    this.container.on("mousedown", (evt) => {
-      //changing the child index so the selected container is on the front
-      this.parent.setChildIndex(this, this.parent.numChildren-1);
-      if (!this.isHooked) {
-        const mouseEvent = evt as createjs.MouseEvent;
-
-        this.mouseOffset = {x: this.x - mouseEvent.stageX, y: this.y - mouseEvent.stageY};
-        this.isPressed = true;
-        //if there is an event listener still going turn it off
-        if (this.containerEventListener && this.containerEventListener.name === 'done') this.container.off("tick", this.containerEventListener);
-        //set a new event listener to animate the rectangle
-        this.containerEventListener = this.container.on("tick", this.handleMouseDown);
-      }
-    });
-
-    this.container.on("pressmove", (evt) => {
-      if (!this.isHooked) {
-        const mouseEvent = evt as createjs.MouseEvent;
-        this.x = mouseEvent.stageX + this.mouseOffset.x;
-        this.y = mouseEvent.stageY + this.mouseOffset.y;
-      }
-    });
-
-    this.container.on("pressup", () => {
-      this.isPressed = false;
-      //if the mouse is outside the canvas when "declicking" remove the containerOutline and hook
-      if (!this.parent.stage.mouseInBounds) {
-        this.containerOutline.visible = false;
-        this.containerHook.visible = false;
-      }
-      if (this.containerEventListener && this.containerEventListener.name === 'done') this.container.off("tick", this.containerEventListener);
-      this.containerEventListener = this.container.on("tick", this.handleMouseUp);
-    });
-
-    this.addChild(this.container);
-
   }
 
-    //animate the container to "grow" when mouse down
-    handleMouseDown() {
-      if (this.parent instanceof Vertex) {
-        this.parent.width += this.parent.widthRamp;
-        this.parent.height += this.parent.heightRamp;
-        // when the rectangle reaches it's max size stop the event listener
-        if (this.parent.width >= this.parent.maxWidth || this.parent.height >= this.parent.maxHeight) {
-          this.parent.container.off("tick", this.parent.containerEventListener);
-          Object.defineProperty(this.parent.containerEventListener, 'name', {value: 'done'});
-          this.parent.width = this.parent.maxWidth;
-          this.parent.height = this.parent.maxHeight;
-        }
-        this.parent.containerShape.graphics.clear().beginFill(`hsl(${this.parent.color.h}, ${this.parent.color.s}%, ${this.parent.color.l}%)`).drawRoundRect(-this.parent.width/2, -this.parent.height/2, this.parent.width, this.parent.height, this.parent.radius);
+  setupDetailsMouse() {
+    this.detailsContainer.on('mouseover', () => {
+      if (this.detailsTimeout !== null) {
+        clearTimeout(this.detailsTimeout);
+        this.detailsTimeout = null;
       }
-    }
-    //animate the container to "shrink" when mouse up
-    handleMouseUp() {
-      if (this.parent instanceof Vertex) {
-        this.parent.width -= this.parent.widthRamp;
-        this.parent.height -= this.parent.heightRamp;
-        // when the rectangle reaches it's max size stop the event listener
-        if (this.parent.width <= this.parent.minWidth || this.parent.height <= this.parent.minHeight) {
-          this.parent.container.off("tick", this.parent.containerEventListener);
-          Object.defineProperty(this.parent.containerEventListener, 'name', {value: 'done'});
-          this.parent.width = this.parent.minWidth;
-          this.parent.height = this.parent.minHeight;
+      this.detailsContainer.visible = true;
+    });
+
+    this.detailsContainer.on("mouseout", () => {
+      if (!this.isPressed) {
+        if (this.detailsTimeout !== null) {
+          clearTimeout(this.detailsTimeout);
         }
-        this.parent.containerShape.graphics.clear().beginFill(`hsl(${this.parent.color.h}, ${this.parent.color.s}%, ${this.parent.color.l}%)`).drawRoundRect(-this.parent.width/2, -this.parent.height/2, this.parent.width, this.parent.height, this.parent.radius);
+        this.detailsTimeout = setTimeout(() => {
+          this.detailsContainer.visible = false
+          this.detailsTimeout = null;
+        }, 300);
       }
+    });
+
+    this.detailsContainer.on('click', () => {
+      this.detailsCallback();
+    })
+  }
+
+  //animate the container to "grow" when mouse down
+  handleMouseDown() {
+    if (this.parent instanceof Vertex) {
+      this.parent.width += this.parent.widthRamp;
+      this.parent.height += this.parent.heightRamp;
+      // when the rectangle reaches it's max size stop the event listener
+      if (this.parent.width >= this.parent.maxWidth || this.parent.height >= this.parent.maxHeight) {
+        this.parent.container.off("tick", this.parent.containerEventListener);
+        Object.defineProperty(this.parent.containerEventListener, 'name', {value: 'done'});
+        this.parent.width = this.parent.maxWidth;
+        this.parent.height = this.parent.maxHeight;
+      }
+      this.parent.containerShape.graphics.clear().beginFill(this.parent.colors.mainColor).drawRoundRect(-this.parent.width/2, -this.parent.height/2, this.parent.width, this.parent.height, this.parent.radius);
     }
+  }
+
+  //animate the container to "shrink" when mouse up
+  handleMouseUp() {
+    if (this.parent instanceof Vertex) {
+      this.parent.width -= this.parent.widthRamp;
+      this.parent.height -= this.parent.heightRamp;
+      // when the rectangle reaches it's max size stop the event listener
+      if (this.parent.width <= this.parent.minWidth || this.parent.height <= this.parent.minHeight) {
+        this.parent.container.off("tick", this.parent.containerEventListener);
+        Object.defineProperty(this.parent.containerEventListener, 'name', {value: 'done'});
+        this.parent.width = this.parent.minWidth;
+        this.parent.height = this.parent.minHeight;
+      }
+      this.parent.containerShape.graphics.clear().beginFill(this.parent.colors.mainColor).drawRoundRect(-this.parent.width/2, -this.parent.height/2, this.parent.width, this.parent.height, this.parent.radius);
+    }
+  }
 }
