@@ -11,6 +11,7 @@ import { AppComponent } from './app.component';
 import { ComposeComponent } from './components/compose/compose.component';
 import { NavBarComponent } from './components/navbar/navbar.component';
 import { NetworkComponent } from './components/network/network.component';
+import { RelationshipDialog } from "./components/network/relationship-dialog/relationship-dialog.component";
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NetworkService } from './services/network-service';
@@ -20,7 +21,8 @@ import { NetworkService } from './services/network-service';
     AppComponent,
     ComposeComponent,
     NavBarComponent,
-    NetworkComponent
+    NetworkComponent,
+    RelationshipDialog
   ],
   imports: [
     BrowserModule,

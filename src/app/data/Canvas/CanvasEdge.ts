@@ -39,13 +39,13 @@ export default class Edge {
   }
 
   renderArc() {
-    this._arc.visible = true;
     this._stage.addChild(this._arc);
+    this._arc.visible = true;
   }
 
   renderArcAtBeggining() {
-    this._arc.visible = true;
     this._stage.addChildAtBeggining(this._arc);
+    this._arc.visible = true;
   }
 
   makeArcInvisible() {

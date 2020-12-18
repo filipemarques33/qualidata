@@ -9,7 +9,6 @@ export default class Vertex extends createjs.Container {
   isHooked: boolean;
   radius: number;
   type: string;
-  detailsTimeout?: number;
 
   containerText!: createjs.Text;
   container!: createjs.Container;
@@ -17,7 +16,6 @@ export default class Vertex extends createjs.Container {
   containerShape!: createjs.Shape;
   containerHook!: createjs.Shape;
   containerDiff!: createjs.Shape;
-  detailsContainer!: createjs.Container;
 
   width!: number;
   initialWidth!: number;
@@ -106,24 +104,6 @@ export default class Vertex extends createjs.Container {
     this.containerOutline.visible = false;
     this.containerOutline.shadow = new createjs.Shadow('#666', 3, 3, 10);
 
-    this.detailsContainer = new createjs.Container();
-    let circleRadius = 8;
-    let circleDistance = 15;
-    let plusSize = 4;
-    let diff = circleRadius - plusSize;
-    let width = - (this.width/2 - circleRadius);
-    let height = -(this.height/2 + circleDistance);
-
-    let detailsCircle = new createjs.Shape();
-    let plusSign = new createjs.Shape();
-    detailsCircle.graphics.beginFill(this.colors.mainColor).drawCircle(width, height, circleRadius);
-    plusSign.graphics.beginStroke(this.colors.textColor).setStrokeStyle(2, 1)
-      .moveTo(width - diff, height).lineTo(width + diff, height)
-      .moveTo(width, height - diff).lineTo(width, height + diff);
-
-    this.detailsContainer.addChild(detailsCircle, plusSign);
-    this.detailsContainer.cursor = 'pointer';
-
     //create on hover hook
     this.containerHook = new createjs.Shape();
     this.containerHook.graphics.beginFill(this.colors.highlightColor).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
@@ -145,9 +125,8 @@ export default class Vertex extends createjs.Container {
 
     this.setupHookMouse();
     this.setupContainerMouse();
-    this.setupDetailsMouse();
 
-    this.addChild(this.container, this.detailsContainer);
+    this.addChild(this.container);
 
   }
 
@@ -155,28 +134,21 @@ export default class Vertex extends createjs.Container {
     this.container.on("mouseover", () => {
       this.containerOutline.visible = true;
       this.containerHook.visible = true;
-      this.detailsContainer.visible = true;
-      if (this.detailsTimeout !== null) {
-        clearTimeout(this.detailsTimeout);
-        this.detailsTimeout = null;
-      }
     });
 
     this.container.on("mouseout", () => {
       if (!this.isPressed) {
         this.containerOutline.visible = false;
         this.containerHook.visible = false;
-        if (this.detailsTimeout !== null) {
-          clearTimeout(this.detailsTimeout);
-        }
-        this.detailsTimeout = setTimeout(() => {
-          this.detailsContainer.visible = false
-          this.detailsTimeout = null;
-        }, 300);
       }
     });
 
-    this.container.on("mousedown", (evt) => {
+    this.container.on("mousedown", (evt: createjs.MouseEvent) => {
+      if (evt.nativeEvent.button === 2) {
+        this.detailsCallback(evt.nativeEvent);
+        return;
+      }
+
       //changing the child index so the selected container is on the front
       this.parent.setChildIndex(this, this.parent.numChildren-1);
       if (!this.isHooked) {
@@ -191,7 +163,7 @@ export default class Vertex extends createjs.Container {
       }
     });
 
-    this.container.on("pressmove", (evt) => {
+    this.container.on("pressmove", (evt: createjs.MouseEvent) => {
       if (!this.isHooked) {
         const mouseEvent = evt as createjs.MouseEvent;
         this.x = mouseEvent.stageX + this.mouseOffset.x;
@@ -328,32 +300,6 @@ export default class Vertex extends createjs.Container {
       this.isHooked = false;
       this.isPressed = false;
     });
-  }
-
-  setupDetailsMouse() {
-    this.detailsContainer.on('mouseover', () => {
-      if (this.detailsTimeout !== null) {
-        clearTimeout(this.detailsTimeout);
-        this.detailsTimeout = null;
-      }
-      this.detailsContainer.visible = true;
-    });
-
-    this.detailsContainer.on("mouseout", () => {
-      if (!this.isPressed) {
-        if (this.detailsTimeout !== null) {
-          clearTimeout(this.detailsTimeout);
-        }
-        this.detailsTimeout = setTimeout(() => {
-          this.detailsContainer.visible = false
-          this.detailsTimeout = null;
-        }, 300);
-      }
-    });
-
-    this.detailsContainer.on('click', () => {
-      this.detailsCallback();
-    })
   }
 
   //animate the container to "grow" when mouse down

@@ -119,3 +119,15 @@ app-network .dragger {
   margin-bottom: 0;
   list-style-type: none;
 }
+
+.cdk-overlay-container .mat-menu-wrapper {
+  min-height: 0;
+}
+
+.mat-menu-wrapper .mat-menu-content:not(:empty) {
+  padding: 0;
+}
+
+.mat-menu-wrapper .mat-menu-content button {
+  outline: none;
+}

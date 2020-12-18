@@ -29,11 +29,30 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <div class='toggle-trigger' (mouseenter)="sidenavHover = true" (mouseout)="sidenavHover = false"></div>
-    <canvas #canvas></canvas>
+    <mat-sidenav-container>
+      <mat-sidenav #details position="end" mode="over" opened="false" disableClose>
+        <span *ngIf="selectedDetailsNode">
+          {{selectedDetailsNode.name}}
+        </span>
+        <div (click)="details.toggle()" >
+          <mat-icon class="btn">close</mat-icon>
+        </div>
+      </mat-sidenav>
+      <mat-sidenav-content>
+        <div class='toggle-trigger' (mouseenter)="sidenavHover = true" (mouseout)="sidenavHover = false"></div>
+        <canvas #canvas></canvas>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
   </mat-sidenav-content>
 
 </mat-sidenav-container>
+
+<div class="position-absolute" #trigger #matTrigger="matMenuTrigger" [matMenuTriggerFor]="menu"></div>
+<mat-menu #menu="matMenu" [class]="'mat-menu-wrapper'" [hasBackdrop]="false">
+  <button mat-menu-item (click)="openDetailsSidenav()">Vertex details</button>
+  <button *ngIf="selectedDetailsNode && filteredVertices(selectedDetailsNode).length" mat-menu-item (click)="openRelationshipDialog()">Add relationship</button>
+</mat-menu>
+
 <div #dragger class="dragger">
-  <span>Drag element</span>
+  <span></span>
 </div>

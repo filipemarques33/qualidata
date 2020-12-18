@@ -28,15 +28,16 @@ export class NetworkService {
     this.canvas = canvasRef;
     this.canvasStage.stage.update();
 
+    Ticker.timingMode = Ticker.RAF_SYNCHED;
+    Ticker.framerate = 30;
+
     Ticker.on("tick", () => {
       this.canvasStage?.stage.update();
     });
 
     this.network = new CanvasNetwork(this.structures, this.canvasStage, this.detailsCallback);
 
-    const codeType: CodeType = {id: -1, name: 'Type 1', color: 'red'};
-    const code = new CanvasCode(this.canvasStage, -1, 'Code 1', {type: codeType}, this.detailsCallback);
-    code.renderVertex(500, 500);
+    this.network.renderVertex('Code', 14, 500, 500);
   }
 
   setupStructures() {
@@ -50,6 +51,7 @@ export class NetworkService {
     this.structures.createCategory(8, 'Category 8', 'black');
 
     this.structures.createCodeType(12, 'Type 1', 'black');
+    this.structures.createCodeType(13, 'Type 13', 'red');
 
     this.structures.createCode(6, 'Node 1', 'red', 12);
     this.structures.createCode(7, 'Node 2', 'red');
@@ -57,6 +59,7 @@ export class NetworkService {
     this.structures.createCode(9, 'Node 4', 'red');
     this.structures.createCode(10, 'Node 5', 'blue');
     this.structures.createCode(11, 'Node 6', 'blue');
+    this.structures.createCode(14, 'Code 1', 'red', 13);
   }
 
   redraw() {

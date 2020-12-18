@@ -19,7 +19,7 @@ export default class VertexCategory {
     this._type = type;
     this._isRendered = false;
     this._detailsCallback = detailsCallback;
-    this._vertex = new Vertex(this._name, this._color, this._type, () => this._detailsCallback(this));
+    this._vertex = new Vertex(this._name, this._color, this._type, (event) => this._detailsCallback(event, this));
     this._vertex.name = `vertex${Math.random()*100000}`
     this._vertex.visible = false;
   }
