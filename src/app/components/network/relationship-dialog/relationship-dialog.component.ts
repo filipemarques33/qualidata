@@ -14,7 +14,7 @@ export interface RelationshipDialogData {
 })
 export class RelationshipDialog {
 
-  vertexControl = new FormControl('', [Validators.required]);
+  vertexControl = new FormControl({value: '', disabled: this.filteredVertices().length === 0}, [Validators.required]);
   selectedVertex: VertexCategory;
 
   constructor(
@@ -24,7 +24,9 @@ export class RelationshipDialog {
   ) {}
 
   filteredVertices() {
-    return this.networkService.network.visibleVertices.filter(vertex => vertex.id !== this.data.vertex.id);
+    let visibleVertices = this.networkService.network.visibleVertices.filter(vertex => vertex.id !== this.data.vertex.id);
+    let currentVertexRelationships = this.networkService.network.visibleRelationships.get(this.data.vertex.id);
+    return visibleVertices.filter(vertex => !currentVertexRelationships.includes(vertex.id));
   }
 
   submitForm() {

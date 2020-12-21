@@ -13,7 +13,7 @@ export default class CanvasNetwork {
   canvasCategories: CanvasCategory[] = [];
   canvasCodes: CanvasCode[] = [];
   quotations: string[];
-  visibleRelationships: any[];
+  visibleRelationships: Map<number, number[]> = new Map();
   visibleVertices: VertexCategory[] = [];
 
   private typeMap: {[key: string]: (id: number) => VertexCategory} = {
@@ -61,8 +61,8 @@ export default class CanvasNetwork {
       .filter(canvasCategory => canvasCategory);
 
     this.quotations = structures.quotations;
-    this.visibleRelationships = [];
-
+    this.codes.forEach(code => this.visibleRelationships.set(code.id, []));
+    this.categories.forEach(category => this.visibleRelationships.set(category.id, []));
   }
 
   renderVertex(type: string, id: number, x: number, y: number) {
@@ -74,8 +74,12 @@ export default class CanvasNetwork {
   }
 
   connectVertices(origin: VertexCategory, destination: VertexCategory) {
-    let edge = new CanvasEdge(this.canvasStage, 'black', origin.vertex, destination.vertex);
-    edge.renderArcAtBeggining();
+    let edge = new CanvasEdge(this.canvasStage, 'blue', origin.vertex, destination.vertex);
+    let originRel = this.visibleRelationships.get(origin.id);
+    let destRel = this.visibleRelationships.get(destination.id);
+    originRel.push(destination.id);
+    destRel.push(origin.id);
+    edge.renderArc();
   }
 
   private findCanvasCode(id: number) {

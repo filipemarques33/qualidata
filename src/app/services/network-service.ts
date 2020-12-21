@@ -36,8 +36,6 @@ export class NetworkService {
     });
 
     this.network = new CanvasNetwork(this.structures, this.canvasStage, this.detailsCallback);
-
-    this.network.renderVertex('Code', 14, 500, 500);
   }
 
   setupStructures() {

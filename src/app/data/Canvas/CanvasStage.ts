@@ -27,7 +27,7 @@ export default class CanvasStage {
   }
 
   addChildAtBeggining(child: any) {
-    this._stage.addChildAt(child, 1);
+    this._stage.addChildAt(child, 0);
   }
 
   removeChild(child: any) {
