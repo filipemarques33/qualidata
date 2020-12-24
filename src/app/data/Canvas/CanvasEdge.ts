@@ -1,36 +1,40 @@
 import * as createjs from 'createjs-module'
 import CanvasStage from './CanvasStage';
 import Vertex from './Vertex';
+import VertexCategory from './VertexCategory';
 
 export default class Edge {
   private _stage: CanvasStage;
   private _color: string;
-  private _fromVertex: Vertex;
-  private _toVertex: Vertex;
   private _fromVertexText: createjs.Text;
   private _toVertexText: createjs.Text;
   private _dash: number;
   private _arc: createjs.Shape;
-  private arrowTo: boolean;
-  private arrowFrom: boolean;
   private divisionFrom: number;
   private divisionTo: number;
+  private arrowSize: number;
 
-  constructor(stage: CanvasStage, color: string, fromVertex: Vertex, toVertex: Vertex) {
+  public fromVertex: VertexCategory;
+  public toVertex: VertexCategory;
+  public arrowTo: boolean;
+  public arrowFrom: boolean;
+
+  constructor(stage: CanvasStage, color: string, fromVertex: VertexCategory, toVertex: VertexCategory, edgeCallback: Function) {
     this._stage = stage;
     this._color = color;
-    this._fromVertex = fromVertex;
-    this._toVertex = toVertex;
-    this._fromVertexText = (fromVertex.getChildAt(0) as createjs.Container).getChildByName('text') as createjs.Text;
-    this._toVertexText = (toVertex.getChildAt(0) as createjs.Container).getChildByName('text') as createjs.Text;
+    this.fromVertex = fromVertex;
+    this.toVertex = toVertex;
+    this._fromVertexText = (fromVertex.vertex.getChildAt(0) as createjs.Container).getChildByName('text') as createjs.Text;
+    this._toVertexText = (toVertex.vertex.getChildAt(0) as createjs.Container).getChildByName('text') as createjs.Text;
     this._dash = 0;
     this._arc = new createjs.Shape();
     this._arc.cursor = 'pointer';
     this._arc.visible = false;
     this.arrowFrom = true;
-    this.arrowTo = false;
+    this.arrowTo = true;
     this.divisionFrom = 1.5;
-    this.divisionTo = 1.7;
+    this.divisionTo = 1.5;
+    this.arrowSize = 7;
 
     this._arc.on('tick', () => {
       if (this._arc.visible) {
@@ -56,15 +60,20 @@ export default class Edge {
         let toY = pt2.y - toVertexDiff.y;
 
 
-        this._arc.graphics.clear().setStrokeStyle(4)
+        this._arc.graphics.clear().setStrokeStyle(4, 1)
           // .beginStroke('black').moveTo(pt1.x, pt1.y).lineTo(pt2.x, pt2.y)
-          .beginStroke(this._color).moveTo(fromX, fromY).lineTo(toX, toY);
-        if (this.arrowFrom) this._arc.graphics.beginFill(this._color).drawPolyStar(fromX, fromY, 5, 3, 0.5, angle*(180/Math.PI));
-        if (this.arrowTo) this._arc.graphics.beginFill(this._color).drawPolyStar(toX, toY, 5, 3, 0.5, angle*(180/Math.PI) + 180);
+          .beginStroke(this._color).moveTo(fromX, fromY).lineTo(toX, toY).endStroke();
+        if (this.arrowFrom) this._arc.graphics.beginFill(this._color).drawPolyStar(fromX, fromY, this.arrowSize, 3, 0.5, angle*(180/Math.PI));
+        if (this.arrowTo) this._arc.graphics.beginFill(this._color).drawPolyStar(toX, toY, this.arrowSize, 3, 0.5, angle*(180/Math.PI) + 180);
       }
     });
 
-    this._arc.on('click', () => console.log('hello'))
+    this._arc.on('click', (evt: createjs.MouseEvent) => {
+      if (evt.nativeEvent.button === 2) {
+        edgeCallback(evt.nativeEvent, this);
+        return;
+      }
+    });
   }
 
   getShapeDiff(absAngle: number, angle: number) {
@@ -82,25 +91,25 @@ export default class Edge {
     }
 
     let degree = angle*(180/Math.PI);
-    let isOnLeftOrRight = Math.tan(absAngle)*this._toVertex.width < this._toVertex.height ? 1 : 0;
+    let isOnLeftOrRight = Math.tan(absAngle)*this.toVertex.vertex.width < this.toVertex.vertex.height ? 1 : 0;
 
     let xSign = Math.abs(degree) < 90 ? -1 : 1;
     let ySign = (-degree/Math.abs(degree));
     if (isOnLeftOrRight) {
-      toVertexDiff.x = this._toVertex.width/this.divisionTo*xSign;
-      // toVertexDiff.arrowX = this._toVertex.width/this.division*xSign;
-      toVertexDiff.y = Math.tan(absAngle)*this._toVertex.width/this.divisionTo*ySign;
-      // toVertexDiff.arrowY = Math.tan(absAngle)*this._toVertex.width/this.division*ySign;
+      toVertexDiff.x = this.toVertex.vertex.width/this.divisionTo*xSign;
+      // toVertexDiff.arrowX = this.toVertex.width/this.division*xSign;
+      toVertexDiff.y = Math.tan(absAngle)*this.toVertex.vertex.width/this.divisionTo*ySign;
+      // toVertexDiff.arrowY = Math.tan(absAngle)*this.toVertex.width/this.division*ySign;
 
-      fromVertexDiff.x = this._fromVertex.width/this.divisionFrom*(-xSign);
-      fromVertexDiff.y = Math.tan(absAngle)*this._fromVertex.width/this.divisionFrom*(-ySign);
+      fromVertexDiff.x = this.fromVertex.vertex.width/this.divisionFrom*(-xSign);
+      fromVertexDiff.y = Math.tan(absAngle)*this.fromVertex.vertex.width/this.divisionFrom*(-ySign);
     } else {
-      toVertexDiff.x = this._toVertex.height/this.divisionTo/Math.tan(absAngle)*xSign;
-      toVertexDiff.y = this._toVertex.height/this.divisionTo*ySign;
-      // arrowDiffX = this._toVertex.height/this.division/Math.tan(absAngle)*xSign;
-      // arrowDiffY = this._toVertex.height/this.division*ySign;
-      fromVertexDiff.x = this._fromVertex.height/this.divisionFrom/Math.tan(absAngle)*(-xSign);
-      fromVertexDiff.y = this._fromVertex.height/this.divisionFrom*(-ySign);
+      toVertexDiff.x = this.toVertex.vertex.height/this.divisionTo/Math.tan(absAngle)*xSign;
+      toVertexDiff.y = this.toVertex.vertex.height/this.divisionTo*ySign;
+      // arrowDiffX = this.toVertex.height/this.division/Math.tan(absAngle)*xSign;
+      // arrowDiffY = this.toVertex.height/this.division*ySign;
+      fromVertexDiff.x = this.fromVertex.vertex.height/this.divisionFrom/Math.tan(absAngle)*(-xSign);
+      fromVertexDiff.y = this.fromVertex.vertex.height/this.divisionFrom*(-ySign);
     }
 
     return {toVertexDiff, fromVertexDiff};

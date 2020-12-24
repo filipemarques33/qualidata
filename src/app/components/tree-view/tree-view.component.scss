@@ -1,0 +1,90 @@
+.tree-view .mat-tree {
+  height: 100%;
+}
+
+.tree-view .dragger {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+  background: gray;
+  padding: 10px;
+  border-radius: 5px;
+  color: white;
+  font-size: 12px;
+  transition: opacity, filter 250ms;
+  white-space: nowrap;
+}
+
+.tree-view .mat-expansion-panel {
+  border-radius: 0;
+}
+
+.tree-view .mat-expansion-panel .mat-expanded {
+  height: 48px;
+}
+
+.tree-view .mat-expansion-panel .mat-expansion-panel-body {
+  padding: 0;
+}
+
+.tree-view .mat-expansion-panel-header.mat-expanded:hover {
+  background: rgba(0,0,0,.04);
+}
+
+.tree-view .toggle-sidenav {
+  position: absolute;
+  top: 50%;
+  left: calc(100% - 20px);
+  z-index: -1;
+  cursor: pointer;
+  transition: all 250ms;
+  transition-delay: 1s;
+}
+
+.tree-view .toggle-sidenav.hovered,
+.tree-view:hover .toggle-sidenav {
+  left: calc(100% + 10px);
+  transition-delay: 0s;
+}
+
+.tree-view .example-tree-invisible {
+  display: none;
+}
+
+.tree-view mat-nested-tree-node {
+  display: block;
+}
+
+.tree-view mat-tree > mat-nested-tree-node,
+.tree-view mat-tree > mat-tree-node {
+  border-bottom: 1px solid #333;
+}
+
+.tree-view mat-tree-node,
+.tree-view ul,
+.tree-view mat-nested-tree-node {
+  cursor: pointer;
+  transition: all 150ms;
+}
+
+.tree-view mat-tree-node:hover,
+.tree-view mat-nested-tree-node li span:hover {
+  background: #eee;
+}
+
+.tree-view span.mat-tree-node {
+  padding: 0 10px;
+  user-select: none;
+}
+
+.tree-view ul {
+  margin-block-start: 0;
+  padding-inline-start: 20px;
+}
+
+.tree-view ul,
+.tree-view li {
+  margin-top: 0;
+  margin-bottom: 0;
+  list-style-type: none;
+}

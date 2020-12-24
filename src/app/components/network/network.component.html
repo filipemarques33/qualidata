@@ -1,42 +1,12 @@
 <mat-sidenav-container class='network-wrapper'>
   <mat-sidenav #sidenav [opened]="true" [mode]="'over'" disableClose>
-    <div class='toggle-sidenav' [class.hovered]="sidenavHover" (click)="sidenav.toggle()">
-      <mat-icon>{{sidenav.opened ? 'arrow_back_ios' : 'arrow_forward_ios'}}</mat-icon>
-    </div>
-    <span *ngIf="!isNetworkLoaded">No categories or codes created</span>
-    <mat-tree *ngIf="isNetworkLoaded" [dataSource]="dataSource" [treeControl]="treeControl">
-      <!-- This is the tree node template for leaf nodes -->
-      <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
-        <span class="mat-tree-node" draggable="true" (dragstart)="hideGhost($event, node)"
-          (drag)="changeDragElement($event)" (dragend)="hideDragElement($event, node)">
-          <!-- use a disabled button to provide padding for tree leaf -->
-          {{node.name}}
-        </span>
-      </mat-tree-node>
-      <!-- This is the tree node template for expandable nodes -->
-      <mat-nested-tree-node matTreeNodeToggle *matTreeNodeDef="let node; when: hasChildren">
-        <li>
-          <span draggable="true" class="mat-tree-node" (dragstart)="hideGhost($event, node)"
-            (drag)="changeDragElement($event)" (dragend)="hideDragElement($event, node)">
-            {{node.name}}
-          </span>
-          <ul [class.example-tree-invisible]="!treeControl.isExpanded(node)">
-            <ng-container matTreeNodeOutlet></ng-container>
-          </ul>
-        </li>
-      </mat-nested-tree-node>
-    </mat-tree>
+    <app-tree-view class="tree-view" [sidenav]="sidenav" [showHandle]="sidenavHover"></app-tree-view>
   </mat-sidenav>
 
-  <mat-sidenav-content>
+  <mat-sidenav-content class="w-100">
     <mat-sidenav-container>
       <mat-sidenav #details position="end" mode="over" opened="false" disableClose>
-        <span *ngIf="selectedDetailsNode">
-          {{selectedDetailsNode.name}}
-        </span>
-        <div (click)="details.toggle()" >
-          <mat-icon class="btn">close</mat-icon>
-        </div>
+        <app-details-sidebar [inputEdge]="selectedEdge" [inputVertex]="selectedDetailsNode" (closeSidebarEvent)="details.close()"></app-details-sidebar>
       </mat-sidenav>
       <mat-sidenav-content>
         <div class='toggle-trigger' (mouseenter)="sidenavHover = true" (mouseout)="sidenavHover = false"></div>
@@ -47,12 +17,10 @@
 
 </mat-sidenav-container>
 
-<div class="position-absolute" #trigger #matTrigger="matMenuTrigger" [matMenuTriggerFor]="menu"></div>
-<mat-menu #menu="matMenu" [class]="'mat-menu-wrapper'" [hasBackdrop]="false">
-  <button mat-menu-item (click)="openDetailsSidenav()">Vertex details</button>
-  <button *ngIf="selectedDetailsNode && filteredVertices(selectedDetailsNode).length" mat-menu-item (click)="openRelationshipDialog()">Add relationship</button>
-</mat-menu>
-
-<div #dragger class="dragger">
-  <span></span>
+<div class="position-absolute" #trigger #matTrigger="matMenuTrigger" [matMenuTriggerFor]="menu">
+  <mat-menu #menu="matMenu" [class]="'mat-menu-wrapper'">
+    <button *ngIf="!focusedEdge" mat-menu-item (click)="openDetailsSidenav()">Vertex details</button>
+    <button *ngIf="focusedDetailsNode && filteredVertices(focusedDetailsNode).length" mat-menu-item (click)="openRelationshipDialog()">Add relationship</button>
+    <button *ngIf="focusedEdge" mat-menu-item (click)="openDetailsSidenav()">Edge details</button>
+  </mat-menu>
 </div>

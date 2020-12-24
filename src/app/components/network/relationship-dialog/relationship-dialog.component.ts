@@ -31,7 +31,7 @@ export class RelationshipDialog {
 
   submitForm() {
     if (this.vertexControl.valid) {
-      this.networkService.network.connectVertices(this.data.vertex, this.selectedVertex);
+      this.networkService.network.connectVertices(this.data.vertex, this.selectedVertex, this.networkService.edgeCallback);
       this.dialogRef.close();
     } else {
       this.vertexControl.markAsDirty();

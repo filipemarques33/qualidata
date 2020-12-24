@@ -143,8 +143,14 @@ export default class Vertex extends createjs.Container {
       }
     });
 
+    this.container.on("contextmenu", (evt: createjs.MouseEvent) => {
+      console.log('contextmenu');
+      evt.nativeEvent.preventDefault();
+    })
+
     this.container.on("mousedown", (evt: createjs.MouseEvent) => {
       if (evt.nativeEvent.button === 2) {
+        evt.nativeEvent.preventDefault();
         this.detailsCallback(evt.nativeEvent);
         return;
       }

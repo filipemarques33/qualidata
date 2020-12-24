@@ -5,59 +5,11 @@ app-network .network-wrapper {
   z-index: 11;
 }
 
-app-network .dragger {
-  display: none;
-  position: absolute;
-  z-index: 1000;
-  background: gray;
-  padding: 10px;
-  border-radius: 5px;
-  color: white;
-  font-size: 12px;
-  transition: opacity, filter 250ms;
-}
-
 .network-wrapper .mat-sidenav {
   min-width: 140px;
   z-index: 10;
   overflow: visible;
   visibility: visible !important;
-}
-
-.network-wrapper .mat-sidenav .mat-tree {
-  height: 100%;
-}
-
-.network-wrapper .mat-sidenav .mat-expansion-panel {
-  border-radius: 0;
-}
-
-.network-wrapper .mat-sidenav .mat-expansion-panel .mat-expanded {
-  height: 48px;
-}
-
-.network-wrapper .mat-sidenav .mat-expansion-panel .mat-expansion-panel-body {
-  padding: 0;
-}
-
-.network-wrapper .mat-sidenav .mat-expansion-panel-header.mat-expanded:hover {
-  background: rgba(0,0,0,.04);
-}
-
-.network-wrapper .mat-sidenav .toggle-sidenav {
-  position: absolute;
-  top: 50%;
-  left: calc(100% - 20px);
-  z-index: -1;
-  cursor: pointer;
-  transition: all 250ms;
-  transition-delay: 1s;
-}
-
-.network-wrapper .mat-sidenav .toggle-sidenav.hovered,
-.network-wrapper .mat-sidenav:hover .toggle-sidenav {
-  left: calc(100% + 10px);
-  transition-delay: 0s;
 }
 
 .network-wrapper .mat-sidenav-content {
@@ -76,48 +28,6 @@ app-network .dragger {
   bottom: 0;
   left: 0;
   z-index: 5;
-}
-
-.network-wrapper .example-tree-invisible {
-  display: none;
-}
-
-.network-wrapper mat-nested-tree-node {
-  display: block;
-}
-
-.network-wrapper mat-tree > mat-nested-tree-node,
-.network-wrapper mat-tree > mat-tree-node {
-  border-bottom: 1px solid #333;
-}
-
-.network-wrapper mat-tree-node,
-.network-wrapper ul,
-.network-wrapper mat-nested-tree-node {
-  cursor: pointer;
-  transition: all 150ms;
-}
-
-.network-wrapper mat-tree-node:hover,
-.network-wrapper mat-nested-tree-node li span:hover {
-  background: #eee;
-}
-
-.network-wrapper span.mat-tree-node {
-  padding: 0 10px;
-  user-select: none;
-}
-
-.network-wrapper ul {
-  margin-block-start: 0;
-  padding-inline-start: 20px;
-}
-
-.network-wrapper ul,
-.network-wrapper li {
-  margin-top: 0;
-  margin-bottom: 0;
-  list-style-type: none;
 }
 
 .cdk-overlay-container .mat-menu-wrapper {

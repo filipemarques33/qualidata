@@ -1,0 +1,18 @@
+<div class="close-button position-absolute" (click)="closeSidebar()" >
+  <mat-icon>close</mat-icon>
+</div>
+<div *ngIf="inputVertex" class="p-2 d-flex flex-column justify-content-center align-items-start">
+  <span>
+    {{inputVertex.name}}
+  </span>
+</div>
+<div *ngIf="inputEdge" class="p-2 pr-3 d-flex flex-column justify-content-start align-items-start">
+  <h4 class="m-0"><small class="text-primary">From</small></h4>
+  <span>{{inputEdge.fromVertex.name}}</span>
+  <h4 class="m-0"><small class="text-primary">To</small></h4>
+  <span>{{inputEdge.toVertex.name}}</span>
+
+  <span class="text-primary mt-3">Relationship direction</span>
+  <mat-slide-toggle [(ngModel)]="inputEdge.arrowFrom">Arrow from</mat-slide-toggle>
+  <mat-slide-toggle [(ngModel)]="inputEdge.arrowTo">Arrow to</mat-slide-toggle>
+</div>

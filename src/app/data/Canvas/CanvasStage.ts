@@ -9,6 +9,7 @@ export default class CanvasStage {
   constructor(canvasRef: HTMLCanvasElement) {
     this._stage = new createjs.Stage(canvasRef);
     this._stage.enableMouseOver();
+    this._stage.mouseEnabled = true;
     this._stage.mouseMoveOutside = true;
     this._canvas = this._stage.canvas as HTMLCanvasElement;
     this._context = this._canvas.getContext('2d', {alpha: true}) as CanvasRenderingContext2D;

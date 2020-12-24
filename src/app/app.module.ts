@@ -12,6 +12,8 @@ import { ComposeComponent } from './components/compose/compose.component';
 import { NavBarComponent } from './components/navbar/navbar.component';
 import { NetworkComponent } from './components/network/network.component';
 import { RelationshipDialog } from "./components/network/relationship-dialog/relationship-dialog.component";
+import { DetailsSidebar } from "./components/details-sidebar/details-sidebar.component";
+import { TreeView } from "./components/tree-view/tree-view.component";
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NetworkService } from './services/network-service';
@@ -22,7 +24,9 @@ import { NetworkService } from './services/network-service';
     ComposeComponent,
     NavBarComponent,
     NetworkComponent,
-    RelationshipDialog
+    RelationshipDialog,
+    DetailsSidebar,
+    TreeView
   ],
   imports: [
     BrowserModule,

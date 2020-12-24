@@ -1,11 +1,12 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { Component, ViewChild, ElementRef, ViewEncapsulation, HostListener, OnInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, ViewEncapsulation, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatMenuTrigger } from '@angular/material/menu';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatSidenav } from '@angular/material/sidenav';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import CanvasCategory from 'src/app/data/Canvas/CanvasCategory';
 import VertexCategory from 'src/app/data/Canvas/VertexCategory';
+import CanvasEdge from 'src/app/data/Canvas/CanvasEdge';
 import { NetworkService } from "../../services/network-service";
 import { RelationshipDialog } from './relationship-dialog/relationship-dialog.component';
 
@@ -24,7 +25,7 @@ interface VertexNode {
   styleUrls: ['./network.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class NetworkComponent implements OnInit {
+export class NetworkComponent implements OnInit, OnDestroy {
 
   @ViewChild('canvas', {static: true}) canvasRef: ElementRef<HTMLCanvasElement>;
   @ViewChild('sidenav') sidenavRef: MatSidenav;
@@ -38,81 +39,67 @@ export class NetworkComponent implements OnInit {
 
   canvas: HTMLCanvasElement;
   canvasContext: CanvasRenderingContext2D;
-  sidebarVertexTree: VertexNode[] = [];
-  dragImg: HTMLImageElement;
+  focusedDetailsNode: VertexCategory;
   selectedDetailsNode: VertexCategory;
-  mousePosition = {
-    x: 0,
-    y: 0
-  };
+  focusedEdge: CanvasEdge;
+  selectedEdge: CanvasEdge;
 
   sidenavHover = false;
-  isNetworkLoaded = false;
+  isOpeningMenu = false;
+
+  private onContextMenu;
 
   constructor(public networkService: NetworkService, public relationshipDialog: MatDialog) {}
 
   ngOnInit(): void {
     this.canvas = this.canvasRef.nativeElement;
-    this.networkService.setupCanvasStage(this.canvas, (event: MouseEvent, vertex: VertexCategory) => this.openDetailsMenu(event, vertex));
-    this.setupTree();
-    this.isNetworkLoaded = true;
-
-    this.dragImg = new Image(0,0);
-    this.dragImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    document.addEventListener("contextmenu", (event) => {
+    this.networkService.setupCanvasStage(this.canvas,
+      (event: MouseEvent, vertex: VertexCategory) => this.openDetailsMenu(event, vertex),
+      (event: MouseEvent, edge: CanvasEdge) => this.openEdgeMenu(event, edge));
+    this.onContextMenu = (event: MouseEvent) => {
+      if (!this.isOpeningMenu) {
+        (event.target as HTMLDivElement).click();
+      }
+      this.isOpeningMenu = false;
       event.preventDefault();
-    }, false);
-  }
-
-  @HostListener('window:resize')
-  onResize() {
-    this.networkService.redraw();
-  }
-
-  hasChildren(_: any, node: VertexNode) {return !!node.children && node.children.length > 0}
-
-  hideGhost(event: DragEvent, node: VertexNode) {
-    event.dataTransfer.setDragImage(this.dragImg, 0, 0);
-    this.draggerRef.nativeElement.style.background = node.color;
-    this.draggerRef.nativeElement.style.color = node.textColor;
-    this.draggerRef.nativeElement.innerHTML = node.name;
-    this.draggerRef.nativeElement.style.display = 'block';
-  }
-
-  changeDragElement(event: DragEvent) {
-    event.preventDefault();
-    if (event.x < this.sidenavRef._getWidth()) {
-      this.draggerRef.nativeElement.style.filter = "brightness(70%)";
-      this.draggerRef.nativeElement.style.opacity = "0.6";
-    } else {
-      this.draggerRef.nativeElement.style.opacity = "1";
-      this.draggerRef.nativeElement.style.filter = "brightness(100%)";
     }
-    if (event.y !== 0) this.draggerRef.nativeElement.style.top = event.y - this.draggerRef.nativeElement.clientHeight/2 + 'px';
-    if (event.x !== 0) this.draggerRef.nativeElement.style.left = event.x - this.draggerRef.nativeElement.clientWidth/2 + 'px';
+    document.addEventListener("contextmenu", this.onContextMenu, false);
   }
 
-  hideDragElement(event: DragEvent, node: VertexNode) {
-    this.draggerRef.nativeElement.style.display = 'none';
-
-    if (event.x > this.sidenavRef._getWidth()) this.networkService.network.renderVertex(node.type, node.id, event.x, event.y - 60);
+  ngOnDestroy(): void {
+    document.removeEventListener("contextmenu", this.onContextMenu, false);
   }
+
+  log(text) {console.log(text)}
 
   openDetailsMenu(event: MouseEvent, vertex: VertexCategory) {
+    this.isOpeningMenu = true;
+    this.focusedDetailsNode = vertex;
+    this.focusedEdge = null;
     this.trigger.nativeElement.style.left = event.clientX + 5 + 'px';
     this.trigger.nativeElement.style.top = event.clientY + 5 + 'px';
     this.matTrigger.openMenu();
-    this.selectedDetailsNode = vertex;
+  }
+
+  openEdgeMenu(event: MouseEvent, edge: CanvasEdge) {
+    this.isOpeningMenu = true;
+    this.focusedDetailsNode = null;
+    this.focusedEdge = edge;
+    this.trigger.nativeElement.style.left = event.clientX + 5 + 'px';
+    this.trigger.nativeElement.style.top = event.clientY + 5 + 'px';
+    this.matTrigger.openMenu();
   }
 
   openDetailsSidenav() {
+    this.selectedDetailsNode = this.focusedDetailsNode;
+    this.selectedEdge = this.focusedEdge;
     this.detailsRef.open();
   }
 
   openRelationshipDialog() {
     this.relationshipDialog.open(RelationshipDialog, {
       data: {
-        vertex: this.selectedDetailsNode
+        vertex: this.focusedDetailsNode
       }
     })
   }
@@ -121,39 +108,9 @@ export class NetworkComponent implements OnInit {
     return this.networkService.network.visibleVertices.filter(vertex => vertex.id !== currentVertex.id);
   }
 
-  private setupTree() {
-    this.sidebarVertexTree = this.networkService.network.canvasCategories.map(canvasCategory => {
-      return this.getCategoryTree(canvasCategory);
-    });
-
-    this.sidebarVertexTree.push(...this.networkService.network.canvasCodes.map(canvasCode => ({
-      id: canvasCode.id,
-      name: canvasCode.name,
-      color: canvasCode.color,
-      textColor: canvasCode.vertex.textColor,
-      type: 'Code'
-    })));
-
-    this.dataSource.data = this.sidebarVertexTree;
-  }
-
-  private getCategoryTree(canvasCategory: CanvasCategory): VertexNode {
-    let children = canvasCategory.categories.map(subCategory => this.getCategoryTree(subCategory));
-    children.push(...canvasCategory.codes.map(canvasCode => ({
-      id: canvasCode.id,
-      name: canvasCode.name,
-      color: canvasCode.color,
-      textColor: canvasCode.vertex.textColor,
-      type: 'Code'
-    })));
-    return {
-      id: canvasCategory.id,
-      name: canvasCategory.name,
-      color: canvasCategory.color,
-      textColor: canvasCategory.vertex.textColor,
-      children: children,
-      type: 'Category'
-    }
+  @HostListener('window:resize')
+  onResize() {
+    this.networkService.redraw();
   }
 
 }

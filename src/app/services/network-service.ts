@@ -17,13 +17,15 @@ export class NetworkService {
   structures: Structures = new Structures();
   network: CanvasNetwork;
   detailsCallback: Function;
+  edgeCallback: Function;
 
   constructor() {
     this.setupStructures();
   }
 
-  setupCanvasStage(canvasRef: HTMLCanvasElement, detailCallback: Function) {
+  setupCanvasStage(canvasRef: HTMLCanvasElement, detailCallback: Function, edgeCallback: Function) {
     this.detailsCallback = detailCallback;
+    this.edgeCallback = edgeCallback;
     this.canvasStage = new CanvasStage(canvasRef);
     this.canvas = canvasRef;
     this.canvasStage.stage.update();
