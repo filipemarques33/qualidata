@@ -16,6 +16,15 @@ export class DetailsSidebar {
 
   @Output() closeSidebarEvent = new EventEmitter();
 
+  edgeTypes = Object.keys(CanvasEdge.EDGE_TYPES);
+
+  edgeTypeTranslations = {
+    STANDARD: 'Standard',
+    DASHED: 'Dashed',
+    DOTTED: 'Dotted',
+    DOUBLE: 'Double'
+  };
+
   constructor(
     public networkService: NetworkService
   ) {}

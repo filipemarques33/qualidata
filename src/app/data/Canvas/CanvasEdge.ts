@@ -1,44 +1,82 @@
 import * as createjs from 'createjs-module'
 import CanvasStage from './CanvasStage';
-import Vertex from './Vertex';
 import VertexCategory from './VertexCategory';
 
-export default class Edge {
+interface drawEdgeInterface {
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+  angle: number;
+}
+
+export default class CanvasEdge {
+  private DRAW_EDGES: {[key: string]: (drawPoints: drawEdgeInterface) => any} = {
+    STANDARD: (drawPoints: drawEdgeInterface) => this.drawStandardEdge(drawPoints),
+    DASHED: (drawPoints: drawEdgeInterface) => this.drawDashedEdge(drawPoints),
+    DOUBLE: (drawPoints: drawEdgeInterface) => this.drawDoubleEdge(drawPoints),
+    DOTTED: (drawPoints: drawEdgeInterface) => this.drawDottedEdge(drawPoints),
+  }
+
   private _stage: CanvasStage;
-  private _color: string;
   private _fromVertexText: createjs.Text;
   private _toVertexText: createjs.Text;
-  private _dash: number;
   private _arc: createjs.Shape;
-  private divisionFrom: number;
-  private divisionTo: number;
-  private arrowSize: number;
+  private _arcHitArea: createjs.Shape;
 
+  private _color: string;
+  private _arrowDistance: number;
+  private _arrowSize: number;
+  private _edgeType: string;
+  private _dash: number;
+
+  public static EDGE_TYPES = {
+    STANDARD: 'STANDARD',
+    DASHED: 'DASHED',
+    DOUBLE: 'DOUBLE',
+    DOTTED: 'DOTTED'
+  };
   public fromVertex: VertexCategory;
   public toVertex: VertexCategory;
   public arrowTo: boolean;
   public arrowFrom: boolean;
 
-  constructor(stage: CanvasStage, color: string, fromVertex: VertexCategory, toVertex: VertexCategory, edgeCallback: Function) {
-    this._stage = stage;
+  constructor(_stage: CanvasStage, color: string, fromVertex: VertexCategory, toVertex: VertexCategory, edgeCallback: Function) {
+    this._stage = _stage;
     this._color = color;
     this.fromVertex = fromVertex;
     this.toVertex = toVertex;
     this._fromVertexText = (fromVertex.vertex.getChildAt(0) as createjs.Container).getChildByName('text') as createjs.Text;
     this._toVertexText = (toVertex.vertex.getChildAt(0) as createjs.Container).getChildByName('text') as createjs.Text;
-    this._dash = 0;
+    this.arrowFrom = true;
+    this.arrowTo = true;
+    this._arrowDistance = 15;
+    this._arrowSize = 7;
+    this._edgeType = CanvasEdge.EDGE_TYPES.STANDARD;
+    this._dash = 20;
+
     this._arc = new createjs.Shape();
     this._arc.cursor = 'pointer';
     this._arc.visible = false;
-    this.arrowFrom = true;
-    this.arrowTo = true;
-    this.divisionFrom = 1.5;
-    this.divisionTo = 1.5;
-    this.arrowSize = 7;
+    this._arcHitArea = new createjs.Shape();
+    this._arc.hitArea = this._arcHitArea;
 
+    this.setupListeners(edgeCallback);
+  }
+
+  get edgeType(): string {
+    return this._edgeType;
+  }
+
+  set edgeType(value: string) {
+    if (Object.keys(CanvasEdge.EDGE_TYPES).includes(value)) {
+      this._edgeType = value;
+    }
+  }
+
+  setupListeners(edgeCallback: Function) {
     this._arc.on('tick', () => {
       if (this._arc.visible) {
-        // this._dash = (this._dash+1)%20;
         const pt1 = this._fromVertexText.localToGlobal(this._fromVertexText.x, this._fromVertexText.y);
         const pt2 = this._toVertexText.localToGlobal(this._toVertexText.x, this._toVertexText.y);
 
@@ -59,60 +97,26 @@ export default class Edge {
         let toX = pt2.x - toVertexDiff.x;
         let toY = pt2.y - toVertexDiff.y;
 
-
-        this._arc.graphics.clear().setStrokeStyle(4, 1)
-          // .beginStroke('black').moveTo(pt1.x, pt1.y).lineTo(pt2.x, pt2.y)
-          .beginStroke(this._color).moveTo(fromX, fromY).lineTo(toX, toY).endStroke();
-        if (this.arrowFrom) this._arc.graphics.beginFill(this._color).drawPolyStar(fromX, fromY, this.arrowSize, 3, 0.5, angle*(180/Math.PI));
-        if (this.arrowTo) this._arc.graphics.beginFill(this._color).drawPolyStar(toX, toY, this.arrowSize, 3, 0.5, angle*(180/Math.PI) + 180);
+        this.DRAW_EDGES[this._edgeType]({fromX, fromY, toX, toY, angle});
+        this._arcHitArea.graphics.clear().beginFill("#000").beginStroke('#000').setStrokeStyle(15).moveTo(fromX, fromY).lineTo(toX, toY);
       }
     });
 
     this._arc.on('click', (evt: createjs.MouseEvent) => {
       if (evt.nativeEvent.button === 2) {
+        console.log(this);
         edgeCallback(evt.nativeEvent, this);
         return;
       }
     });
-  }
 
-  getShapeDiff(absAngle: number, angle: number) {
-    let toVertexDiff = {
-      x: 0,
-      y: 0,
-      arrowX: 0,
-      arrowY: 0
-    };
-    let fromVertexDiff = {
-      x: 0,
-      y: 0,
-      arrowX: 0,
-      arrowY: 0
-    }
+    this._arc.on('mouseover', () => {
+      this._arc.shadow = new createjs.Shadow('#999', 3, 3, 5);
+    });
 
-    let degree = angle*(180/Math.PI);
-    let isOnLeftOrRight = Math.tan(absAngle)*this.toVertex.vertex.width < this.toVertex.vertex.height ? 1 : 0;
-
-    let xSign = Math.abs(degree) < 90 ? -1 : 1;
-    let ySign = (-degree/Math.abs(degree));
-    if (isOnLeftOrRight) {
-      toVertexDiff.x = this.toVertex.vertex.width/this.divisionTo*xSign;
-      // toVertexDiff.arrowX = this.toVertex.width/this.division*xSign;
-      toVertexDiff.y = Math.tan(absAngle)*this.toVertex.vertex.width/this.divisionTo*ySign;
-      // toVertexDiff.arrowY = Math.tan(absAngle)*this.toVertex.width/this.division*ySign;
-
-      fromVertexDiff.x = this.fromVertex.vertex.width/this.divisionFrom*(-xSign);
-      fromVertexDiff.y = Math.tan(absAngle)*this.fromVertex.vertex.width/this.divisionFrom*(-ySign);
-    } else {
-      toVertexDiff.x = this.toVertex.vertex.height/this.divisionTo/Math.tan(absAngle)*xSign;
-      toVertexDiff.y = this.toVertex.vertex.height/this.divisionTo*ySign;
-      // arrowDiffX = this.toVertex.height/this.division/Math.tan(absAngle)*xSign;
-      // arrowDiffY = this.toVertex.height/this.division*ySign;
-      fromVertexDiff.x = this.fromVertex.vertex.height/this.divisionFrom/Math.tan(absAngle)*(-xSign);
-      fromVertexDiff.y = this.fromVertex.vertex.height/this.divisionFrom*(-ySign);
-    }
-
-    return {toVertexDiff, fromVertexDiff};
+    this._arc.on('mouseout', () => {
+      this._arc.shadow = null;
+    });
   }
 
   renderArc() {
@@ -132,5 +136,102 @@ export default class Edge {
   unrenderArc() {
     this._stage.removeChild(this._arc);
     this._arc.visible = false;
+  }
+
+  private getShapeDiff(absAngle: number, angle: number) {
+    let toVertexDiff = {
+      x: 0,
+      y: 0,
+      arrowX: 0,
+      arrowY: 0
+    };
+    let fromVertexDiff = {
+      x: 0,
+      y: 0,
+      arrowX: 0,
+      arrowY: 0
+    }
+
+    let degree = angle*(180/Math.PI);
+    let fromVertexHeight = this.fromVertex.vertex.height/2 + this._arrowDistance;
+    let fromVertexWidth = this.fromVertex.vertex.width/2 + this._arrowDistance;
+    let toVertexHeight = this.toVertex.vertex.height/2 + this._arrowDistance;
+    let toVertexWidth = this.toVertex.vertex.width/2 + this._arrowDistance;
+
+    let isOnLeftOrRightFrom = Math.tan(absAngle)*fromVertexWidth <= fromVertexHeight ? 1 : 0;
+    let isOnLeftOrRightTo = Math.tan(absAngle)*toVertexWidth <= toVertexHeight ? 1 : 0;
+
+    let xSign = Math.abs(degree) < 90 ? -1 : 1;
+    let ySign = (-degree/Math.abs(degree));
+
+    if (isOnLeftOrRightFrom) {
+      fromVertexDiff.x = fromVertexWidth*(-xSign);
+      fromVertexDiff.y = Math.tan(absAngle)*fromVertexWidth*(-ySign);
+    } else {
+      fromVertexDiff.x = fromVertexHeight/Math.tan(absAngle)*(-xSign);
+      fromVertexDiff.y = fromVertexHeight*(-ySign);
+    }
+
+    if (isOnLeftOrRightTo) {
+      toVertexDiff.x = toVertexWidth*xSign;
+      toVertexDiff.y = Math.tan(absAngle)*toVertexWidth*ySign;
+    } else {
+      toVertexDiff.x = toVertexHeight/Math.tan(absAngle)*xSign;
+      toVertexDiff.y = toVertexHeight*ySign;
+    }
+
+    return {toVertexDiff, fromVertexDiff};
+  }
+
+  private drawStandardEdge(drawPoints: drawEdgeInterface) {
+    let {fromX, fromY, toX, toY, angle} = drawPoints;
+    this._arc.graphics.clear().setStrokeStyle(4, 1).beginStroke(this._color)
+      .moveTo(fromX, fromY).lineTo(toX, toY).endStroke();
+    if (this.arrowFrom)
+      this._arc.graphics.beginFill(this._color)
+        .drawPolyStar(fromX, fromY, this._arrowSize, 3, 0.5, angle*(180/Math.PI));
+    if (this.arrowTo)
+      this._arc.graphics.beginFill(this._color)
+        .drawPolyStar(toX, toY, this._arrowSize, 3, 0.5, angle*(180/Math.PI) + 180);
+  }
+
+  private drawDashedEdge(drawPoints: drawEdgeInterface) {
+    let {fromX, fromY, toX, toY, angle} = drawPoints;
+    this._arc.graphics.clear().setStrokeStyle(4, 1).setStrokeDash([this._dash, this._dash/2])
+      .beginStroke(this._color).moveTo(fromX, fromY).lineTo(toX, toY).endStroke();
+    if (this.arrowFrom)
+      this._arc.graphics.beginFill(this._color)
+        .drawPolyStar(fromX, fromY, this._arrowSize, 3, 0.5, angle*(180/Math.PI));
+    if (this.arrowTo)
+      this._arc.graphics.beginFill(this._color)
+        .drawPolyStar(toX, toY, this._arrowSize, 3, 0.5, angle*(180/Math.PI) + 180);
+  }
+
+  private drawDoubleEdge(drawPoints: drawEdgeInterface) {
+    let {fromX, fromY, toX, toY, angle} = drawPoints;
+    let xOffset = 2*Math.sin(angle);
+    let yOffset = 2*Math.cos(angle);
+    this._arc.graphics.clear().setStrokeStyle(2, 1).beginStroke(this._color)
+      .moveTo(fromX - xOffset, fromY + yOffset).lineTo(toX - xOffset, toY + yOffset).endStroke();
+    this._arc.graphics.setStrokeStyle(2, 1).beginStroke(this._color)
+      .moveTo(fromX + xOffset, fromY - yOffset).lineTo(toX + xOffset, toY - yOffset).endStroke();
+    if (this.arrowFrom)
+      this._arc.graphics.beginFill(this._color)
+        .drawPolyStar(fromX, fromY, this._arrowSize, 3, 0.5, angle*(180/Math.PI));
+    if (this.arrowTo)
+      this._arc.graphics.beginFill(this._color)
+        .drawPolyStar(toX, toY, this._arrowSize, 3, 0.5, angle*(180/Math.PI) + 180);
+  }
+
+  private drawDottedEdge(drawPoints: drawEdgeInterface) {
+    let {fromX, fromY, toX, toY, angle} = drawPoints;
+    this._arc.graphics.clear().setStrokeStyle(4, 1).setStrokeDash([1, 5])
+      .beginStroke(this._color).moveTo(fromX, fromY).lineTo(toX, toY).endStroke();
+    if (this.arrowFrom)
+      this._arc.graphics.beginFill(this._color)
+        .drawPolyStar(fromX, fromY, this._arrowSize, 3, 0.5, angle*(180/Math.PI));
+    if (this.arrowTo)
+      this._arc.graphics.beginFill(this._color)
+        .drawPolyStar(toX, toY, this._arrowSize, 3, 0.5, angle*(180/Math.PI) + 180);
   }
 }

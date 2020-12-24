@@ -15,4 +15,13 @@
   <span class="text-primary mt-3">Relationship direction</span>
   <mat-slide-toggle [(ngModel)]="inputEdge.arrowFrom">Arrow from</mat-slide-toggle>
   <mat-slide-toggle [(ngModel)]="inputEdge.arrowTo">Arrow to</mat-slide-toggle>
+
+  <span class="text-primary mt-3">Edge type</span>
+  <mat-radio-group class="d-flex flex-column">
+    <mat-radio-button ngDefaultControl *ngFor="let edgeType of edgeTypes"
+      [value]="edgeType"
+      [checked]="inputEdge.edgeType === edgeType"
+      [(ngModel)]="inputEdge.edgeType"
+    >{{edgeTypeTranslations[edgeType]}}</mat-radio-button>
+  </mat-radio-group>
 </div>
