@@ -23,8 +23,9 @@ export default class CanvasStage {
     this.redraw();
   }
 
-  addChild(child: any) {
-    this._stage.addChild(child);
+  addChild(...children: createjs.DisplayObject[]) {
+    console.log(children);
+    this._stage.addChild(...children);
   }
 
   addChildAtBeggining(child: any) {

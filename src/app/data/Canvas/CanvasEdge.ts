@@ -23,6 +23,9 @@ export default class CanvasEdge {
   private _toVertexText: createjs.Text;
   private _arc: createjs.Shape;
   private _arcHitArea: createjs.Shape;
+  private _titleShape: createjs.Text;
+  private _titleMask: createjs.Shape;
+  private _arcMask: createjs.Shape;
 
   private _color: string;
   private _arrowDistance: number;
@@ -40,6 +43,7 @@ export default class CanvasEdge {
   public toVertex: VertexCategory;
   public arrowTo: boolean;
   public arrowFrom: boolean;
+  public title: string;
 
   constructor(_stage: CanvasStage, color: string, fromVertex: VertexCategory, toVertex: VertexCategory, edgeCallback: Function) {
     this._stage = _stage;
@@ -54,12 +58,22 @@ export default class CanvasEdge {
     this._arrowSize = 7;
     this._edgeType = CanvasEdge.EDGE_TYPES.STANDARD;
     this._dash = 20;
+    this.title = this.fromVertex.name + ' to ' + this.toVertex.name;
 
     this._arc = new createjs.Shape();
     this._arc.cursor = 'pointer';
-    this._arc.visible = false;
     this._arcHitArea = new createjs.Shape();
     this._arc.hitArea = this._arcHitArea;
+    this._titleShape = new createjs.Text(this.title, '12px Arial', 'black');
+    this._titleShape.textAlign = 'center';
+    this._titleShape.textBaseline = 'middle';
+    this._titleShape.name = 'text';
+    this._titleShape.lineWidth = 100;
+    this._titleMask = new createjs.Shape();
+    this._arcMask = new createjs.Shape();
+    // this._arcMask.mask = this._titleMask;
+
+    this._arc.mask = this._arcMask;
 
     this.setupListeners(edgeCallback);
   }
@@ -90,21 +104,44 @@ export default class CanvasEdge {
         let absAngle = Math.atan2(Math.abs(deltaY), Math.abs(deltaX));
         let angle = Math.atan2(deltaY, deltaX);
 
-        let {toVertexDiff, fromVertexDiff} = this.getShapeDiff(absAngle, angle);
-        let fromX = pt1.x - fromVertexDiff.x;
-        let fromY = pt1.y - fromVertexDiff.y;
+        let fromVertexDiff = this.getShapeDiff(absAngle, angle, this.fromVertex.vertex.width, this.fromVertex.vertex.height, false);
+        let toVertexDiff = this.getShapeDiff(absAngle, angle, this.toVertex.vertex.width, this.toVertex.vertex.height, true);
+        let fromX = pt1.x - fromVertexDiff.xDiff;
+        let fromY = pt1.y - fromVertexDiff.yDiff;
 
-        let toX = pt2.x - toVertexDiff.x;
-        let toY = pt2.y - toVertexDiff.y;
+        let toX = pt2.x - toVertexDiff.xDiff;
+        let toY = pt2.y - toVertexDiff.yDiff;
 
         this.DRAW_EDGES[this._edgeType]({fromX, fromY, toX, toY, angle});
         this._arcHitArea.graphics.clear().beginFill("#000").beginStroke('#000').setStrokeStyle(15).moveTo(fromX, fromY).lineTo(toX, toY);
+
+        this._titleShape.x = (fromX + toX)/2;
+        this._titleShape.y = (fromY + toY)/2;
+        const lines = this._titleShape.getMeasuredHeight()/this._titleShape.getMeasuredLineHeight();
+        this._titleShape.y -= Math.round(this._titleShape.getMeasuredLineHeight()*(lines-1)/2);
+
+        let bounds = this._titleShape.getBounds();
+        let fromTextDiff = this.getShapeDiff(absAngle, angle, bounds.width, bounds.height, true);
+        let toTextDiff = this.getShapeDiff(absAngle, angle, bounds.width, bounds.height, false);
+        let fromTextCenter = {
+          x: (fromX + (this._titleShape.x - fromTextDiff.xDiff))/2,
+          y: (fromY + (this._titleShape.y - fromTextDiff.yDiff))/2,
+        };
+        let fromRadius = Math.sqrt(Math.pow(fromTextCenter.x - fromX, 2) + Math.pow(fromTextCenter.y - fromY, 2)) + this._arrowSize;
+
+        let toTextCenter = {
+          x: (toX + (this._titleShape.x - toTextDiff.xDiff))/2,
+          y: (toY + (this._titleShape.y - toTextDiff.yDiff))/2,
+        };
+        let toRadius = Math.sqrt(Math.pow(toTextCenter.x - toX, 2) + Math.pow(toTextCenter.y - toY, 2)) + this._arrowSize;
+        this._arcMask.graphics.clear();
+        this._arcMask.graphics.beginFill('black').drawCircle(fromTextCenter.x, fromTextCenter.y, fromRadius);
+        this._arcMask.graphics.drawCircle(toTextCenter.x, toTextCenter.y, toRadius).endFill();
       }
     });
 
     this._arc.on('click', (evt: createjs.MouseEvent) => {
       if (evt.nativeEvent.button === 2) {
-        console.log(this);
         edgeCallback(evt.nativeEvent, this);
         return;
       }
@@ -120,13 +157,16 @@ export default class CanvasEdge {
   }
 
   renderArc() {
-    this._stage.addChild(this._arc);
+    this._stage.addChild(this._arc, this._titleShape);
     this._arc.visible = true;
+    this._titleShape.visible = true;
   }
 
   renderArcAtBeggining() {
     this._stage.addChildAtBeggining(this._arc);
+    this._stage.addChildAtBeggining(this._titleShape);
     this._arc.visible = true;
+    this._titleShape.visible = true;
   }
 
   makeArcInvisible() {
@@ -138,49 +178,32 @@ export default class CanvasEdge {
     this._arc.visible = false;
   }
 
-  private getShapeDiff(absAngle: number, angle: number) {
-    let toVertexDiff = {
-      x: 0,
-      y: 0,
-      arrowX: 0,
-      arrowY: 0
-    };
-    let fromVertexDiff = {
-      x: 0,
-      y: 0,
-      arrowX: 0,
-      arrowY: 0
-    }
+  private getShapeDiff(absAngle: number, angle: number, width: number, height: number, sign: boolean) {
+    let xDiff: number, yDiff: number;
+    height = height/2 + this._arrowDistance;
+    width = width/2 + this._arrowDistance;
 
     let degree = angle*(180/Math.PI);
-    let fromVertexHeight = this.fromVertex.vertex.height/2 + this._arrowDistance;
-    let fromVertexWidth = this.fromVertex.vertex.width/2 + this._arrowDistance;
-    let toVertexHeight = this.toVertex.vertex.height/2 + this._arrowDistance;
-    let toVertexWidth = this.toVertex.vertex.width/2 + this._arrowDistance;
 
-    let isOnLeftOrRightFrom = Math.tan(absAngle)*fromVertexWidth <= fromVertexHeight ? 1 : 0;
-    let isOnLeftOrRightTo = Math.tan(absAngle)*toVertexWidth <= toVertexHeight ? 1 : 0;
+    let isOnLeftOrRight = Math.tan(absAngle)*width <= height ? 1 : 0;
 
     let xSign = Math.abs(degree) < 90 ? -1 : 1;
     let ySign = (-degree/Math.abs(degree));
 
-    if (isOnLeftOrRightFrom) {
-      fromVertexDiff.x = fromVertexWidth*(-xSign);
-      fromVertexDiff.y = Math.tan(absAngle)*fromVertexWidth*(-ySign);
-    } else {
-      fromVertexDiff.x = fromVertexHeight/Math.tan(absAngle)*(-xSign);
-      fromVertexDiff.y = fromVertexHeight*(-ySign);
+    if (sign) {
+      xSign *= -1;
+      ySign *= -1;
     }
 
-    if (isOnLeftOrRightTo) {
-      toVertexDiff.x = toVertexWidth*xSign;
-      toVertexDiff.y = Math.tan(absAngle)*toVertexWidth*ySign;
+    if (isOnLeftOrRight) {
+      xDiff = width*(-xSign);
+      yDiff = Math.tan(absAngle)*width*(-ySign);
     } else {
-      toVertexDiff.x = toVertexHeight/Math.tan(absAngle)*xSign;
-      toVertexDiff.y = toVertexHeight*ySign;
+      xDiff = height/Math.tan(absAngle)*(-xSign);
+      yDiff = height*(-ySign);
     }
 
-    return {toVertexDiff, fromVertexDiff};
+    return {xDiff, yDiff};
   }
 
   private drawStandardEdge(drawPoints: drawEdgeInterface) {
