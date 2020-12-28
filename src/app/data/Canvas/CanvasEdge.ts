@@ -24,8 +24,9 @@ export default class CanvasEdge {
   private _arc: createjs.Shape;
   private _arcHitArea: createjs.Shape;
   private _titleShape: createjs.Text;
-  private _titleMask: createjs.Shape;
+  private _container: createjs.Container;
   private _arcMask: createjs.Shape;
+  private _title: string;
 
   private _color: string;
   private _arrowDistance: number;
@@ -43,7 +44,6 @@ export default class CanvasEdge {
   public toVertex: VertexCategory;
   public arrowTo: boolean;
   public arrowFrom: boolean;
-  public title: string;
 
   constructor(_stage: CanvasStage, color: string, fromVertex: VertexCategory, toVertex: VertexCategory, edgeCallback: Function) {
     this._stage = _stage;
@@ -58,24 +58,33 @@ export default class CanvasEdge {
     this._arrowSize = 7;
     this._edgeType = CanvasEdge.EDGE_TYPES.STANDARD;
     this._dash = 20;
-    this.title = this.fromVertex.name + ' to ' + this.toVertex.name;
+    this._title = this.fromVertex.name + ' to ' + this.toVertex.name;
 
     this._arc = new createjs.Shape();
     this._arc.cursor = 'pointer';
     this._arcHitArea = new createjs.Shape();
     this._arc.hitArea = this._arcHitArea;
-    this._titleShape = new createjs.Text(this.title, '12px Arial', 'black');
+    this._titleShape = new createjs.Text(this._title, '12px Arial', 'black');
     this._titleShape.textAlign = 'center';
     this._titleShape.textBaseline = 'middle';
-    this._titleShape.name = 'text';
+    this._titleShape.cursor = 'pointer';
     this._titleShape.lineWidth = 100;
-    this._titleMask = new createjs.Shape();
     this._arcMask = new createjs.Shape();
-    // this._arcMask.mask = this._titleMask;
 
     this._arc.mask = this._arcMask;
+    this._container = new createjs.Container();
+    this._container.addChild(this._arc, this._titleShape);
 
     this.setupListeners(edgeCallback);
+  }
+
+  get title(): string {
+    return this._title;
+  }
+
+  set title(value: string) {
+    this._title = value;
+    this._titleShape.text = value;
   }
 
   get edgeType(): string {
@@ -88,7 +97,7 @@ export default class CanvasEdge {
     }
   }
 
-  setupListeners(edgeCallback: Function) {
+  private setupListeners(edgeCallback: Function) {
     this._arc.on('tick', () => {
       if (this._arc.visible) {
         const pt1 = this._fromVertexText.localToGlobal(this._fromVertexText.x, this._fromVertexText.y);
@@ -113,60 +122,70 @@ export default class CanvasEdge {
         let toY = pt2.y - toVertexDiff.yDiff;
 
         this.DRAW_EDGES[this._edgeType]({fromX, fromY, toX, toY, angle});
-        this._arcHitArea.graphics.clear().beginFill("#000").beginStroke('#000').setStrokeStyle(15).moveTo(fromX, fromY).lineTo(toX, toY);
+        this._arcHitArea.graphics.clear().beginFill("#000").beginStroke('#000').setStrokeStyle(15).moveTo(fromX, fromY).lineTo(toX, toY).endStroke();
 
         this._titleShape.x = (fromX + toX)/2;
         this._titleShape.y = (fromY + toY)/2;
+        this._arcHitArea.graphics.beginFill('#000').drawRect(
+          this._titleShape.x - this._titleShape.getMeasuredWidth()/2,
+          this._titleShape.y  - this._titleShape.getMeasuredHeight()/2,
+          this._titleShape.getMeasuredWidth(),
+          this._titleShape.getMeasuredHeight()
+        );
         const lines = this._titleShape.getMeasuredHeight()/this._titleShape.getMeasuredLineHeight();
         this._titleShape.y -= Math.round(this._titleShape.getMeasuredLineHeight()*(lines-1)/2);
-
         let bounds = this._titleShape.getBounds();
-        let fromTextDiff = this.getShapeDiff(absAngle, angle, bounds.width, bounds.height, true);
-        let toTextDiff = this.getShapeDiff(absAngle, angle, bounds.width, bounds.height, false);
-        let fromTextCenter = {
-          x: (fromX + (this._titleShape.x - fromTextDiff.xDiff))/2,
-          y: (fromY + (this._titleShape.y - fromTextDiff.yDiff))/2,
-        };
-        let fromRadius = Math.sqrt(Math.pow(fromTextCenter.x - fromX, 2) + Math.pow(fromTextCenter.y - fromY, 2)) + this._arrowSize;
+        if (bounds) {
+          let fromTextDiff = this.getShapeDiff(absAngle, angle, bounds.width, bounds.height, true);
+          let toTextDiff = this.getShapeDiff(absAngle, angle, bounds.width, bounds.height, false);
+          let fromTextCenter = {
+            x: (fromX + (this._titleShape.x - fromTextDiff.xDiff))/2,
+            y: (fromY + (this._titleShape.y - fromTextDiff.yDiff))/2,
+          };
+          let fromRadius = Math.sqrt(Math.pow(fromTextCenter.x - fromX, 2) + Math.pow(fromTextCenter.y - fromY, 2)) + this._arrowSize;
 
-        let toTextCenter = {
-          x: (toX + (this._titleShape.x - toTextDiff.xDiff))/2,
-          y: (toY + (this._titleShape.y - toTextDiff.yDiff))/2,
-        };
-        let toRadius = Math.sqrt(Math.pow(toTextCenter.x - toX, 2) + Math.pow(toTextCenter.y - toY, 2)) + this._arrowSize;
-        this._arcMask.graphics.clear();
-        this._arcMask.graphics.beginFill('black').drawCircle(fromTextCenter.x, fromTextCenter.y, fromRadius);
-        this._arcMask.graphics.drawCircle(toTextCenter.x, toTextCenter.y, toRadius).endFill();
+          let toTextCenter = {
+            x: (toX + (this._titleShape.x - toTextDiff.xDiff))/2,
+            y: (toY + (this._titleShape.y - toTextDiff.yDiff))/2,
+          };
+          let toRadius = Math.sqrt(Math.pow(toTextCenter.x - toX, 2) + Math.pow(toTextCenter.y - toY, 2)) + this._arrowSize;
+          this._arcMask.graphics.clear();
+          this._arcMask.graphics.beginFill('black').drawCircle(fromTextCenter.x, fromTextCenter.y, fromRadius);
+          this._arcMask.graphics.drawCircle(toTextCenter.x, toTextCenter.y, toRadius).endFill();
+        } else {
+          this._arcMask.graphics.clear();
+        }
       }
     });
 
-    this._arc.on('click', (evt: createjs.MouseEvent) => {
+    this._container.on('click', (evt: createjs.MouseEvent) => {
       if (evt.nativeEvent.button === 2) {
         edgeCallback(evt.nativeEvent, this);
         return;
       }
     });
 
-    this._arc.on('mouseover', () => {
+    this._container.on('mouseover', () => {
       this._arc.shadow = new createjs.Shadow('#999', 3, 3, 5);
     });
 
-    this._arc.on('mouseout', () => {
+    this._container.on('mouseout', () => {
       this._arc.shadow = null;
     });
   }
 
   renderArc() {
-    this._stage.addChild(this._arc, this._titleShape);
+    this._stage.addChild(this._container);
     this._arc.visible = true;
     this._titleShape.visible = true;
+    this._container.visible = true;
   }
 
   renderArcAtBeggining() {
-    this._stage.addChildAtBeggining(this._arc);
-    this._stage.addChildAtBeggining(this._titleShape);
+    this._stage.addChildAtBeggining(this._container);
     this._arc.visible = true;
     this._titleShape.visible = true;
+    this._container.visible = true;
   }
 
   makeArcInvisible() {

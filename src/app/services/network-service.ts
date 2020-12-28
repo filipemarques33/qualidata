@@ -38,6 +38,12 @@ export class NetworkService {
     });
 
     this.network = new CanvasNetwork(this.structures, this.canvasStage, this.detailsCallback);
+    this.network.renderVertex('Category', 1, 400, 100);
+    this.network.renderVertex('Category', 2, 900, 200);
+    this.network.connectVertices(
+      this.network.canvasCategories.find(category => category.id === 1),
+      this.network.canvasCategories.find(category => category.id === 2),
+      this.edgeCallback);
   }
 
   setupStructures() {

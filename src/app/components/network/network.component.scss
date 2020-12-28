@@ -30,6 +30,10 @@ app-network .network-wrapper {
   z-index: 5;
 }
 
+.network-wrapper .details-sidebar {
+  width: 220px;
+}
+
 .cdk-overlay-container .mat-menu-wrapper {
   min-height: 0;
 }
