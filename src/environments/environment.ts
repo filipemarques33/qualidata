@@ -4,6 +4,16 @@
 
 export const environment = {
   production: false,
+  firebaseConfig: {
+    apiKey: "AIzaSyAYEK5miud6gBwBtalnGhpoBlKbg0EYWTA",
+    authDomain: "pipocaqda.firebaseapp.com",
+    databaseURL: "https://pipocaqda-default-rtdb.firebaseio.com",
+    projectId: "pipocaqda",
+    storageBucket: "pipocaqda.appspot.com",
+    messagingSenderId: "1014990876843",
+    appId: "1:1014990876843:web:301c2369ca396dd9f287ee",
+    measurementId: "G-B2M6W47SF9"
+  }
 };
 
 /*

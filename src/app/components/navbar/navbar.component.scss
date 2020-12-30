@@ -1,3 +1,5 @@
+@import '../../../styles.scss';
+
 .content-wrapper {
   display: flex;
   flex-direction: column;
@@ -14,21 +16,51 @@
   height: 60px;
 }
 
+.content-wrapper .navbar .logo {
+  width: 30px;
+  filter: invert(1);
+}
+
+.content-wrapper .navbar .username {
+  line-height: normal;
+}
+
+.content-wrapper .navbar .user-button {
+  outline: none;
+  background: none;
+  border-radius: 10px;
+
+  &:hover {
+    background: rgba(mat-color($candy-app-primary, darker), 0.6);
+  }
+
+  &:active {
+    background: mat-color($candy-app-primary, darker);
+  }
+
+  &:focus {
+    box-shadow: none;
+    background: none;
+  }
+}
+
 .content-wrapper .navbar .router-button {
-  //#3f51b5
   background: white;
   width: 150px;
   color: #333;
   transition: all 150ms;
   box-shadow: none;
-}
+  border-radius: 10px;
 
-.content-wrapper .navbar .router-button:hover {
-  box-shadow: -2px 2px 3px 0px #333;
-}
+  &:hover {
+    box-shadow: 2px 2px 3px 0px #666;
+    transform: translateX(-2px) translateY(-2px);
+  }
 
-.content-wrapper .navbar .router-button:active {
-  box-shadow: -1px 1px 3px 0px #333;
+  &:active {
+    box-shadow: 1px 1px 3px 0px #666;
+    transform: translateX(0) translateY(0);
+  }
 }
 
 .content-wrapper .content {

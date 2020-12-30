@@ -1,0 +1,12 @@
+<h1 mat-dialog-title>Login</h1>
+<div mat-dialog-content>
+  <p>Enter email to login</p>
+  <mat-form-field>
+    <mat-label>Email</mat-label>
+    <input matInput [(ngModel)]="email">
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button (click)="loginUser()" cdkFocusInitial>Login</button>
+</div>

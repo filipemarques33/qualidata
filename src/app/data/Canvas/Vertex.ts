@@ -75,13 +75,13 @@ export default class Vertex extends createjs.Container {
     this.containerText.y = -Math.round(this.containerText.getMeasuredLineHeight()*(lines-1)/2);
 
     //define initial container size based on the text
-    this.width = bounds.width + 30;
+    this.width = bounds ? bounds.width + 30 : 150;
     this.initialWidth = this.width;
     this.minWidth = this.width;
     this.maxWidth = this.width + 3;
     this.widthRamp = (this.maxWidth - this.width)/3;
 
-    this.height = bounds.height + 30;
+    this.height = bounds ? bounds.height + 30 : 70;
     this.initialHeight = this.height;
     this.minHeight = this.height;
     this.maxHeight = this.height + 3;

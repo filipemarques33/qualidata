@@ -3,8 +3,12 @@ import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { EditorModule, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
-import { ImportsModule } from 'src/app/common/imports.module';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFireDatabaseModule } from '@angular/fire/database';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
 
+import { ImportsModule } from 'src/app/common/imports.module';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
@@ -14,10 +18,14 @@ import { NetworkComponent } from './components/network/network.component';
 import { RelationshipDialog } from "./components/network/relationship-dialog/relationship-dialog.component";
 import { DetailsSidebar } from "./components/details-sidebar/details-sidebar.component";
 import { TreeView } from "./components/tree-view/tree-view.component";
+import { UserLoginDialog } from './components/user-login/user-login.component';
+import { ProjectsComponent } from './components/projects/projects.component';
 
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NetworkService } from './services/network-service';
+import { DatabaseService } from './services/database-service';
+import { AuthService } from './services/auth-service';
 
+import { environment } from 'src/environments/environment';
 @NgModule({
   declarations: [
     AppComponent,
@@ -26,7 +34,9 @@ import { NetworkService } from './services/network-service';
     NetworkComponent,
     RelationshipDialog,
     DetailsSidebar,
-    TreeView
+    TreeView,
+    UserLoginDialog,
+    ProjectsComponent
   ],
   imports: [
     BrowserModule,
@@ -35,11 +45,16 @@ import { NetworkService } from './services/network-service';
     BrowserAnimationsModule,
     EditorModule,
     ImportsModule,
-    NgbModule
+    NgbModule,
+    AngularFireModule.initializeApp(environment.firebaseConfig),
+    AngularFireDatabaseModule,
+    AngularFirestoreModule
   ],
   providers: [
     {provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js'},
-    NetworkService
+    NetworkService,
+    DatabaseService,
+    AuthService
   ],
   bootstrap: [AppComponent]
 })

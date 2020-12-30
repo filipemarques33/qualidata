@@ -51,8 +51,6 @@ export default class VertexCategory {
       this._vertex.visible = true;
       this._stage.addChild(this._vertex);
       this._isRendered = true;
-
-      console.log();
     }
   }
 

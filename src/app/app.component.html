@@ -1,3 +1,4 @@
-<app-navbar>
+<app-navbar *ngIf="router.url !== '/projects'">
   <router-outlet ></router-outlet>
 </app-navbar>
+<router-outlet *ngIf="router.url === '/projects'"></router-outlet>

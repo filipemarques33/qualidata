@@ -74,7 +74,7 @@ export default class CanvasNetwork {
   }
 
   connectVertices(origin: VertexCategory, destination: VertexCategory, edgeCallback: Function) {
-    let edge = new CanvasEdge(this.canvasStage, 'blue', origin, destination, edgeCallback);
+    let edge = new CanvasEdge(this.canvasStage, 'gray', origin, destination, edgeCallback);
     let originRel = this.visibleRelationships.get(origin.id);
     let destRel = this.visibleRelationships.get(destination.id);
     originRel.push(destination.id);

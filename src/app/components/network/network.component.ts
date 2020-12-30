@@ -9,6 +9,9 @@ import VertexCategory from 'src/app/data/Canvas/VertexCategory';
 import CanvasEdge from 'src/app/data/Canvas/CanvasEdge';
 import { NetworkService } from "../../services/network-service";
 import { RelationshipDialog } from './relationship-dialog/relationship-dialog.component';
+import { AngularFireDatabase } from '@angular/fire/database';
+import { Observable } from 'rxjs';
+import { DatabaseService } from 'src/app/services/database-service';
 
 interface VertexNode {
   id: number;
@@ -49,9 +52,13 @@ export class NetworkComponent implements OnInit, OnDestroy {
 
   private onContextMenu;
 
-  constructor(public networkService: NetworkService, public relationshipDialog: MatDialog) {}
+  constructor(
+    public networkService: NetworkService,
+    public databaseService: DatabaseService,
+    public relationshipDialog: MatDialog,
+  ) {}
 
-  ngOnInit(): void {
+  async ngOnInit() {
     this.canvas = this.canvasRef.nativeElement;
     this.networkService.setupCanvasStage(this.canvas,
       (event: MouseEvent, vertex: VertexCategory) => this.openDetailsMenu(event, vertex),
