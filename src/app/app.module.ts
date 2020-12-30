@@ -9,16 +9,30 @@ import { ImportsModule } from 'src/app/common/imports.module';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { environment } from 'src/environments/environment';
-import { ComposeComponent } from './containers/compose/compose.component';
-import { TemplateComponent } from './templates/template/template.component';
+
+import { ComposeComponent } from './components/compose/compose.component';
+import { ProjectsComponent } from './components/projects/projects.component';
+import { NavBarComponent } from './components/navbar/navbar.component';
+import { NetworkComponent } from './components/network/network.component';
+import { RelationshipDialog } from "./components/network/relationship-dialog/relationship-dialog.component";
+import { DetailsSidebar } from "./components/details-sidebar/details-sidebar.component";
+import { TreeView } from "./components/tree-view/tree-view.component";
+
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NetworkService } from './services/network-service';
+import { NewProjectDialogComponent } from './components/projects/new-project-dialog/new-project-dialog.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ComposeComponent,
-    TemplateComponent
+    NavBarComponent,
+    NetworkComponent,
+    RelationshipDialog,
+    DetailsSidebar,
+    TreeView,
+    ProjectsComponent,
+    NewProjectDialogComponent
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebaseConfig),

@@ -1,0 +1,43 @@
+<div class="container py-3 px-0 h-100">
+  <div class="jumbotron py-5">
+    <h1 class="pageHeadline">Meus Projetos</h1>
+    <button mat-flat-button type='button' color='primary' (click)="openNewProjectDialog()" >
+      <mat-icon class="mat-18">add</mat-icon>
+      Novo projeto
+    </button>
+  </div>
+  <!-- <div class="panel panel-primary">
+    <div class="panel-heading">Status</div>
+    <div class="panel-body">
+      <mat-form-field>
+        <mat-label>Document Title</mat-label>
+        <input matInput placeholder="Title" [(ngModel)]="newFile.title" required>
+      </mat-form-field>
+
+      <editor
+        [init]="{
+          base_url: '/tinymce',
+          suffix: '.min',
+          height: 500,
+          menubar: false,
+          placeholder: 'Start writing your document here',
+          plugins: [
+            'advlist autolink lists link image charmap print',
+            'preview anchor searchreplace visualblocks code',
+            'fullscreen insertdatetime media table paste',
+            'help wordcount'
+          ],
+          toolbar:
+            'undo redo | formatselect | bold italic | \
+            alignleft aligncenter alignright alignjustify | \
+            bullist numlist outdent indent | help'
+        }"
+        [(ngModel)]="newFile.content"
+      >
+      </editor>
+    </div>
+    <div class="d-flex justify-content-between mt-3">
+      <button mat-flat-button color='primary' type='button' [disabled]='!verifyFields()' (click)='saveFile()'>Save document</button>
+    </div>
+  </div> -->
+</div>
