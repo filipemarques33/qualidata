@@ -1,7 +1,12 @@
 <div class='toggle-sidenav' [class.hovered]="showHandle" (click)="sidenav.toggle()">
   <mat-icon>{{sidenav.opened ? 'arrow_back_ios' : 'arrow_forward_ios'}}</mat-icon>
 </div>
-<span *ngIf="!isNetworkLoading && dataSource.data.length === 0">No categories or codes created</span>
+<div *ngIf="!isNetworkLoading && dataSource.data.length === 0"
+  class="w-100 h-100 d-flex justify-content-start align-items-start bg-white">
+  <span class="p-3">
+    No categories or codes created
+  </span>
+</div>
 <mat-tree *ngIf="!isNetworkLoading && dataSource.data.length !== 0" [dataSource]="dataSource" [treeControl]="treeControl">
   <!-- This is the tree node template for leaf nodes -->
   <mat-nested-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>

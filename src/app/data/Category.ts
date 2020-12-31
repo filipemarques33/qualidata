@@ -1,34 +1,14 @@
-import Structure from "./Structure";
+import Code from "./Code";
 
-export default class Category extends Structure {
-  private _codes: Set<number>;
-  private _categories: Set<number>;
-
-  constructor(
-    id: number,
-    name: string,
-    color: string,
-    categories?:  number[],
-    codes?: number[],
-  ) {
-    super(id, name, color);
-    this._codes = codes ? new Set(codes) : new Set();
-    this._categories = categories ? new Set(categories) : new Set();
+export default class Category {
+  constructor(public name: string, public color: string, public categories?:  Category[], public codes?: Code[], public position?: {x: number, y: number}) {
   }
 
-  get codes(): Set<number> {
-    return this._codes;
+  addCode(code: Code) {
+    this.codes.push(code);
   }
 
-  get categories(): Set<number> {
-    return this._categories;
-  }
-
-  addCode(codeId: number) {
-    this._codes.add(codeId);
-  }
-
-  addCategory(codeId: number) {
-    this._categories.add(codeId);
+  addCategory(category: Category) {
+    this.categories.push(category);
   }
 }

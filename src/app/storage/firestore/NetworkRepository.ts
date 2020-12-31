@@ -2,26 +2,18 @@ import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Repository } from '../Repository';
-
-interface Network {
-  id: string;
-  name: string;
-}
-
-interface Project {
-  networks: Network[];
-}
+import Network from '../../data/Network';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ProjectRepository extends Repository<Project> {
+export class NetworkRepository extends Repository<Network> {
   constructor (private firebase: AngularFirestore) {
     super();
   }
 
   async getById(id: string) {
-    let project = await this.firebase.collection('projects').doc<Project>(id).get().toPromise();
-    return project.data();
+    let network = await this.firebase.collection('networks').doc<Network>(id).get().toPromise();
+    return network.data();
   }
 }

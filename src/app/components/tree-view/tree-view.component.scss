@@ -52,114 +52,6 @@
   display: none;
 }
 
-// .tree-view mat-nested-tree-node {
-//   display: block;
-//   top: -24px;
-// }
-
-// .tree-view ul, .tree-view li {
-//   list-style: none;
-//   margin: 0;
-//   padding: 0;
-// }
-
-// .tree-view mat-tree > mat-nested-tree-node,
-// .tree-view mat-tree > mat-tree-node {
-//   border-bottom: 1px solid #333;
-// }
-
-// .tree-view mat-tree-node,
-// .tree-view ul,
-// .tree-view mat-nested-tree-node {
-//   cursor: pointer;
-//   transition: all 150ms;
-// }
-
-// .tree-view mat-tree-node:hover,
-// .tree-view mat-nested-tree-node li span:hover {
-//   background: #eee;
-// }
-
-// .tree-view span.mat-tree-node {
-//   padding: 0 10px;
-//   user-select: none;
-// }
-
-// .tree-view ul {
-//   margin: 0;
-// }
-
-// .tree-view li {
-//   padding-left: 10px;
-//   border: 1px dotted grey;
-//   border-width: 0 0 1px 1px;
-//   position: relative;
-//   top: -24px;
-//   list-style-type: none;
-// }
-
-// .tree-view li.mat-tree-node,
-// .tree-view li span {
-//   margin: 0;
-//   position: relative;
-//   top: 24px;
-// }
-
-////////////////////////////////////////////////////////////////////
-
-// .tree-view mat-tree {
-//   margin-left: 10px;
-// }
-
-// .tree-view .nested-node {
-//   padding-left: 10px;
-// }
-
-// .tree-view .mat-nested-tree-node {
-//   top: -24px;
-// }
-
-// .tree-view .mat-tree-node {
-//   padding: 0;
-//   background: white;
-// }
-
-// .tree-view ul, .tree-view li {
-//   list-style: none;
-//   margin: 0;
-//   padding: 0;
-// }
-
-// .tree-view ul {
-//   padding-left: 10px;
-// }
-
-// .tree-view li {
-//   padding-left: 10px;
-//   border: 1px dotted grey;
-//   border-width: 0 0 1px 1px;
-//   position: relative;
-//   top: -24px;
-// }
-
-// .tree-view li.mat-tree-node,
-// .tree-view li span {
-//   margin: 0;
-//   position: relative;
-//   top: 24px;
-// }
-
-// .tree-view li ul {
-//   border-top: 1px dotted grey;
-//   margin-left: -10px;
-//   padding-left: 20px;
-// }
-
-// .tree-view .mat-nested-tree-node:last-child ul {
-//   border-left: 1px solid white;
-//   margin-left: -11px;
-// }
-
 .tree-view mat-tree {
   margin-left: 10px;
 }
@@ -170,16 +62,18 @@
   padding: 0;
 }
 
-// .tree-view .mat-tree-node {
-//   background: white;
-// }
-
-// .tree-view mat-tree > .mat-nested-tree-node * li,
 .tree-view mat-tree > .mat-nested-tree-node * ul {
   margin-left: 10px;
   border-left: 1px solid black;
-  // border: 1px dotted grey;
-  // border-width: 0 0 1px 1px;
+}
+
+.tree-view span {
+  padding: 0 10px;
+  cursor: pointer;
+
+  &:hover {
+    background: #f1f1f1;
+  }
 }
 
 .tree-view mat-tree > .mat-nested-tree-node * .mat-nested-tree-node span::before {

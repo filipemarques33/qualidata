@@ -15,12 +15,19 @@ export default class Structures {
     this.codeTypes = [];
   }
 
-  createCategory(id: number, name: string, color: string, categories?: number[], codes?: number[]) {
-    this.categories.push(new Category(id, name, color, categories, codes));
+  clear() {
+    this.categories = [];
+    this.codes = [];
+    this.quotations = [];
+    this.codeTypes = [];
   }
 
-  createCode(id:number, name: string, color: string, type?: number) {
-    this.codes.push(new Code(id, name, color, type));
+  createCategory(name: string, color: string, categories?: Category[], codes?: Code[]) {
+    this.categories.push(new Category(name, color, categories, codes));
+  }
+
+  createCode(name: string, color: string, codes?: Code[]) {
+    this.codes.push(new Code(name, color, codes));
   }
 
   createCodeType(id:number, name: string, color: string) {

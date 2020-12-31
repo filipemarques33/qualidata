@@ -34,14 +34,18 @@
     background: rgba(mat-color($candy-app-primary, darker), 0.6);
   }
 
-  &:active {
-    background: mat-color($candy-app-primary, darker);
-  }
-
   &:focus {
     box-shadow: none;
     background: none;
   }
+
+  &:active {
+    background: mat-color($candy-app-primary, darker);
+  }
+}
+
+.content-wrapper .navbar .user-button .mat-button-focus-overlay {
+  opacity: 0;
 }
 
 .content-wrapper .navbar .router-button {

@@ -77,8 +77,6 @@ export class NetworkComponent implements OnInit, OnDestroy {
     document.removeEventListener("contextmenu", this.onContextMenu, false);
   }
 
-  log(text) {console.log(text)}
-
   openDetailsMenu(event: MouseEvent, vertex: VertexCategory) {
     this.isOpeningMenu = true;
     this.focusedDetailsNode = vertex;

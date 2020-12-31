@@ -4,10 +4,10 @@ import CanvasCode from "./CanvasCode";
 import CanvasStage from './CanvasStage';
 import CanvasEdge from './CanvasEdge';
 import VertexCategory from './VertexCategory';
+import Category from '../Category';
 
 export default class CanvasNetwork {
-  private codes: CanvasCode[];
-  private categories: CanvasCategory[];
+  private idCounter: number;
 
   canvasStage: CanvasStage;
   canvasCategories: CanvasCategory[] = [];
@@ -15,58 +15,31 @@ export default class CanvasNetwork {
   quotations: string[];
   visibleRelationships: Map<number, number[]> = new Map();
   visibleVertices: VertexCategory[] = [];
+  detailsCallback: Function;
 
-  private typeMap: {[key: string]: (id: number) => VertexCategory} = {
-    'Code': (id: number) => this.findCanvasCode(id),
-    'Category': (id: number) => this.findCanvasCategory(id)
-  };
+  private vertexMap: Map<number, VertexCategory> = new Map();
 
-  constructor(structures: Structures, canvasStage: CanvasStage, detailsCallback: Function) {
-    let categoriesMap = new Map<number, {category: CanvasCategory, isRoot: boolean}>();
+  constructor(canvasStage: CanvasStage, detailsCallback: Function) {
     this.canvasStage = canvasStage;
-
-    this.codes = structures.codes.map(code => new CanvasCode(this.canvasStage, code.id, code.name, {
-      color: code.color,
-      type: structures.codeTypes.find(codeType => codeType.id === code.codeType)
-    }, detailsCallback));
-
-    this.canvasCodes = this.codes.slice(0);
-
-    this.categories = [];
-
-    structures.categories.forEach(category => {
-      let newCategory = new CanvasCategory(this.canvasStage, category.id, category.name, category.color, detailsCallback);
-      if (category.codes.size) {
-        [...category.codes].forEach(code => {
-          let canvasCode = this.canvasCodes.find(canvasCode => canvasCode.id === code);
-          newCategory.addCode(canvasCode);
-          this.canvasCodes = this.canvasCodes.filter(cCode => cCode.id !== canvasCode.id);
-        });
-      }
-      this.categories.push(newCategory);
-      categoriesMap.set(newCategory.id, {category: newCategory, isRoot: true});
-    });
-
-    structures.categories.forEach(category => {
-      if (category.categories.size) {
-        let canvasCategory = categoriesMap.get(category.id).category;
-        category.categories.forEach(categoryId => {
-          canvasCategory.addCategory(categoriesMap.get(categoryId).category);
-          categoriesMap.get(categoryId).isRoot = false;
-        });
-      }
-    });
-
-    this.canvasCategories = [...categoriesMap].map(([key, categoryRef]) => categoryRef.isRoot ? categoryRef.category : null)
-      .filter(canvasCategory => canvasCategory);
-
-    this.quotations = structures.quotations;
-    this.codes.forEach(code => this.visibleRelationships.set(code.id, []));
-    this.categories.forEach(category => this.visibleRelationships.set(category.id, []));
+    this.detailsCallback = detailsCallback;
   }
 
-  renderVertex(type: string, id: number, x: number, y: number) {
-    let vertex = this.typeMap[type](id);
+  setupStructures(structures: Structures) {
+    this.idCounter = 0;
+    this.canvasCategories = structures.categories.map(category => this.createCanvasCategory(category));
+    this.canvasCodes = structures.codes.map(code => {
+      let canvasCode = new CanvasCode(this.canvasStage, this.idCounter, code.name, {color: code.color}, this.detailsCallback);
+      this.vertexMap.set(this.idCounter++, canvasCode);
+      if (code.position) {
+        canvasCode.renderVertex(code.position.x, code.position.y);
+        this.visibleVertices.push(canvasCode);
+      }
+      return canvasCode;
+    });
+  }
+
+  renderVertex(id: number, x: number, y: number) {
+    let vertex = this.vertexMap.get(id);
     if (vertex && !vertex.isVertexRendered) {
       vertex.renderVertex(x, y);
       this.visibleVertices.push(vertex);
@@ -82,11 +55,29 @@ export default class CanvasNetwork {
     edge.renderArc();
   }
 
-  private findCanvasCode(id: number) {
-    return this.codes.find(vertex => vertex.id === id);
-  }
-
-  private findCanvasCategory(id: number) {
-    return this.categories.find(vertex => vertex.id === id);
+  private createCanvasCategory(parentCategory: Category): CanvasCategory {
+    let canvasCategory = new CanvasCategory(this.canvasStage, this.idCounter, parentCategory.name, parentCategory.color, this.detailsCallback);
+    this.vertexMap.set(this.idCounter++, canvasCategory);
+    parentCategory.categories.forEach(category => canvasCategory.addCategory(this.createCanvasCategory(category)));
+    parentCategory.codes.forEach(code => {
+      let canvasCode = new CanvasCode(
+        this.canvasStage,
+        this.idCounter,
+        code.name,
+        {color: code.color},
+        this.detailsCallback
+      );
+      this.vertexMap.set(this.idCounter++, canvasCode);
+      if (code.position) {
+        canvasCode.renderVertex(code.position.x, code.position.y);
+        this.visibleVertices.push(canvasCode);
+      }
+      canvasCategory.addCode(canvasCode);
+    });
+    if (parentCategory.position) {
+      canvasCategory.renderVertex(parentCategory.position.x, parentCategory.position.y);
+      this.visibleVertices.push(canvasCategory);
+    }
+    return canvasCategory;
   }
 }

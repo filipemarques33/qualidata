@@ -1,17 +1,8 @@
-import Structure from './Structure';
+export default class Code {
 
-export default class Code extends Structure {
-  constructor(
-    id: number,
-    name: string,
-    color?: string,
-    private _codeType?: number,
-    private _quotations?: string[]
-  ) {
-    super(id, name, color);
-  }
+  constructor(public name: string, public color: string, public codes: Code[], public position?: {x: number, y: number}) {}
 
-  get codeType(): number {
-    return this._codeType;
+  addCode(code: Code) {
+    this.codes.push(code);
   }
 }

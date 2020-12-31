@@ -1,5 +1,5 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { Component, ViewChild, ElementRef, ViewEncapsulation, HostListener, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, ViewChild, ElementRef, ViewEncapsulation, HostListener, OnInit, OnDestroy, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatSidenav } from '@angular/material/sidenav';
@@ -14,7 +14,6 @@ interface VertexNode {
   name: string;
   color: string;
   textColor: string;
-  type: string;
   children?: VertexNode[];
 }
 
@@ -46,9 +45,11 @@ export class TreeView implements OnInit {
   constructor(public networkService: NetworkService) {}
 
   ngOnInit(): void {
-    this.isNetworkLoading = true;
-    this.setupTree();
-    this.isNetworkLoading = false;
+    this.networkService.structuresUpdated.subscribe(() => {
+      this.isNetworkLoading = true;
+      this.setupTree();
+      this.isNetworkLoading = false;
+    });
     this.dragImg = new Image(0,0);
     this.dragImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   }
@@ -79,7 +80,7 @@ export class TreeView implements OnInit {
   hideDragElement(event: DragEvent, node: VertexNode) {
     this.draggerRef.nativeElement.style.display = 'none';
 
-    if (event.x > this.sidenav._getWidth()) this.networkService.network.renderVertex(node.type, node.id, event.x, event.y - 60);
+    if (event.x > this.sidenav._getWidth()) this.networkService.network.renderVertex(node.id, event.x, event.y - 60);
   }
 
   private setupTree() {
@@ -91,8 +92,7 @@ export class TreeView implements OnInit {
       id: canvasCode.id,
       name: canvasCode.name,
       color: canvasCode.color,
-      textColor: canvasCode.vertex.textColor,
-      type: 'Code'
+      textColor: canvasCode.vertex.textColor
     })));
 
     this.dataSource.data = this.sidebarVertexTree;
@@ -112,8 +112,7 @@ export class TreeView implements OnInit {
       name: canvasCategory.name,
       color: canvasCategory.color,
       textColor: canvasCategory.vertex.textColor,
-      children: children,
-      type: 'Category'
+      children: children
     }
   }
 
