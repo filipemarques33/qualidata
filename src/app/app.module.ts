@@ -26,6 +26,7 @@ import { DatabaseService } from './services/database-service';
 import { AuthService } from './services/auth-service';
 
 import { environment } from 'src/environments/environment';
+import { SourcesComponent } from './components/sources/sources.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -36,7 +37,8 @@ import { environment } from 'src/environments/environment';
     DetailsSidebar,
     TreeView,
     UserLoginDialog,
-    ProjectsComponent
+    ProjectsComponent,
+    SourcesComponent
   ],
   imports: [
     BrowserModule,

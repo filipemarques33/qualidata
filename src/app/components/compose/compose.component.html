@@ -1,23 +1,22 @@
 <div class="container py-3 px-4 h-100">
   <div class="jumbotron py-5">
-    <h1>Qualidata</h1>
-    <h2 class="mb-0">Novo documento</h2>
+    <h1 class="headline">Novo documento</h1>
   </div>
   <div class="panel panel-primary">
-    <div class="panel-heading">Status</div>
-    <div class="panel-body">
+    <div class="panel-heading">
       <mat-form-field>
-        <mat-label>Document Title</mat-label>
-        <input matInput placeholder="Title" [(ngModel)]="newFile.title" required>
+        <mat-label>Título do documento</mat-label>
+        <input matInput placeholder="Título" [(ngModel)]="newFile.title" required>
       </mat-form-field>
-
+    </div>
+    <div class="panel-body">
       <editor
         [init]="{
           base_url: '/tinymce',
           suffix: '.min',
           height: 500,
           menubar: false,
-          placeholder: 'Start writing your document here',
+          placeholder: 'Comece a escrever seu documento aqui',
           plugins: [
             'advlist autolink lists link image charmap print',
             'preview anchor searchreplace visualblocks code',

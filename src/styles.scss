@@ -38,3 +38,26 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 button, button:active, button:focus {
   outline: none;
 }
+
+.jumbotron {
+  background-color: rgba(mat-color($candy-app-primary, lighter), 0.2);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.jumbotron .headline {
+  font-size: xx-large;
+  font-weight: 800;
+}
+
+.jumbotron .description {
+  color: gray;
+}
+
+.jumbotron .composeButton {
+  background-color: mat-color($candy-app-primary, darker);
+  color: white;
+  border-radius: 8px;
+}

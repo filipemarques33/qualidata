@@ -1,0 +1,24 @@
+<div class="container py-3 px-0 h-100">
+  <div class="jumbotron py-5">
+    <div>
+      <h1 class="headline">{{currentProject.name}}</h1>
+      <p class="description">{{currentProject.description}}</p>
+    </div>
+    <button class='composeButton px-4 py-2' mat-flat-button type='button' routerLink='/editor'>
+      <mat-icon>add</mat-icon> Nova fonte de pesquisa
+    </button>
+  </div>
+  <div>
+    <mat-nav-list>
+      <mat-list-item *ngFor="let source of sources">
+        <a matLine href="editor">{{source.title}}</a>
+        <button mat-icon-button (click)="showInfo(link)">
+          <mat-icon>info</mat-icon>
+        </button>
+        <button mat-icon-button (click)="showInfo(link)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-list-item>
+    </mat-nav-list>
+  </div>
+</div>

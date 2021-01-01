@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { File } from 'src/app/models/file';
+import File from 'src/app/data/File';
 
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Content } from '@angular/compiler/src/render3/r3_ast';
