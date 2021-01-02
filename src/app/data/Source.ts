@@ -1,4 +1,4 @@
-export default class File {
+export default class Source {
   constructor(
     private _id: number,
     private _title: string,

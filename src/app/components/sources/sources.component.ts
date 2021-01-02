@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import Project from 'src/app/data/Project';
-import File from 'src/app/data/File'
+import Source from 'src/app/data/Source'
 
 @Component({
   selector: 'app-sources',
@@ -10,7 +10,7 @@ import File from 'src/app/data/File'
 export class SourcesComponent implements OnInit {
 
   currentProject = new Project(1, "Pesquisa", "Teste de descrição")
-  sources: File[] = []
+  sources: Source[] = []
 
   constructor() {}
 
@@ -20,8 +20,8 @@ export class SourcesComponent implements OnInit {
 
   getSourcesById(){
     for (var i = 1; i < 10; i++) {
-      let newFile = new File(i, "Test Project " + i, "This is a test")
-      this.sources.push(newFile)
+      let newSource = new Source(i, "Test Project " + i, "This is a test")
+      this.sources.push(newSource)
     }
   }
 }

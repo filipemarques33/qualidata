@@ -11,8 +11,11 @@ const routes: Routes = [
   { path: 'editor', component: ComposeComponent },
   { path: 'network', component: NetworkComponent },
   { path: 'projects', component: ProjectsComponent },
-  { path: 'sources', component: SourcesComponent },
-  { path: '**', redirectTo: 'editor' }
+  { path: 'sources', children: [
+    { path: '', pathMatch: 'full', component: SourcesComponent },
+    { path: ':sourceId/edit', component: ComposeComponent},
+    { path: 'new', component: ComposeComponent},
+  ]}
 ];
 
 @NgModule({

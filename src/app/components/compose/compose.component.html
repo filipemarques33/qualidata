@@ -6,7 +6,7 @@
     <div class="panel-heading">
       <mat-form-field>
         <mat-label>Título do documento</mat-label>
-        <input matInput placeholder="Título" [(ngModel)]="newFile.title" required>
+        <input matInput placeholder="Título" [(ngModel)]="currSourceContent.title" required>
       </mat-form-field>
     </div>
     <div class="panel-body">
@@ -28,7 +28,7 @@
             alignleft aligncenter alignright alignjustify | \
             bullist numlist outdent indent | help'
         }"
-        [(ngModel)]="newFile.content"
+        [(ngModel)]="currSourceContent.content"
       >
       </editor>
     </div>
