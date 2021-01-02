@@ -28,7 +28,7 @@
 .content-wrapper .navbar .user-button {
   outline: none;
   background: none;
-  border-radius: 10px;
+  border-radius: 8px;
 
   &:hover {
     background: rgba(mat-color($candy-app-primary, darker), 0.6);
@@ -69,4 +69,41 @@
 
 .content-wrapper .content {
   height: calc(100% - 60px);
+}
+
+.sidenav {
+  min-width: 250px;
+  padding: 0 1.2em;
+  background-color: mat-color($mat-gray, 50);;
+  top: 56px;
+}
+
+.sidenav-container {
+  flex: 1;
+  background-color: white;
+}
+
+.nav-item {
+  padding: 1.5em 2em;
+  border-radius: 8px;
+
+  .mat-icon {
+    margin-right: 0.5em;
+  }
+}
+
+.menuButton{
+  color: white;
+  &:hover {
+    background: rgba(mat-color($candy-app-primary, darker), 0.6);
+  }
+
+  &:focus {
+    box-shadow: none;
+    background: none;
+  }
+
+  &:active {
+    background: mat-color($candy-app-primary, darker);
+  }
 }

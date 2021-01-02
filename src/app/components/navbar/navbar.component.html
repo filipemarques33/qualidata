@@ -1,14 +1,40 @@
 <div class='content-wrapper'>
   <mat-toolbar color='primary' class='navbar'>
-    <img class="logo" src="../../../assets/logos/logo1.svg" alt="logo">
-    <h1 class='my-auto ml-2 text-light'>Qualidata</h1>
+    <button class="mx-2 menuButton" mat-icon-button (click)="snav.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <a routerLink="/projects">
+      <div class="d-flex"><img class="logo" src="../../../assets/logos/logo1.svg" alt="logo"><h1 class='my-auto ml-2 text-light'>Qualidata</h1></div>
+    </a>
     <small *ngIf="authService.user" class="ml-3 text-light username">{{authService.user.email}}</small>
     <button *ngIf="!authService.user" class="ml-auto mr-3 text-light user-button" mat-flat-button disableRipple type="button" (click)="loginUser()">Login</button>
     <button *ngIf="authService.user" class="ml-auto mr-3 text-light user-button" mat-flat-button disableRipple type="button" (click)="logoutUser()">Logout</button>
-    <button *ngIf="router.url === '/sources'" class="router-button" mat-flat-button type='button' routerLink='/network'>Go to Network</button>
-    <button *ngIf="router.url === '/network'" class="router-button" mat-flat-button type='button' routerLink='/sources'>Go to Sources</button>
   </mat-toolbar>
-  <div class='content'>
-    <ng-content></ng-content>
-  </div>
+
+  <mat-sidenav-container class="sidenav-container" style="min-width: 320px;">
+    <mat-sidenav #snav
+      [mode]="'side'"
+      class="sidenav"
+      opened
+    >
+      <mat-nav-list>
+        <div>
+          <div *ngFor="let item of navItems">
+            <a mat-list-item  [routerLink]="item.route" class="nav-item">
+              <mat-icon>{{item.icon}}</mat-icon> {{item.text}}
+            </a>
+          </div>
+        </div>
+      </mat-nav-list>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <div class="d-flex align-items-center justify-content-center" style="min-height: 100%;" *ngIf="loading">
+        <mat-spinner diameter="120"></mat-spinner>
+      </div>
+      <div class='content'>
+        <ng-content></ng-content>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
 </div>
