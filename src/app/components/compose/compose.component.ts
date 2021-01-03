@@ -5,7 +5,9 @@ import Source from 'src/app/data/Source';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Content } from '@angular/compiler/src/render3/r3_ast';
 import { NetworkService } from 'src/app/services/network-service';
+import { DatabaseService } from 'src/app/services/database-service';
 import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common'
 
 @Component({
   selector: 'app-compose',
@@ -14,41 +16,45 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class ComposeComponent implements OnInit {
 
-  sourceId: string;
-  currSourceContent = {title: '', content: ''}
+  currSource = new Source('', '', '');
 
   constructor(
     private route: ActivatedRoute,
     private snackbar: MatSnackBar,
-    private networkService: NetworkService
+    private databaseService: DatabaseService,
+    private location: Location
   ) { }
 
   ngOnInit(): void {
-    this.getFileContent();
+    this.getSourceContent().then(
+      source => this.currSource = source
+    );
   }
 
-  getFileContent(): void {
-    this.sourceId = this.route.snapshot.paramMap.get('sourceId');
-    if (this.sourceId != null) {
-      // get current File via File Service
-      console.log("File ID = " + this.sourceId);
-      this.currSourceContent = {title: 'Source test', content: 'This is the current content of this source'};
+  async getSourceContent() {
+    const sourceId = this.route.snapshot.paramMap.get('sourceId');
+    if (sourceId != null) {
+      let source = await this.databaseService.getSourceById(sourceId);
+      return new Source(sourceId, source.title, source.content);
     } else {
-      // get new file
-      console.log("New File");
+      return this.currSource
     }
-
-
   }
 
   saveFile(): void {
+    // const projId = this.route.snapshot.paramMap.get('projId');
     console.log('Button clicked');
-    this.snackbar.open('Documento salvo', null, {
-        duration: 2000,
-    });
+    this.databaseService.saveSource(this.currSource, '1').then(
+      () => {
+        this.snackbar.open('Documento salvo', null, {
+          duration: 2000,
+        })
+        this.location.back()
+      }
+    )
   }
 
   verifyFields() {
-    return (this.currSourceContent.title && this.currSourceContent.content)
+    return (this.currSource.title && this.currSource.content)
   }
 }

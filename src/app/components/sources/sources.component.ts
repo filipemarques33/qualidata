@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import Project from 'src/app/data/Project';
-import Source from 'src/app/data/Source'
+// import Source from 'src/app/data/Source'
+import { ActivatedRoute } from '@angular/router';
+import { DatabaseService } from 'src/app/services/database-service';
+import { Source } from 'src/app/storage/firestore/ProjectRepository'
 
 @Component({
   selector: 'app-sources',
@@ -9,19 +12,25 @@ import Source from 'src/app/data/Source'
 })
 export class SourcesComponent implements OnInit {
 
-  currentProject = new Project(1, "Pesquisa", "Teste de descrição")
+  currProject: Project = new Project(1, "Pesquisa", "Teste de descrição")
   sources: Source[] = []
 
-  constructor() {}
+  constructor(
+    private route: ActivatedRoute,
+    private databaseService: DatabaseService
+  ) {}
 
   ngOnInit(): void {
-    this.getSourcesById()
+    this.getProjectSources().then(
+        project => this.sources = project.sources
+    )
   }
 
-  getSourcesById(){
-    for (var i = 1; i < 10; i++) {
-      let newSource = new Source(i, "Test Project " + i, "This is a test")
-      this.sources.push(newSource)
-    }
+  async getProjectSources(){
+    // const projId = this.route.snapshot.paramMap.get('projId');
+    const projId = '1';
+    let project = await this.databaseService.getProjectById(projId);
+    return project;
   }
 }
+

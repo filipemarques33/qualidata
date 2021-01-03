@@ -8,8 +8,14 @@ interface Network {
   name: string;
 }
 
+export interface Source {
+  id: string;
+  title: string;
+}
+
 interface Project {
   networks: Network[];
+  sources: Source[];
 }
 
 @Injectable({
@@ -24,4 +30,5 @@ export class ProjectRepository extends Repository<Project> {
     let project = await this.firebase.collection('projects').doc<Project>(id).get().toPromise();
     return project.data();
   }
+
 }

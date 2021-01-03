@@ -1,11 +1,11 @@
 export default class Source {
   constructor(
-    private _id: number,
+    private _id: string,
     private _title: string,
     private _content: string,
   ) {}
 
-  get id(): number {
+  get id(): string {
     return this._id;
   }
 
@@ -15,6 +15,14 @@ export default class Source {
 
   get content(): string {
     return this._content;
+  }
+
+  set title(title: string) {
+    this._title = title;
+  }
+
+  set content(content: string) {
+    this._content = content;
   }
 
 }
