@@ -193,8 +193,8 @@ export default class CanvasEdge {
   }
 
   unrenderArc() {
-    this._stage.removeChild(this._arc);
-    this._arc.visible = false;
+    this._stage.removeChild(this._container);
+    this._container.visible = false;
   }
 
   private getShapeDiff(absAngle: number, angle: number, width: number, height: number, sign: boolean) {

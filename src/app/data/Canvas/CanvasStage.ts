@@ -24,7 +24,6 @@ export default class CanvasStage {
   }
 
   addChild(...children: createjs.DisplayObject[]) {
-    console.log(children);
     this._stage.addChild(...children);
   }
 

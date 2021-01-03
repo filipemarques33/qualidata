@@ -3,8 +3,9 @@
     <img class="logo" src="../../../assets/logos/logo1.svg" alt="logo">
     <h1 class='my-auto ml-2 text-light'>Qualidata</h1>
     <small *ngIf="authService.user" class="ml-3 text-light username">{{authService.user.email}}</small>
-    <button *ngIf="!authService.user" class="ml-auto mr-3 text-light user-button" mat-flat-button disableRipple type="button" (click)="loginUser()">Login</button>
-    <button *ngIf="authService.user" class="ml-auto mr-3 text-light user-button" mat-flat-button disableRipple type="button" (click)="logoutUser()">Logout</button>
+    <button class="ml-auto mr-3 text-light user-button" mat-flat-button disableRipple type="button" (click)="saveChanges()">Save</button>
+    <button *ngIf="!authService.user" class="mr-3 text-light user-button" mat-flat-button disableRipple type="button" (click)="loginUser()">Login</button>
+    <button *ngIf="authService.user" class="mr-3 text-light user-button" mat-flat-button disableRipple type="button" (click)="logoutUser()">Logout</button>
     <button *ngIf="router.url === '/editor'" class="router-button" mat-flat-button type='button' routerLink='/network'>Go to Network</button>
     <button *ngIf="router.url === '/network'" class="router-button" mat-flat-button type='button' routerLink='/editor'>Go to Editor</button>
   </mat-toolbar>

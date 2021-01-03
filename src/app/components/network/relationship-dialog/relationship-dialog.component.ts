@@ -24,14 +24,14 @@ export class RelationshipDialog {
   ) {}
 
   filteredVertices() {
-    let visibleVertices = this.networkService.network.visibleVertices.filter(vertex => vertex.id !== this.data.vertex.id);
-    let currentVertexRelationships = this.networkService.network.visibleRelationships.get(this.data.vertex.id);
-    return visibleVertices.filter(vertex => !currentVertexRelationships.includes(vertex.id));
+    let visibleVertices = this.networkService.visibleVertices.filter(vertex => vertex.id !== this.data.vertex.id);
+    let currentVertexRelationships = this.networkService.visibleRelationships.get(this.data.vertex.id);
+    return visibleVertices.filter(vertex => currentVertexRelationships.every(edge => edge.toVertex !== vertex && edge.fromVertex !== vertex));
   }
 
   submitForm() {
     if (this.vertexControl.valid) {
-      this.networkService.network.connectVertices(this.data.vertex, this.selectedVertex, this.networkService.edgeCallback);
+      this.networkService.connectVertices(this.data.vertex, this.selectedVertex);
       this.dialogRef.close();
     } else {
       this.vertexControl.markAsDirty();

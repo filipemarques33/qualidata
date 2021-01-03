@@ -1,16 +1,13 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { Component, ViewChild, ElementRef, ViewEncapsulation, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatMenuTrigger } from '@angular/material/menu';
 import { MatSidenav } from '@angular/material/sidenav';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
-import CanvasCategory from 'src/app/data/Canvas/CanvasCategory';
 import VertexCategory from 'src/app/data/Canvas/VertexCategory';
 import CanvasEdge from 'src/app/data/Canvas/CanvasEdge';
 import { NetworkService } from "../../services/network-service";
 import { RelationshipDialog } from './relationship-dialog/relationship-dialog.component';
-import { AngularFireDatabase } from '@angular/fire/database';
-import { Observable } from 'rxjs';
 import { DatabaseService } from 'src/app/services/database-service';
 
 interface VertexNode {
@@ -109,8 +106,12 @@ export class NetworkComponent implements OnInit, OnDestroy {
     })
   }
 
+  removeVertex() {
+    this.networkService.removeVertex(this.focusedDetailsNode);
+  }
+
   filteredVertices(currentVertex: VertexCategory) {
-    return this.networkService.network.visibleVertices.filter(vertex => vertex.id !== currentVertex.id);
+    return this.networkService.visibleVertices.filter(vertex => vertex.id !== currentVertex.id);
   }
 
   @HostListener('window:resize')
