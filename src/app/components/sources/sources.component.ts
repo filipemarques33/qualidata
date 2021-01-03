@@ -22,7 +22,10 @@ export class SourcesComponent implements OnInit {
 
   ngOnInit(): void {
     this.getProjectSources().then(
-        project => this.sources = project.sources
+        project => {
+          this.sources = project.sources;
+          console.log(this.sources);
+        }
     )
   }
 

@@ -10,11 +10,11 @@ import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common'
 
 @Component({
-  selector: 'app-compose',
-  templateUrl: './compose.component.html',
-  styleUrls: ['./compose.component.scss']
+  selector: 'app-edit-source',
+  templateUrl: './edit-source.component.html',
+  styleUrls: ['./edit-source.component.scss']
 })
-export class ComposeComponent implements OnInit {
+export class EditSourceComponent implements OnInit {
 
   currSource = new Source('', '', '');
 
@@ -25,16 +25,24 @@ export class ComposeComponent implements OnInit {
     private location: Location
   ) { }
 
-  ngOnInit(): void {  }
+  ngOnInit(): void {
+    this.getSourceContent().then(
+      source => this.currSource = source
+    );
+  }
 
-  saveFile(): void {
-    // const projId = this.route.snapshot.paramMap.get('projId');
-    this.databaseService.saveSource(this.currSource, '1').then(
+  async getSourceContent() {
+    const sourceId = this.route.snapshot.paramMap.get('sourceId');
+    let source = await this.databaseService.getSourceById(sourceId);
+    return new Source(sourceId, source.title, source.content);
+  }
+
+  updateFile(): void {
+    this.databaseService.updateSource(this.currSource).then(
       () => {
-        this.snackbar.open('Documento salvo', null, {
+        this.snackbar.open('Documento atualizado', null, {
           duration: 2000,
         })
-        this.location.back()
       }
     )
   }
@@ -42,4 +50,5 @@ export class ComposeComponent implements OnInit {
   verifyFields() {
     return (this.currSource.title && this.currSource.content)
   }
+
 }

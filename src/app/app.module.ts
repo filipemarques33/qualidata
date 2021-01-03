@@ -27,6 +27,7 @@ import { AuthService } from './services/auth-service';
 
 import { environment } from 'src/environments/environment';
 import { SourcesComponent } from './components/sources/sources.component';
+import { EditSourceComponent } from './components/edit-source/edit-source.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -38,7 +39,8 @@ import { SourcesComponent } from './components/sources/sources.component';
     TreeView,
     UserLoginDialog,
     ProjectsComponent,
-    SourcesComponent
+    SourcesComponent,
+    EditSourceComponent
   ],
   imports: [
     BrowserModule,

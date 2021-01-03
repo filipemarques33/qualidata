@@ -30,7 +30,11 @@ export class DatabaseService {
   }
 
   async saveSource(source: Source, projId: string) {
-    await this.sourceRepository.saveToProject(source, projId)
+    await this.sourceRepository.saveToProject(source, projId);
+  }
+
+  async updateSource(source: Source) {
+    await this.sourceRepository.update(source);
   }
 
   async getUserByEmail(email: string) {
