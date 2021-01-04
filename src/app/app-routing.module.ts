@@ -9,7 +9,7 @@ import { SourcesComponent } from './components/sources/sources.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/editor', pathMatch: 'full' },
-  { path: 'editor', component: ComposeComponent },
+  { path: 'categories', component: ComposeComponent },
   { path: 'network', component: NetworkComponent },
   { path: 'projects', component: ProjectsComponent },
   { path: 'sources', children: [

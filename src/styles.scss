@@ -56,7 +56,7 @@ button, button:active, button:focus {
   color: gray;
 }
 
-.jumbotron .jumbotronButton {
+.primaryButton {
   background-color: mat-color($candy-app-primary, darker);
   color: white;
   border-radius: 8px;

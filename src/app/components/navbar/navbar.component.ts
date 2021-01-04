@@ -29,7 +29,7 @@ export class NavBarComponent implements AfterViewInit {
     },
     {
       text: 'Categorias',
-      route: '/editor',
+      route: '/categories',
       icon: 'format_list_bulleted',
     },
     {
