@@ -8,14 +8,21 @@ interface Network {
   name: string;
 }
 
-export interface Source {
+interface Source {
   id: string;
-  title: string;
+  // title: string;
+}
+
+interface Category {
+  id: string;
+  // color: string;
+  // name: string;
 }
 
 interface Project {
   networks: Network[];
   sources: Source[];
+  categories: Category[];
 }
 
 @Injectable({

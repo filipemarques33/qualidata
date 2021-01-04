@@ -7,6 +7,7 @@ import { DatabaseService } from 'src/app/services/database-service';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common'
 import { EditorComponent } from '@tinymce/tinymce-angular'
+import tinymce from 'tinymce';
 
 @Component({
   selector: 'app-edit-source',
@@ -73,6 +74,7 @@ export class EditSourceComponent implements OnInit {
       ],
       setup: function(editor) {
         editor.ui.registry.addButton('tagging', {
+          icon: 'permanent-pen',
           text: 'Tag fragment',
           onAction: function (_) {
             component.myfunction()
@@ -83,7 +85,8 @@ export class EditSourceComponent implements OnInit {
   }
 
   myfunction(){
-    console.log("Passed here somehow")
+    console.log(tinymce.activeEditor.selection.getSel().toString())
+    console.log(tinymce.activeEditor.selection.getRng())
   }
 
 }

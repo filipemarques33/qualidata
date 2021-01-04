@@ -1,0 +1,16 @@
+<div class='formDialog'>
+  <h1 mat-dialog-title>Nova categoria</h1>
+  <div mat-dialog-content class="d-flex flex-column">
+    <form [formGroup]="categoryForm" class="d-flex flex-column" (ngSubmit)="submit()">
+      <mat-form-field class="mb-2" appearance="fill">
+        <mat-label>Nome</mat-label>
+        <input formControlName="name" matInput>
+        <mat-error *ngIf="categoryForm.invalid">Escreva um nome</mat-error>
+      </mat-form-field>
+      <mat-dialog-actions class="mb-2">
+        <button mat-flat-button (click)="dialogRef.close()">Cancelar</button>
+        <button class="primaryButton" mat-raised-button type="submit" value="Submit">Criar categoria</button>
+      </mat-dialog-actions>
+    </form>
+  </div>
+</div>

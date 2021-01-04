@@ -21,19 +21,27 @@ export class SourceRepository extends Repository<Source> {
     return source.data();
   }
 
+  async getByIds(ids: string[]) {
+    let sources = await this.firebase.collection<Source>('sources').ref.where(firebase.default.firestore.FieldPath.documentId(), 'in', ids).get();
+    return sources.docs.map(doc => {
+      let category = doc.data()
+      category.id = doc.id;
+      return category;
+    });
+  }
+
   async saveToProject(instance: Source, projId: string) {
     var newDocRef: DocumentReference;
-    this.firebase.collection('sources').add(
-      {'title': instance.title,
+    this.firebase.collection('sources').add({
+      'title': instance.title,
       'content': instance.content
     }).then(function(docRef) {
         newDocRef = docRef;
       }
     ).finally(
       () => {
-        const sourceRef =  {id: newDocRef.id, title: instance.title};
         this.firebase.collection('projects').doc(projId).update({
-          sources: firebase.default.firestore.FieldValue.arrayUnion(sourceRef)
+          sources: firebase.default.firestore.FieldValue.arrayUnion({id: newDocRef.id})
         })
       }
     )

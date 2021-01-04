@@ -19,6 +19,7 @@
 .content-wrapper .navbar .logo {
   width: 30px;
   filter: invert(1);
+
 }
 
 .content-wrapper .navbar .username {
@@ -94,6 +95,8 @@
 
 .menuButton{
   color: white;
+  text-decoration: none;
+
   &:hover {
     background: rgba(mat-color($candy-app-primary, darker), 0.6);
   }

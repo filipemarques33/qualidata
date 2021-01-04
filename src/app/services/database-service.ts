@@ -3,10 +3,12 @@ import { ProjectRepository } from "../storage/firestore/ProjectRepository";
 import { NetworkRepository } from "../storage/firestore/NetworkRepository";
 import { SourceRepository } from "../storage/firestore/SourceRepository";
 import { UserRepository } from "../storage/firestore/UserRepository";
-import Source from "src/app/data/Source";
 import { CategoryRepository } from '../storage/firestore/CategoryRepository';
 import { CodeRepository } from '../storage/firestore/CodeRepository';
-import Relationship from '../data/Relationship';
+import Relationship from 'src/app/data/Relationship';
+import Source from "src/app/data/Source";
+import Category from "src/app/data/Category";
+
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +36,10 @@ export class DatabaseService {
     return await this.sourceRepository.getById(id);
   }
 
+  async getSourcesByIds(ids: string[]) {
+    return await this.sourceRepository.getByIds(ids);
+  }
+
   async saveSource(source: Source, projId: string) {
     await this.sourceRepository.saveToProject(source, projId);
   }
@@ -48,6 +54,10 @@ export class DatabaseService {
 
   async getCategoriesByIds(ids: string[]) {
     return await this.categoryRepository.getByIds(ids);
+  }
+
+  async saveCategory(category: Category, projId: string) {
+    await this.categoryRepository.saveToProject(category, projId);
   }
 
   async getCodesByIds(ids: string[]) {

@@ -28,6 +28,8 @@ import { AuthService } from './services/auth-service';
 import { environment } from 'src/environments/environment';
 import { SourcesComponent } from './components/sources/sources.component';
 import { EditSourceComponent } from './components/edit-source/edit-source.component';
+import { CategoriesComponent } from './components/categories/categories.component';
+import { NewCategoryDialogComponent } from './components/categories/new-category-dialog/new-category-dialog.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -40,7 +42,9 @@ import { EditSourceComponent } from './components/edit-source/edit-source.compon
     UserLoginDialog,
     ProjectsComponent,
     SourcesComponent,
-    EditSourceComponent
+    EditSourceComponent,
+    CategoriesComponent,
+    NewCategoryDialogComponent
   ],
   imports: [
     BrowserModule,
