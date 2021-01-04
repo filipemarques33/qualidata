@@ -17,6 +17,7 @@ import { Location } from '@angular/common'
 export class ComposeComponent implements OnInit {
 
   currSource = new Source('', '', '');
+  tinyMceConfig: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -25,7 +26,9 @@ export class ComposeComponent implements OnInit {
     private location: Location
   ) { }
 
-  ngOnInit(): void {  }
+  ngOnInit(): void {
+    this.configureEditor()
+  }
 
   saveFile(): void {
     // const projId = this.route.snapshot.paramMap.get('projId');
@@ -42,4 +45,26 @@ export class ComposeComponent implements OnInit {
   verifyFields() {
     return (this.currSource.title && this.currSource.content)
   }
+
+  configureEditor(){
+    const component = this
+    this.tinyMceConfig = {
+      base_url: '/tinymce',
+      suffix: '.min',
+      height: 500,
+      menubar: false,
+      placeholder: 'Comece a escrever seu documento aqui',
+      plugins: [
+        'advlist autolink lists link image charmap print',
+        'preview anchor searchreplace visualblocks code',
+        'fullscreen insertdatetime media table paste',
+        'help wordcount'
+      ],
+      toolbar:
+        'undo redo | formatselect | bold italic | \
+        alignleft aligncenter alignright alignjustify | \
+        bullist numlist outdent indent | help'
+    }
+  }
+
 }

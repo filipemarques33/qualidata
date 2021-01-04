@@ -1,13 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-
+import { Component, Directive, OnInit } from '@angular/core';
 import Source from 'src/app/data/Source';
-
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Content } from '@angular/compiler/src/render3/r3_ast';
 import { NetworkService } from 'src/app/services/network-service';
 import { DatabaseService } from 'src/app/services/database-service';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common'
+import { EditorComponent } from '@tinymce/tinymce-angular'
 
 @Component({
   selector: 'app-edit-source',
@@ -17,6 +16,7 @@ import { Location } from '@angular/common'
 export class EditSourceComponent implements OnInit {
 
   currSource = new Source('', '', '');
+  tinyMceConfig: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -29,6 +29,7 @@ export class EditSourceComponent implements OnInit {
     this.getSourceContent().then(
       source => this.currSource = source
     );
+    this.configureEditor();
   }
 
   async getSourceContent() {
@@ -49,6 +50,40 @@ export class EditSourceComponent implements OnInit {
 
   verifyFields() {
     return (this.currSource.title && this.currSource.content)
+  }
+
+  configureEditor(){
+    const component = this
+    this.tinyMceConfig = {
+      base_url: '/tinymce',
+      suffix: '.min',
+      height: 500,
+      menubar: false,
+      placeholder: 'Comece a escrever seu documento aqui',
+      plugins: [
+        'advlist autolink lists link image charmap print',
+        'preview anchor searchreplace visualblocks code',
+        'fullscreen insertdatetime media table paste',
+        'help wordcount'
+      ],
+      toolbar:[
+        'undo redo | formatselect | bold italic | \
+        alignleft aligncenter alignright alignjustify \
+        bullist numlist outdent indent | help | tagging',
+      ],
+      setup: function(editor) {
+        editor.ui.registry.addButton('tagging', {
+          text: 'Tag fragment',
+          onAction: function (_) {
+            component.myfunction()
+          }
+        });
+      }
+    }
+  }
+
+  myfunction(){
+    console.log("Passed here somehow")
   }
 
 }

@@ -5,23 +5,7 @@
   <div class="panel panel-primary">
     <div class="panel-body">
       <editor
-        [init]="{
-          base_url: '/tinymce',
-          suffix: '.min',
-          height: 500,
-          menubar: false,
-          placeholder: 'Comece a escrever seu documento aqui',
-          plugins: [
-            'advlist autolink lists link image charmap print',
-            'preview anchor searchreplace visualblocks code',
-            'fullscreen insertdatetime media table paste',
-            'help wordcount'
-          ],
-          toolbar:
-            'undo redo | formatselect | bold italic | \
-            alignleft aligncenter alignright alignjustify | \
-            bullist numlist outdent indent | help'
-        }"
+        [init]="tinyMceConfig"
         [(ngModel)]="currSource.content"
       >
       </editor>
@@ -31,3 +15,5 @@
     </div>
   </div>
 </div>
+
+
