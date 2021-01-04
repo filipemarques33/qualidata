@@ -3,28 +3,28 @@ import CanvasCode from './CanvasCode';
 import VertexCategory from './VertexCategory'
 
 export default class CanvasCategory extends VertexCategory {
-  codes: CanvasCode[];
-  categories: CanvasCategory[];
+  codes: string[];
+  categories: string[];
 
-  constructor(stage: CanvasStage, id: number, name: string, color: string, detailsCallback: Function) {
+  constructor(stage: CanvasStage, id: string, name: string, color: string, detailsCallback: Function) {
     super(stage.stage, id, name, 'Category', color, detailsCallback);
     this.codes = [];
     this.categories = [];
   }
 
-  addCode(code: CanvasCode) {
-    this.codes.push(code);
+  addCode(codeId: string) {
+    this.codes.push(codeId);
   }
 
-  removeCode(code: CanvasCode) {
-    this.codes = this.codes.filter(existingCode => code.id === existingCode.id);
+  removeCode(codeId: string) {
+    this.codes = this.codes.filter(existingCodeId => codeId === existingCodeId);
   }
 
-  addCategory(category: CanvasCategory) {
-    this.categories.push(category);
+  addCategory(categoryId: string) {
+    this.categories.push(categoryId);
   }
 
-  removeCategory(category: CanvasCategory) {
-    this.categories = this.categories.filter(existingCategory => category.id === existingCategory.id);
+  removeCategory(categoryId: string) {
+    this.categories = this.categories.filter(existingCategoryId => categoryId === existingCategoryId);
   }
 }

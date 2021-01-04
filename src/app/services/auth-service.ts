@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { UserRepository, User } from "../storage/firestore/UserRepository";
+import { User } from "../storage/firestore/UserRepository";
 import { DatabaseService } from "./database-service";
 import { NetworkService } from "./network-service";
 
@@ -17,8 +17,10 @@ export class AuthService {
       this.user = users[0];
       let project = await this.databaseService.getProjectById(this.user.projectIds[0]);
       let network = await this.databaseService.getNetworkById(project.networks[0].id);
-      this.networkService.setupStructures(network);
-    }
+      let categories = await this.databaseService.getCategoriesByIds(network.categories);
+      let codes = await this.databaseService.getCodesByIds(network.codes);
+      this.networkService.setupStructures(network, categories, codes);
+    };
   }
 
   logoutUser() {

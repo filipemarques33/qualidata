@@ -2,7 +2,7 @@ import Vertex from "./Vertex";
 import * as createjs from 'createjs-module'
 
 export default class VertexCategory {
-  private _id: number;
+  private _id: string;
   private _color: string;
   private _name: string;
   private _stage: createjs.Stage;
@@ -11,7 +11,7 @@ export default class VertexCategory {
   private _type: string;
   private _detailsCallback: Function;
 
-  constructor(stage: createjs.Stage, id: number, name: string, type: string, color: string = 'white', detailsCallback: Function) {
+  constructor(stage: createjs.Stage, id: string, name: string, type: string, color: string = 'white', detailsCallback: Function) {
     this._id = id;
     this._color = color;
     this._name = name;

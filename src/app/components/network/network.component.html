@@ -22,5 +22,6 @@
     <button *ngIf="!focusedEdge" mat-menu-item (click)="openDetailsSidenav()">Vertex details</button>
     <button *ngIf="focusedDetailsNode && filteredVertices(focusedDetailsNode).length" mat-menu-item (click)="openRelationshipDialog()">Add relationship</button>
     <button *ngIf="focusedEdge" mat-menu-item (click)="openDetailsSidenav()">Edge details</button>
+    <button *ngIf="focusedDetailsNode" mat-menu-item (click)="removeVertex()">Delete vertex</button>
   </mat-menu>
 </div>

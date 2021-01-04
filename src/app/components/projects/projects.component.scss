@@ -7,21 +7,21 @@
   line-height: normal;
 }
 
-.projects-wrapper .content-wrapper {
-  width: 85%;
+.projects-wrapper .projects-content-wrapper {
+  width: 95%;
 }
 
-.projects-wrapper .content-wrapper .title {
+.projects-wrapper .projects-content-wrapper .title {
   font-size: 70px;
   line-height: normal;
 }
 
-.projects-wrapper .content-wrapper .subtitle {
+.projects-wrapper .projects-content-wrapper .subtitle {
   font-size: 35px;
   line-height: normal;
 }
 
-.projects-wrapper .content-wrapper .add-projects-wrapper {
+.projects-wrapper .projects-content-wrapper .add-projects-wrapper {
   width: 350px;
   height: 70vh;
   border-radius: 10px;
@@ -32,7 +32,7 @@
   font-weight: 100;
 }
 
-.projects-wrapper .content-wrapper .add-projects-wrapper .add-projects {
+.projects-wrapper .projects-content-wrapper .add-projects-wrapper .add-projects {
   position: absolute;
   width: 350px;
   height: 50px;
@@ -53,7 +53,7 @@
   }
 }
 
-.projects-wrapper .content-wrapper .add-projects-wrapper .projects-list .project {
+.projects-wrapper .projects-content-wrapper .add-projects-wrapper .projects-list .project {
   border-bottom: 1px solid #999;
   cursor: pointer;
   transition: all 100ms ease-in-out;

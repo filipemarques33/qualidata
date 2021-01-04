@@ -1,16 +1,13 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { Component, ViewChild, ElementRef, ViewEncapsulation, HostListener, OnInit, OnDestroy, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatSidenav } from '@angular/material/sidenav';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import CanvasCategory from '../../data/Canvas/CanvasCategory';
-import VertexCategory from '../../data/Canvas/VertexCategory';
-import CanvasEdge from '../../data/Canvas/CanvasEdge';
 import { NetworkService } from "../../services/network-service";
+import CanvasCode from 'src/app/data/Canvas/CanvasCode';
 
 interface VertexNode {
-  id: number;
+  id: string;
   name: string;
   color: string;
   textColor: string;
@@ -61,7 +58,6 @@ export class TreeView implements OnInit {
     this.draggerRef.nativeElement.style.background = node.color;
     this.draggerRef.nativeElement.style.color = node.textColor;
     this.draggerRef.nativeElement.innerHTML = node.name;
-    this.draggerRef.nativeElement.style.display = 'block';
   }
 
   changeDragElement(event: DragEvent) {
@@ -75,45 +71,72 @@ export class TreeView implements OnInit {
     }
     if (event.y !== 0) this.draggerRef.nativeElement.style.top = event.y - 60 - this.draggerRef.nativeElement.clientHeight/2 + 'px';
     if (event.x !== 0) this.draggerRef.nativeElement.style.left = event.x - this.draggerRef.nativeElement.clientWidth/2 + 'px';
+
+    this.draggerRef.nativeElement.style.display = 'block';
   }
 
   hideDragElement(event: DragEvent, node: VertexNode) {
     this.draggerRef.nativeElement.style.display = 'none';
 
-    if (event.x > this.sidenav._getWidth()) this.networkService.network.renderVertex(node.id, event.x, event.y - 60);
+    if (event.x > this.sidenav._getWidth()) this.networkService.renderVertex(node.id, event.x, event.y - 60);
   }
 
   private setupTree() {
-    this.sidebarVertexTree = this.networkService.network.canvasCategories.map(canvasCategory => {
-      return this.getCategoryTree(canvasCategory);
-    });
+    this.sidebarVertexTree = [];
+    let remainingCodes: Map<string, CanvasCode> = new Map();
+    this.networkService.canvasCodes.slice().forEach(code => remainingCodes.set(code.id, code));
 
-    this.sidebarVertexTree.push(...this.networkService.network.canvasCodes.map(canvasCode => ({
-      id: canvasCode.id,
-      name: canvasCode.name,
-      color: canvasCode.color,
-      textColor: canvasCode.vertex.textColor
-    })));
+    let builtCategories = new Map<string, {node: VertexNode, parent?: string}>();
+
+    this.networkService.canvasCategories.forEach(canvasCategory => {
+      if (!builtCategories.get(canvasCategory.id))
+       this.sidebarVertexTree.push(this.getCategoryTree(canvasCategory, remainingCodes, builtCategories));
+    });
+    this.sidebarVertexTree = this.sidebarVertexTree.filter(node => !builtCategories.get(node.id).parent);
+    [...remainingCodes.values()].forEach(canvasCode => {
+      this.sidebarVertexTree.push({
+        id: canvasCode.id,
+        name: canvasCode.name,
+        color: canvasCode.color,
+        textColor: canvasCode.vertex.textColor
+      });
+    });
 
     this.dataSource.data = this.sidebarVertexTree;
   }
 
-  private getCategoryTree(canvasCategory: CanvasCategory): VertexNode {
-    let children = canvasCategory.categories.map(subCategory => this.getCategoryTree(subCategory));
-    children.push(...canvasCategory.codes.map(canvasCode => ({
-      id: canvasCode.id,
-      name: canvasCode.name,
-      color: canvasCode.color,
-      textColor: canvasCode.vertex.textColor,
-      type: 'Code'
-    })));
-    return {
+  private getCategoryTree(canvasCategory: CanvasCategory, remainingCodes: Map<string, CanvasCode>, builtCategories: Map<string, {node: VertexNode, parent?: string}>): VertexNode {
+    let children = canvasCategory.categories.map(subCategoryId => {
+      let existingChild = builtCategories.get(subCategoryId);
+      if (existingChild) {
+        existingChild.parent = canvasCategory.id;
+        return builtCategories.get(subCategoryId).node;
+      }
+      return this.getCategoryTree(
+        this.networkService.getVertexById(subCategoryId) as CanvasCategory,
+        remainingCodes,
+        builtCategories
+      );
+    });
+    canvasCategory.codes.forEach(canvasCodeId => {
+      let canvasCode = this.networkService.getVertexById(canvasCodeId);
+      remainingCodes.delete(canvasCode.id);
+      children.push({
+        id: canvasCodeId,
+        name: canvasCode.name,
+        color: canvasCode.color,
+        textColor: canvasCode.vertex.textColor
+      });
+    });
+    let category = {
       id: canvasCategory.id,
       name: canvasCategory.name,
       color: canvasCategory.color,
       textColor: canvasCategory.vertex.textColor,
       children: children
-    }
+    };
+    builtCategories.set(canvasCategory.id, {node: category});
+    return category;
   }
 
 }

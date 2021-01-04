@@ -7,8 +7,9 @@
       <div class="d-flex"><img class="logo" src="../../../assets/logos/logo1.svg" alt="logo"><h1 class='my-auto ml-2 text-light'>Qualidata</h1></div>
     </a>
     <small *ngIf="authService.user" class="ml-3 text-light username">{{authService.user.email}}</small>
-    <button *ngIf="!authService.user" class="ml-auto mr-3 text-light user-button" mat-flat-button disableRipple type="button" (click)="loginUser()">Login</button>
-    <button *ngIf="authService.user" class="ml-auto mr-3 text-light user-button" mat-flat-button disableRipple type="button" (click)="logoutUser()">Logout</button>
+    <button class="ml-auto mr-3 text-light user-button" mat-flat-button disableRipple type="button" (click)="saveChanges()">Save</button>
+    <button *ngIf="!authService.user" class="mr-3 text-light user-button" mat-flat-button disableRipple type="button" (click)="loginUser()">Login</button>
+    <button *ngIf="authService.user" class="mr-3 text-light user-button" mat-flat-button disableRipple type="button" (click)="logoutUser()">Logout</button>
   </mat-toolbar>
 
   <mat-sidenav-container class="sidenav-container" style="min-width: 320px;">
