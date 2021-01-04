@@ -28,23 +28,16 @@ export class CategoryRepository extends Repository<Category> {
   }
 
   async saveToProject(instance: Category, projId: string) {
-    var newDocRef: DocumentReference;
-    this.firebase.collection('categories').add({
+    var newDocRef = await this.firebase.collection('categories').add({
       'name': instance.name,
       'color': instance.color,
       'categories' : instance.categories ? instance.categories : [],
       'codes' : instance.codes ? instance.codes : [],
       'position' : instance.position ? instance.position : []
-    }).then(function(docRef) {
-        newDocRef = docRef;
-      }
-    ).finally(
-      () => {
-        this.firebase.collection('projects').doc(projId).update({
-          categories: firebase.default.firestore.FieldValue.arrayUnion({id: newDocRef.id})
-        })
-      }
-    )
+    });
+    await this.firebase.collection('projects').doc(projId).update({
+      categories: firebase.default.firestore.FieldValue.arrayUnion({id: newDocRef.id})
+    });
     return;
   }
 

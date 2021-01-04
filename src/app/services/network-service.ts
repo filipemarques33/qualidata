@@ -22,6 +22,11 @@ export class NetworkService {
   private networkId: string;
   private detailsCallback: Function;
   private edgeCallback: Function;
+  private structures: {
+    network: Network,
+    categories: Category[],
+    codes: Code[]
+  };
 
   public structuresUpdated: EventEmitter<boolean> = new EventEmitter();
 
@@ -58,11 +63,21 @@ export class NetworkService {
     });
 
     this.network = new CanvasNetwork(this.canvasStage, this.detailsCallback, this.edgeCallback);
+    if (this.structures) {
+      this.network.setupStructures(this.structures.network, this.structures.categories, this.structures.codes);
+    }
   }
 
   setupStructures(network: Network, categories: Category[], codes: Code[]) {
     this.networkId = network.id;
-    this.network.setupStructures(network, categories, codes);
+    this.structures = {
+      network,
+      categories,
+      codes
+    };
+    if (this.network) {
+      this.network.setupStructures(network, categories, codes);
+    }
     this.structuresUpdated.emit(true);
   }
 

@@ -16,7 +16,7 @@ export class AuthService {
     if (users.length) {
       this.user = users[0];
       let project = await this.databaseService.getProjectById(this.user.projectIds[0]);
-      let network = await this.databaseService.getNetworkById(project.networks[0].id);
+      let network = await this.databaseService.getNetworkById(project.networks[0]);
       let categories = await this.databaseService.getCategoriesByIds(network.categories);
       let codes = await this.databaseService.getCodesByIds(network.codes);
       this.networkService.setupStructures(network, categories, codes);

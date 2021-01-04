@@ -19,7 +19,8 @@ const routes: Routes = [
     { path: '', pathMatch: 'full', component: SourcesComponent },
     { path: ':sourceId/edit', component: EditSourceComponent},
     { path: 'new', component: ComposeComponent},
-  ]}
+  ]},
+  { path: '**', redirectTo: '/sources' }
 ];
 
 @NgModule({

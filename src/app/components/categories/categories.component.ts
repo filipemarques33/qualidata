@@ -14,7 +14,7 @@ import { NewCategoryDialogComponent } from 'src/app/components/categories/new-ca
 export class CategoriesComponent implements OnInit {
 
   //currProject: Project = new Project(1, "Pesquisa", "Teste de descrição")
-  currProject: any;
+  currProject: Project;
   categories: Category[];
 
   constructor(
@@ -30,7 +30,7 @@ export class CategoriesComponent implements OnInit {
   async getCategories(){
     const projId = '1';
     this.currProject = await this.databaseService.getProjectById(projId);
-    this.categories = await this.databaseService.getCategoriesByIds(this.currProject.categories.map(category => category.id))
+    this.categories = await this.databaseService.getCategoriesByIds(this.currProject.categories);
   }
 
   openNewCategoryDialog() {

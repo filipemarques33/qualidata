@@ -1,16 +1,10 @@
 export default class Project {
   constructor(
-    private _id: number,
-    private _name: string,
-    private _description: string,
+    public id: number,
+    public name: string,
+    public description: string,
+    public networks?: string[],
+    public sources?: string[],
+    public categories?: string[]
   ) {}
-
-  get name(): string {
-    return this._name;
-  }
-
-  get description(): string {
-    return this._description;
-  }
-
 }

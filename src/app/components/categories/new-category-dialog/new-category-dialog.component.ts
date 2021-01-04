@@ -1,4 +1,4 @@
-import { Component, createPlatformFactory, Inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ColorPickerDirective } from 'ngx-color-picker';
