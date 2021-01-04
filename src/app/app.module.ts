@@ -7,6 +7,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { ColorPickerModule } from 'ngx-color-picker';
 
 import { ImportsModule } from 'src/app/common/imports.module';
 import { AppRoutingModule } from './app-routing.module';
@@ -30,6 +31,7 @@ import { SourcesComponent } from './components/sources/sources.component';
 import { EditSourceComponent } from './components/edit-source/edit-source.component';
 import { CategoriesComponent } from './components/categories/categories.component';
 import { NewCategoryDialogComponent } from './components/categories/new-category-dialog/new-category-dialog.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -56,7 +58,8 @@ import { NewCategoryDialogComponent } from './components/categories/new-category
     NgbModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireDatabaseModule,
-    AngularFirestoreModule
+    AngularFirestoreModule,
+    ColorPickerModule
   ],
   providers: [
     {provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js'},

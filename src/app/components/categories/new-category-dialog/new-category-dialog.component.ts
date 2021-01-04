@@ -1,6 +1,7 @@
 import { Component, createPlatformFactory, Inject, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { ColorPickerDirective } from 'ngx-color-picker';
 import Category from 'src/app/data/Category';
 import { DatabaseService } from 'src/app/services/database-service';
 
@@ -10,19 +11,12 @@ import { DatabaseService } from 'src/app/services/database-service';
   styleUrls: ['./new-category-dialog.component.scss']
 })
 export class NewCategoryDialogComponent implements OnInit {
-
-  category = new Category('','','#0000FF',[],[]);
-
-  // categoryForm = new FormControl({
-  //   name: '',
-  //   color: '',
-  //   disabled: false
-  // }, [Validators.required]);
+  public toggle: boolean = false;
 
   categoryForm = new FormGroup({
-    name: new FormControl (this.category.name, [Validators.required]),
-    color: new FormControl (this.category.color, [Validators.required])
+    name: new FormControl ('', [Validators.required]),
   })
+  selectedColor = "#0000FF"
 
   constructor(
     public databaseService: DatabaseService,
@@ -30,19 +24,22 @@ export class NewCategoryDialogComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log(this.category.name)
-    console.log(this.categoryForm.get('name'))
   }
 
   submit() {
     if (this.categoryForm.valid) {
       const projId = '1'
-      const category = new Category('',this.categoryForm.get('name').value, this.categoryForm.get('color').value)
+      const category = new Category('',this.categoryForm.get('name').value, this.selectedColor)
+      console.log('Save ' + category.name + ' ' + category.color)
       this.databaseService.saveCategory(category, projId);
       this.dialogRef.close();
     } else {
       this.categoryForm.markAsDirty();
     }
+  }
+
+  changeColor(newColor: string) {
+    this.selectedColor = newColor
   }
 
 }

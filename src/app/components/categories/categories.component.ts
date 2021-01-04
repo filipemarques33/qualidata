@@ -13,8 +13,9 @@ import { NewCategoryDialogComponent } from 'src/app/components/categories/new-ca
 })
 export class CategoriesComponent implements OnInit {
 
-  currProject: Project = new Project(1, "Pesquisa", "Teste de descrição")
-  categories: Category[]
+  //currProject: Project = new Project(1, "Pesquisa", "Teste de descrição")
+  currProject: any;
+  categories: Category[];
 
   constructor(
     private route: ActivatedRoute,
@@ -23,21 +24,18 @@ export class CategoriesComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.getCategories().then(
-      categories => {
-        this.categories = categories
-      }
-    )
+    this.getCategories();
   }
 
   async getCategories(){
-    // const projId = this.route.snapshot.paramMap.get('projId');
     const projId = '1';
-    let project = await this.databaseService.getProjectById(projId);
-    return await this.databaseService.getCategoriesByIds(project.categories.map(category => category.id))
+    this.currProject = await this.databaseService.getProjectById(projId);
+    this.categories = await this.databaseService.getCategoriesByIds(this.currProject.categories.map(category => category.id))
   }
 
   openNewCategoryDialog() {
-    this.newCategoryDialog.open(NewCategoryDialogComponent)
+    this.newCategoryDialog.open(NewCategoryDialogComponent, {
+      autoFocus: false
+    }).afterClosed().subscribe(() => {this.getCategories(); console.log("Refreshing")})
   }
 }
