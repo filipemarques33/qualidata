@@ -31,20 +31,13 @@ export class SourceRepository extends Repository<Source> {
   }
 
   async saveToProject(instance: Source, projId: string) {
-    var newDocRef: DocumentReference;
-    this.firebase.collection('sources').add({
+    var newDocRef = await this.firebase.collection('sources').add({
       'title': instance.title,
       'content': instance.content
-    }).then(function(docRef) {
-        newDocRef = docRef;
-      }
-    ).finally(
-      () => {
-        this.firebase.collection('projects').doc(projId).update({
-          sources: firebase.default.firestore.FieldValue.arrayUnion({id: newDocRef.id})
-        })
-      }
-    )
+    })
+    await this.firebase.collection('projects').doc(projId).update({
+        sources: firebase.default.firestore.FieldValue.arrayUnion(newDocRef.id)
+    })
     return;
   }
 

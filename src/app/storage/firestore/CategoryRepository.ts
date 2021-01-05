@@ -32,13 +32,19 @@ export class CategoryRepository extends Repository<Category> {
     var newDocRef = await this.firebase.collection('categories').add({
       'name': instance.name,
       'color': instance.color,
+      'parent': instance.parent ? instance.parent : null,
       'categories' : instance.categories ? instance.categories : [],
       'codes' : instance.codes ? instance.codes : [],
       'position' : instance.position ? instance.position : []
     });
     await this.firebase.collection('projects').doc(projId).update({
-      categories: firebase.default.firestore.FieldValue.arrayUnion({id: newDocRef.id})
+      categories: firebase.default.firestore.FieldValue.arrayUnion(newDocRef.id)
     });
+    if (instance.parent) {
+      await this.firebase.collection('categories').doc(instance.parent).update({
+        categories: firebase.default.firestore.FieldValue.arrayUnion(newDocRef.id)
+      })
+    }
     return;
   }
 
