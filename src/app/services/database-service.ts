@@ -9,6 +9,16 @@ import Relationship from 'src/app/data/Relationship';
 import Source from "src/app/data/Source";
 import Category from "src/app/data/Category";
 
+export interface VertexUpdateData {
+  id: string;
+  name: string;
+  color: string;
+  textColor: string;
+  position: {
+    x: number,
+    y: number
+  };
+};
 
 @Injectable({
   providedIn: 'root'
@@ -68,15 +78,15 @@ export class DatabaseService {
     return await this.userRepository.getByProperty('email', email);
   }
 
-  async updateCategoriesPositions(updateCategories: {id: string, position: null|{x: number, y: number}}[]) {
-    for (let updateData of updateCategories) {
-      await this.categoryRepository.updatePositionById(updateData.id, updateData.position);
+  async updateCategories(updateData: VertexUpdateData[]) {
+    for (let data of updateData) {
+      await this.categoryRepository.updateById(data.id, data);
     }
   }
 
-  async updateCodesPositions(updateCodes: {id: string, position: null|{x: number, y: number}}[]) {
-    for (let updateData of updateCodes) {
-      await this.codeRepository.updatePositionById(updateData.id, updateData.position);
+  async updateCodes(updateData: VertexUpdateData[]) {
+    for (let data of updateData) {
+      await this.codeRepository.updateById(data.id, data);
     }
   }
 

@@ -3,6 +3,7 @@ export default class Category {
     public id: string,
     public name: string,
     public color: string,
+    public textColor: string,
     public categories?: string[],
     public codes?: string[],
     public position?: { x: number, y: number }

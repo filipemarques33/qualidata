@@ -107,10 +107,20 @@ export class NetworkService {
     let updateRelationships: Relationship[];
     let uniqueRelationships: CanvasEdge[] = [];
     this.network.visibleVertices.forEach(vertex => {
+      let updateData = {
+        id: vertex.id,
+        name: vertex.name,
+        color: vertex.color,
+        textColor: vertex.textColor,
+        position: {
+          x: vertex.vertex.x,
+          y: vertex.vertex.y
+        }
+      }
       if (vertex instanceof CanvasCategory) {
-        updateCategories.push({id: vertex.id, position: {x: vertex.vertex.x, y: vertex.vertex.y}});
+        updateCategories.push(updateData);
       } else {
-        updateCodes.push({id: vertex.id, position: {x: vertex.vertex.x, y: vertex.vertex.y}});
+        updateCodes.push(updateData);
       }
     });
     this.network.deletedVertices.forEach(vertex => {
@@ -125,14 +135,16 @@ export class NetworkService {
     });
     updateRelationships = uniqueRelationships.map(relationship => ({
       title: relationship.title,
+      comment: relationship.comment,
+      color: relationship.color,
       from: relationship.fromVertex.id,
       to: relationship.toVertex.id,
       arrowFrom: relationship.arrowFrom,
       arrowTo: relationship.arrowTo,
       edgeType: relationship.edgeType
     }));
-    if (updateCategories.length) await this.databaseService.updateCategoriesPositions(updateCategories);
-    if (updateCodes.length) await this.databaseService.updateCodesPositions(updateCodes);
+    if (updateCategories.length) await this.databaseService.updateCategories(updateCategories);
+    if (updateCodes.length) await this.databaseService.updateCodes(updateCodes);
     console.log(updateRelationships);
     if (updateRelationships) await this.databaseService.updateRelationships(this.networkId, updateRelationships);
   }

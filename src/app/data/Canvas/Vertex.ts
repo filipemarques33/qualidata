@@ -39,6 +39,18 @@ export default class Vertex extends createjs.Container {
   hookCenter: {x: number, y: number} = {x: 0, y: 0};
   originalTextPosition: {x: number, y: number} = {x: 0, y: 0};
 
+  commands: {
+    containerShape: any,
+    containerOutline: any,
+    containerHook: any,
+    containerDiff: any
+  } = {
+    containerShape: null,
+    containerOutline: null,
+    containerHook: null,
+    containerDiff: null
+  }
+
   constructor(text: string, color: string, type: string, detailsCallback: Function) {
     super();
 
@@ -66,6 +78,43 @@ export default class Vertex extends createjs.Container {
     this.containerText.name = 'text';
     this.containerText.cursor = 'pointer';
     this.containerText.lineWidth = 100;
+    this.calculateBounds();
+
+    //create rounded rectangle
+    this.containerShape = new createjs.Shape();
+    this.containerShape.cursor = "pointer";
+    this.containerShape.name = 'rRect';
+    this.containerShape.shadow = new createjs.Shadow('#666', 3, 3, 10);
+
+    //create on hover outline
+    this.containerOutline = new createjs.Shape();
+    this.containerOutline.visible = false;
+    this.containerOutline.shadow = new createjs.Shadow('#666', 3, 3, 10);
+
+    //create on hover hook
+    this.containerHook = new createjs.Shape();
+    this.containerHook.cursor = 'pointer';
+    this.containerHook.visible = false;
+
+    if (this.type === 'Category') {
+      this.containerDiff = new createjs.Shape();
+      this.containerDiff.mask = new createjs.Shape();
+    }
+
+    this.drawElements();
+
+    this.container = new createjs.Container();
+
+    this.container.addChild(this.containerShape, this.containerDiff, this.containerText, this.containerHook, this.containerOutline);
+
+    this.setupHookMouse();
+    this.setupContainerMouse();
+
+    this.addChild(this.container);
+
+  }
+
+  calculateBounds() {
     const lines = this.containerText.getMeasuredHeight()/this.containerText.getMeasuredLineHeight();
 
     let bounds = this.containerText.getBounds();
@@ -86,48 +135,38 @@ export default class Vertex extends createjs.Container {
     this.minHeight = this.height;
     this.maxHeight = this.height + 3;
     this.heightRamp = (this.maxHeight - this.height)/3;
+  }
 
-    //create rounded rectangle
-    this.containerShape = new createjs.Shape();
-    this.containerShape.graphics.beginFill(this.colors.mainColor).drawRoundRect(-this.width/ 2, -this.height/2, this.width, this.height, this.radius);
-    this.containerShape.cursor = "pointer";
-    this.containerShape.x = this.x;
-    this.containerShape.y = this.y;
-    this.containerShape.name = 'rRect';
-    this.containerShape.shadow = new createjs.Shadow('#666', 3, 3, 10);
+  recolorElements() {
+    this.commands.containerShape.style = this.colors.mainColor;
+    this.commands.containerOutline.style = this.colors.mainColor;
+    this.commands.containerHook.style = this.colors.highlightColor;
+    if (this.commands.containerDiff) this.commands.containerDiff.style = this.colors.activeColor;
+  }
+
+  drawElements() {
+    this.commands.containerShape = this.containerShape.graphics.clear().beginFill(this.colors.mainColor).command;
+    this.containerShape.graphics.drawRoundRect(-this.width/ 2, -this.height/2, this.width, this.height, this.radius);
+    // this.containerShape.x = this.x;
+    // this.containerShape.y = this.y;
 
     //create on hover outline
-    this.containerOutline = new createjs.Shape();
-    this.containerOutline.graphics.setStrokeStyle(2).beginStroke(this.colors.mainColor).drawRoundRect(-(this.width/ 2 + 3.5), -(this.height/2 + 3.5), this.width + 7, this.height + 7, this.radius);
-    this.containerOutline.x = this.x;
-    this.containerOutline.y = this.y;
-    this.containerOutline.visible = false;
-    this.containerOutline.shadow = new createjs.Shadow('#666', 3, 3, 10);
+    this.commands.containerOutline = this.containerOutline.graphics.clear().setStrokeStyle(2).beginStroke(this.colors.mainColor).command;
+    this.containerOutline.graphics.drawRoundRect(-(this.width/ 2 + 3.5), -(this.height/2 + 3.5), this.width + 7, this.height + 7, this.radius);
+    // this.containerOutline.x = this.x;
+    // this.containerOutline.y = this.y;
 
     //create on hover hook
-    this.containerHook = new createjs.Shape();
-    this.containerHook.graphics.beginFill(this.colors.highlightColor).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
-    this.containerHook.cursor = 'pointer';
-    this.containerHook.visible = false;
-    this.containerHook.x = this.x;
-    this.containerHook.y = this.y;
+    this.commands.containerHook = this.containerHook.graphics.clear().beginFill(this.colors.highlightColor).command;
+    this.containerHook.graphics.drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
+    // this.containerHook.x = this.x;
+    // this.containerHook.y = this.y;
 
     if (this.type === 'Category') {
-      this.containerDiff = new createjs.Shape();
-      this.containerDiff.mask = new createjs.Shape();
-      this.containerDiff.mask.graphics.drawRect(-this.width/2 - 1, -this.height/2, 10, this.height);
-      this.containerDiff.graphics.beginFill(this.colors.activeColor).drawRoundRect(-this.width/2 - 1, -this.height/2, 20, this.height, this.radius);
+      this.containerDiff.mask.graphics.clear().drawRect(-this.width/2 - 1, -this.height/2, 10, this.height);
+      this.commands.containerDiff = this.containerDiff.graphics.clear().beginFill(this.colors.activeColor).command;
+      this.containerDiff.graphics.drawRoundRect(-this.width/2 - 1, -this.height/2, 20, this.height, this.radius);
     }
-
-    this.container = new createjs.Container();
-
-    this.container.addChild(this.containerShape, this.containerDiff, this.containerText, this.containerHook, this.containerOutline);
-
-    this.setupHookMouse();
-    this.setupContainerMouse();
-
-    this.addChild(this.container);
-
   }
 
   setupContainerMouse() {
@@ -186,11 +225,15 @@ export default class Vertex extends createjs.Container {
 
   setupHookMouse() {
     this.containerHook.on("mouseover", () => {
-      if (!this.isHooked) this.containerHook.graphics.clear().beginFill(this.colors.hoverColor).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
+      if (!this.isHooked)
+        this.commands.containerHook = this.containerHook.graphics.clear().beginFill(this.colors.hoverColor).command;
+        this.containerHook.graphics.drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
     });
 
     this.containerHook.on("mouseout", () => {
-      if (!this.isHooked) this.containerHook.graphics.clear().beginFill(this.colors.highlightColor).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
+      if (!this.isHooked)
+        this.commands.containerHook = this.containerHook.graphics.clear().beginFill(this.colors.highlightColor).command;
+        this.containerHook.graphics.drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
     });
 
     this.containerHook.on('mousedown', (evt) => {
@@ -259,17 +302,21 @@ export default class Vertex extends createjs.Container {
         hookCenter.y = this.hookCenter.y + diffY;
       }
       //finally, we update the rectangle, outline and hook graphics
-      this.containerShape.graphics.clear().beginFill(this.colors.mainColor).drawRoundRect(
+      this.commands.containerShape = this.containerShape.graphics.clear().beginFill(this.colors.mainColor).command;
+      this.containerShape.graphics.drawRoundRect(
         this.containerShapeCenter.x,
         this.containerShapeCenter.y,
         this.width,
         this.height,
         this.radius);
-      this.containerOutline.graphics.clear().setStrokeStyle(2).beginStroke(this.colors.mainColor).drawRoundRect(this.outlineCenter.x, this.outlineCenter.y, this.width + 7, this.height + 7, this.radius);
-      this.containerHook.graphics.clear().beginFill(this.colors.activeColor).drawCircle(hookCenter.x, hookCenter.y, 5);
+      this.commands.containerOutline = this.containerOutline.graphics.clear().setStrokeStyle(2).beginStroke(this.colors.mainColor).command;
+      this.containerOutline.graphics.drawRoundRect(this.outlineCenter.x, this.outlineCenter.y, this.width + 7, this.height + 7, this.radius);
+      this.commands.containerHook = this.containerHook.graphics.clear().beginFill(this.colors.activeColor).command;
+      this.containerHook.graphics.drawCircle(hookCenter.x, hookCenter.y, 5);
       if (this.type === 'Category') {
         this.containerDiff.mask.graphics.clear().drawRect(-this.originalBounds.w/2 - 1, -this.originalBounds.h/2, 10, this.height);
-        this.containerDiff.graphics.clear().beginFill(this.colors.activeColor).drawRoundRect(-this.originalBounds.w/2-1, -this.originalBounds.h/2, 20, this.height, this.radius);
+        this.commands.containerDiff = this.containerDiff.graphics.clear().beginFill(this.colors.activeColor).command;
+        this.containerDiff.graphics.drawRoundRect(-this.originalBounds.w/2-1, -this.originalBounds.h/2, 20, this.height, this.radius);
       }
     });
 
@@ -287,11 +334,14 @@ export default class Vertex extends createjs.Container {
       const vertex = this.parent.getChildByName(this.name);
       vertex.x += (this.width - this.originalBounds.w)/2;
       vertex.y += (this.height - this.originalBounds.h)/2;
-      this.containerOutline.graphics.clear().setStrokeStyle(2).beginStroke(this.colors.mainColor).drawRoundRect(-(this.width/ 2 + 3.5), -(this.height/2 + 3.5), this.width + 7, this.height + 7, this.radius);
-      this.containerHook.graphics.clear().beginFill(this.colors.highlightColor).drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
+      this.commands.containerOutline = this.containerOutline.graphics.clear().setStrokeStyle(2).beginStroke(this.colors.mainColor).command;
+      this.containerOutline.graphics.drawRoundRect(-(this.width/ 2 + 3.5), -(this.height/2 + 3.5), this.width + 7, this.height + 7, this.radius);
+      this.commands.containerHook = this.containerHook.graphics.clear().beginFill(this.colors.highlightColor).command;
+      this.containerHook.graphics.drawCircle(this.width/ 2 - 7.5, this.height/2 - 7.5, 5);
       if (this.type === 'Category') {
         this.containerDiff.mask.graphics.clear().drawRect(-this.width/2 - 1, -this.height/2, 10, this.height);
-        this.containerDiff.graphics.clear().beginFill(this.colors.activeColor).drawRoundRect(-this.width/2 - 1, -this.height/2, 20, this.height, this.radius);
+        this.commands.containerDiff = this.containerDiff.graphics.clear().beginFill(this.colors.activeColor).command;
+        this.containerDiff.graphics.drawRoundRect(-this.width/2 - 1, -this.height/2, 20, this.height, this.radius);
       }
 
       //since the container x and y positions changed we can now rever the original text positions
@@ -315,7 +365,8 @@ export default class Vertex extends createjs.Container {
         this.parent.width = this.parent.maxWidth;
         this.parent.height = this.parent.maxHeight;
       }
-      this.parent.containerShape.graphics.clear().beginFill(this.parent.colors.mainColor).drawRoundRect(-this.parent.width/2, -this.parent.height/2, this.parent.width, this.parent.height, this.parent.radius);
+      this.parent.commands.containerShape = this.parent.containerShape.graphics.clear().beginFill(this.parent.colors.mainColor).command;
+      this.parent.containerShape.graphics.drawRoundRect(-this.parent.width/2, -this.parent.height/2, this.parent.width, this.parent.height, this.parent.radius);
     }
   }
 
@@ -331,7 +382,8 @@ export default class Vertex extends createjs.Container {
         this.parent.width = this.parent.minWidth;
         this.parent.height = this.parent.minHeight;
       }
-      this.parent.containerShape.graphics.clear().beginFill(this.parent.colors.mainColor).drawRoundRect(-this.parent.width/2, -this.parent.height/2, this.parent.width, this.parent.height, this.parent.radius);
+      this.parent.commands.containerShape = this.parent.containerShape.graphics.clear().beginFill(this.parent.colors.mainColor).command;
+      this.parent.containerShape.graphics.drawRoundRect(-this.parent.width/2, -this.parent.height/2, this.parent.width, this.parent.height, this.parent.radius);
     }
   }
 }

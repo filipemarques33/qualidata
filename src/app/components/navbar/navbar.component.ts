@@ -44,7 +44,7 @@ export class NavBarComponent implements AfterViewInit {
   constructor(public router: Router, public authService: AuthService, private dialog: MatDialog, private networkService: NetworkService) { }
 
   async ngAfterViewInit() {
-    // await this.authService.loginUser('jonathas.sardinha@gmail.com');
+    await this.authService.loginUser('jonathas.sardinha@gmail.com');
   }
 
   loginUser() {

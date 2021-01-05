@@ -1,12 +1,14 @@
 import Vertex from "./Vertex";
 import * as createjs from 'createjs-module'
+import { colourNameToHex } from "src/app/utils/colors";
 
 export default class VertexCategory {
   private _id: string;
-  private _color: string;
-  private _name: string;
   private _stage: createjs.Stage;
   private _vertex: Vertex;
+  private _name: string;
+  private _color: string;
+  private _textColor: string;
   private _isRendered: boolean;
   private _type: string;
   private _detailsCallback: Function;
@@ -20,6 +22,7 @@ export default class VertexCategory {
     this._isRendered = false;
     this._detailsCallback = detailsCallback;
     this._vertex = new Vertex(this._name, this._color, this._type, (event) => this._detailsCallback(event, this));
+    this._textColor = this._vertex.textColor;
     this._vertex.name = `vertex${Math.random()*100000}`
     this._vertex.visible = false;
   }
@@ -40,8 +43,30 @@ export default class VertexCategory {
     return this._name;
   }
 
+  set name(value: string) {
+    this._name = value;
+    this._vertex.containerText.text = value;
+    this._vertex.calculateBounds();
+    this._vertex.drawElements();
+  }
+
   get color() {
     return this._color;
+  }
+
+  set color(value: string) {
+    this._color = value;
+    this._vertex.colors = colourNameToHex(value);
+    this._vertex.recolorElements();
+  }
+
+  get textColor() {
+    return this._textColor;
+  }
+
+  set textColor(value: string) {
+    this._textColor = value;
+    this._vertex.containerText.color = value;
   }
 
   renderVertex(x: number, y: number) {

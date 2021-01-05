@@ -9,6 +9,8 @@ import Network from '../Network';
 
 export interface ConnectionOptions {
   title?: string;
+  comment?: string;
+  color?: string;
   edgeType?: string;
   arrowFrom?: boolean;
   arrowTo?: boolean;
@@ -68,6 +70,8 @@ export default class CanvasNetwork {
       let toVertex = this.vertexMap.get(relationship.to);
       this.connectVertices(fromVertex, toVertex, {
         title: relationship.title,
+        comment: relationship.comment,
+        color: relationship.color,
         edgeType: relationship.edgeType,
         arrowFrom: relationship.arrowFrom,
         arrowTo: relationship.arrowTo
@@ -109,8 +113,9 @@ export default class CanvasNetwork {
   }
 
   connectVertices(origin: VertexCategory, destination: VertexCategory, options?: ConnectionOptions) {
-    let edge = new CanvasEdge(this.canvasStage, 'gray', origin, destination, this.edgeCallback);
+    let edge = new CanvasEdge(this.canvasStage, options.color ? options.color : 'gray', origin, destination, this.edgeCallback);
     if (options) {
+      edge.comment = options.comment;
       edge.title = options.title != null ? options.title : edge.title;
       edge.edgeType = options.edgeType != null ? options.edgeType : edge.edgeType;
       edge.arrowFrom = options.arrowFrom != null ? options.arrowFrom : edge.arrowFrom;

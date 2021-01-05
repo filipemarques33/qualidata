@@ -28,7 +28,6 @@ export default class CanvasEdge {
   private _arcMask: createjs.Shape;
   private _title: string;
 
-  private _color: string;
   private _arrowDistance: number;
   private _arrowSize: number;
   private _edgeType: string;
@@ -40,6 +39,8 @@ export default class CanvasEdge {
     DOUBLE: 'DOUBLE',
     DOTTED: 'DOTTED'
   };
+  public comment: string;
+  public color: string;
   public fromVertex: VertexCategory;
   public toVertex: VertexCategory;
   public arrowTo: boolean;
@@ -47,7 +48,7 @@ export default class CanvasEdge {
 
   constructor(_stage: CanvasStage, color: string, fromVertex: VertexCategory, toVertex: VertexCategory, edgeCallback: Function) {
     this._stage = _stage;
-    this._color = color;
+    this.color = color;
     this.fromVertex = fromVertex;
     this.toVertex = toVertex;
     this._fromVertexText = (fromVertex.vertex.getChildAt(0) as createjs.Container).getChildByName('text') as createjs.Text;
@@ -104,9 +105,9 @@ export default class CanvasEdge {
         const pt2 = this._toVertexText.localToGlobal(this._toVertexText.x, this._toVertexText.y);
 
         pt1.x -= this._fromVertexText.x;
-        pt1.y -= this._fromVertexText.y;
+        pt1.y -= (this._fromVertexText.y - this._fromVertexText.getMeasuredHeight()/2 + this._fromVertexText.getMeasuredLineHeight()/2);
         pt2.x -= this._toVertexText.x;
-        pt2.y -= this._toVertexText.y;
+        pt2.y -= (this._toVertexText.y - this._toVertexText.getMeasuredHeight()/2 + this._toVertexText.getMeasuredLineHeight()/2);
 
         let deltaY = pt1.y - pt2.y;
         let deltaX = pt1.x - pt2.x;
@@ -227,25 +228,25 @@ export default class CanvasEdge {
 
   private drawStandardEdge(drawPoints: drawEdgeInterface) {
     let {fromX, fromY, toX, toY, angle} = drawPoints;
-    this._arc.graphics.clear().setStrokeStyle(4, 1).beginStroke(this._color)
+    this._arc.graphics.clear().setStrokeStyle(4, 1).beginStroke(this.color)
       .moveTo(fromX, fromY).lineTo(toX, toY).endStroke();
     if (this.arrowFrom)
-      this._arc.graphics.beginFill(this._color)
+      this._arc.graphics.beginFill(this.color)
         .drawPolyStar(fromX, fromY, this._arrowSize, 3, 0.5, angle*(180/Math.PI));
     if (this.arrowTo)
-      this._arc.graphics.beginFill(this._color)
+      this._arc.graphics.beginFill(this.color)
         .drawPolyStar(toX, toY, this._arrowSize, 3, 0.5, angle*(180/Math.PI) + 180);
   }
 
   private drawDashedEdge(drawPoints: drawEdgeInterface) {
     let {fromX, fromY, toX, toY, angle} = drawPoints;
     this._arc.graphics.clear().setStrokeStyle(4, 1).setStrokeDash([this._dash, this._dash/2])
-      .beginStroke(this._color).moveTo(fromX, fromY).lineTo(toX, toY).endStroke();
+      .beginStroke(this.color).moveTo(fromX, fromY).lineTo(toX, toY).endStroke();
     if (this.arrowFrom)
-      this._arc.graphics.beginFill(this._color)
+      this._arc.graphics.beginFill(this.color)
         .drawPolyStar(fromX, fromY, this._arrowSize, 3, 0.5, angle*(180/Math.PI));
     if (this.arrowTo)
-      this._arc.graphics.beginFill(this._color)
+      this._arc.graphics.beginFill(this.color)
         .drawPolyStar(toX, toY, this._arrowSize, 3, 0.5, angle*(180/Math.PI) + 180);
   }
 
@@ -253,27 +254,27 @@ export default class CanvasEdge {
     let {fromX, fromY, toX, toY, angle} = drawPoints;
     let xOffset = 2*Math.sin(angle);
     let yOffset = 2*Math.cos(angle);
-    this._arc.graphics.clear().setStrokeStyle(2, 1).beginStroke(this._color)
+    this._arc.graphics.clear().setStrokeStyle(2, 1).beginStroke(this.color)
       .moveTo(fromX - xOffset, fromY + yOffset).lineTo(toX - xOffset, toY + yOffset).endStroke();
-    this._arc.graphics.setStrokeStyle(2, 1).beginStroke(this._color)
+    this._arc.graphics.setStrokeStyle(2, 1).beginStroke(this.color)
       .moveTo(fromX + xOffset, fromY - yOffset).lineTo(toX + xOffset, toY - yOffset).endStroke();
     if (this.arrowFrom)
-      this._arc.graphics.beginFill(this._color)
+      this._arc.graphics.beginFill(this.color)
         .drawPolyStar(fromX, fromY, this._arrowSize, 3, 0.5, angle*(180/Math.PI));
     if (this.arrowTo)
-      this._arc.graphics.beginFill(this._color)
+      this._arc.graphics.beginFill(this.color)
         .drawPolyStar(toX, toY, this._arrowSize, 3, 0.5, angle*(180/Math.PI) + 180);
   }
 
   private drawDottedEdge(drawPoints: drawEdgeInterface) {
     let {fromX, fromY, toX, toY, angle} = drawPoints;
     this._arc.graphics.clear().setStrokeStyle(4, 1).setStrokeDash([1, 5])
-      .beginStroke(this._color).moveTo(fromX, fromY).lineTo(toX, toY).endStroke();
+      .beginStroke(this.color).moveTo(fromX, fromY).lineTo(toX, toY).endStroke();
     if (this.arrowFrom)
-      this._arc.graphics.beginFill(this._color)
+      this._arc.graphics.beginFill(this.color)
         .drawPolyStar(fromX, fromY, this._arrowSize, 3, 0.5, angle*(180/Math.PI));
     if (this.arrowTo)
-      this._arc.graphics.beginFill(this._color)
+      this._arc.graphics.beginFill(this.color)
         .drawPolyStar(toX, toY, this._arrowSize, 3, 0.5, angle*(180/Math.PI) + 180);
   }
 }

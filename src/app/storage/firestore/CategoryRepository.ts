@@ -1,9 +1,10 @@
 import { Injectable } from "@angular/core";
-import { AngularFirestore, DocumentReference } from "@angular/fire/firestore";
+import { AngularFirestore } from "@angular/fire/firestore";
 import * as firebase from 'firebase/app';
 
 import Category from '../../data/Category';
 import { Repository } from '../Repository';
+import { VertexUpdateData } from '../../services/database-service';
 
 export interface User {
   email: string;
@@ -41,7 +42,12 @@ export class CategoryRepository extends Repository<Category> {
     return;
   }
 
-  async updatePositionById(id: string, position: null|{x: number, y: number}) {
-    await this.firebase.doc<Category>(`categories/${id}`).update({position});
+  async updateById(id: string, data: VertexUpdateData) {
+    await this.firebase.doc<Category>(`categories/${id}`).update({
+      name: data.name,
+      color: data.color,
+      textColor: data.textColor,
+      position: data.position
+    });
   }
 }
