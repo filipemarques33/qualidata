@@ -24,7 +24,7 @@
         <mat-label>Categoria pai</mat-label>
         <mat-select formControlName="parent"  (valueChange)="changeParent($event)">
           <mat-option>Nenhuma</mat-option>
-          <mat-option appearance="fill" *ngFor="let cat of avaliableCategories" [(value)]="cat.id">
+          <mat-option appearance="fill" *ngFor="let cat of availableCategories" [(value)]="cat.id">
             <mat-icon [ngStyle]="{'color': cat.color}">stop_circle</mat-icon>
             {{cat.name}}
           </mat-option>
@@ -36,7 +36,7 @@
           </mat-select-trigger>
         </mat-select>
       </mat-form-field>
-      <mat-dialog-actions class="mb-2">
+      <mat-dialog-actions>
         <button mat-flat-button (click)="dialogRef.close()">Cancelar</button>
         <button class="primaryButton" mat-raised-button type="submit" value="Submit">Criar categoria</button>
       </mat-dialog-actions>

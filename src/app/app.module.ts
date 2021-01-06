@@ -24,6 +24,7 @@ import { ProjectsComponent } from './components/projects/projects.component';
 
 import { NetworkService } from './services/network-service';
 import { DatabaseService } from './services/database-service';
+import { CategoryService } from './services/category-service';
 import { AuthService } from './services/auth-service';
 
 import { environment } from 'src/environments/environment';
@@ -31,6 +32,7 @@ import { SourcesComponent } from './components/sources/sources.component';
 import { EditSourceComponent } from './components/edit-source/edit-source.component';
 import { CategoriesComponent } from './components/categories/categories.component';
 import { NewCategoryDialogComponent } from './components/categories/new-category-dialog/new-category-dialog.component';
+import { TaggingDialogComponent } from './components/edit-source/tagging-dialog/tagging-dialog.component';
 
 @NgModule({
   declarations: [
@@ -46,7 +48,8 @@ import { NewCategoryDialogComponent } from './components/categories/new-category
     SourcesComponent,
     EditSourceComponent,
     CategoriesComponent,
-    NewCategoryDialogComponent
+    NewCategoryDialogComponent,
+    TaggingDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -65,6 +68,7 @@ import { NewCategoryDialogComponent } from './components/categories/new-category
     {provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js'},
     NetworkService,
     DatabaseService,
+    CategoryService,
     AuthService
   ],
   bootstrap: [AppComponent]

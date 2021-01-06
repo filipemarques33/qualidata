@@ -5,8 +5,8 @@ import { Content } from '@angular/compiler/src/render3/r3_ast';
 import { NetworkService } from 'src/app/services/network-service';
 import { DatabaseService } from 'src/app/services/database-service';
 import { ActivatedRoute } from '@angular/router';
-import { Location } from '@angular/common'
-import { EditorComponent } from '@tinymce/tinymce-angular'
+import { MatDialog } from '@angular/material/dialog';
+import { TaggingDialogComponent } from './tagging-dialog/tagging-dialog.component';
 import tinymce from 'tinymce';
 
 @Component({
@@ -23,20 +23,18 @@ export class EditSourceComponent implements OnInit {
     private route: ActivatedRoute,
     private snackbar: MatSnackBar,
     private databaseService: DatabaseService,
-    private location: Location
+    private fragmentDialogRef: MatDialog
   ) { }
 
   ngOnInit(): void {
-    this.getSourceContent().then(
-      source => this.currSource = source
-    );
+    this.getSourceContent();
     this.configureEditor();
   }
 
   async getSourceContent() {
     const sourceId = this.route.snapshot.paramMap.get('sourceId');
     let source = await this.databaseService.getSourceById(sourceId);
-    return new Source(sourceId, source.title, source.content);
+    this.currSource = new Source(sourceId, source.title, source.content);
   }
 
   updateFile(): void {
@@ -77,16 +75,21 @@ export class EditSourceComponent implements OnInit {
           icon: 'permanent-pen',
           text: 'Tag fragment',
           onAction: function (_) {
-            component.myfunction()
+            component.tagFragment()
           }
         });
       }
     }
   }
 
-  myfunction(){
-    console.log(tinymce.activeEditor.selection.getSel().toString())
-    console.log(tinymce.activeEditor.selection.getRng())
+  tagFragment(){
+    this.fragmentDialogRef.open(TaggingDialogComponent,{
+      autoFocus: false,
+      data: {
+        id: this.currSource.id,
+        selection: tinymce.activeEditor.selection
+      }
+    })
   }
 
 }

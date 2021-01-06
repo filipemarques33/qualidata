@@ -28,6 +28,29 @@ export class CodeRepository extends Repository<Code> {
     });
   }
 
+  async saveToCategories(code: Code, catIds:string[]) {
+    let sourceData = {
+      'id': code.source.id,
+      'range': code.source.range
+    }
+
+    let dataToSave = {
+      'name': code.name,
+      'content': code.content,
+      'color': code.color,
+      'textColor': code.textColor,
+      'source': sourceData,
+      'position': code.position ? code.position : null
+    }
+
+    let newDocRef = await this.firebase.collection('codes').add(dataToSave)
+    for (let id in catIds) {
+      await this.firebase.collection('category').doc(id).update({
+        codes: firebase.default.firestore.FieldValue.arrayUnion(newDocRef)
+      })
+    }
+  }
+
   async updateById(id: string, data: VertexUpdateData) {
     await this.firebase.doc<Code>(`codes/${id}`).update({
       name: data.name,

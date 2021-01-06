@@ -3,6 +3,7 @@ import Project from 'src/app/data/Project';
 import { ActivatedRoute } from '@angular/router';
 import { DatabaseService } from 'src/app/services/database-service';
 import Source from 'src/app/data/Source';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-sources',
@@ -11,8 +12,11 @@ import Source from 'src/app/data/Source';
 })
 export class SourcesComponent implements OnInit {
 
-  currProject: Project = new Project(1, "Pesquisa", "Teste de descrição")
-  sources: Source[] = []
+  currentProject: Project;
+  projectSubscription: Subscription;
+
+  sources: Source[]
+  sourceSubscription: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -20,7 +24,14 @@ export class SourcesComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    this.sources = await this.getSources();
+    let projId = '1'
+    this.projectSubscription = this.databaseService.getProject(projId).subscribe(
+      project => this.currentProject = project
+    )
+    this.sourceSubscription = this.databaseService.getAllSources().subscribe(
+      sources => this.sources = sources.filter(source => this.currentProject.sources.includes(source.id))
+    )
+    //this.sources = await this.getSources();
   }
 
   async getSources(){
