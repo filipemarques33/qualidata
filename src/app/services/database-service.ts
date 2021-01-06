@@ -46,6 +46,10 @@ export class DatabaseService {
     return this.projectRepository.getProjectById(id)
   }
 
+  getProjects() {
+    return this.projectRepository.getAllProjects()
+  }
+
 
   // Network
 
@@ -67,13 +71,9 @@ export class DatabaseService {
     return await this.sourceRepository.getByIds(ids);
   }
 
-  // async saveSource(source: Source, projId: string) {
-  //   await this.sourceRepository.saveToProject(source, projId);
-  // }
-
-    getAllSources() {
-      return this.sourceRepository.getAllSources()
-    }
+  getAllSources() {
+    return this.sourceRepository.getAllSources()
+  }
 
   async saveSource(source: Source, projId: string) {
     await this.sourceRepository.saveToProject(source, projId);
@@ -93,11 +93,7 @@ export class DatabaseService {
     return this.categoryRepository.getAllCategories();
   }
 
-  // async saveCategory(category: Category, projId: string) {
-  //   await this.categoryRepository.saveToProject(category, projId);
-  // }
-
-  saveCategory(category: Category, projId: string) {
+  async saveCategory(category: Category, projId: string) {
     this.categoryRepository.saveToProject(category, projId)
   }
 

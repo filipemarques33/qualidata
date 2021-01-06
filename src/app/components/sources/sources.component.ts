@@ -23,21 +23,20 @@ export class SourcesComponent implements OnInit {
     private databaseService: DatabaseService
   ) {}
 
-  async ngOnInit() {
-    let projId = '1'
+  ngOnInit() {
+    let projId = this.route.snapshot.paramMap.get('projId')
     this.projectSubscription = this.databaseService.getProject(projId).subscribe(
       project => this.currentProject = project
     )
     this.sourceSubscription = this.databaseService.getAllSources().subscribe(
       sources => this.sources = sources.filter(source => this.currentProject.sources.includes(source.id))
     )
-    //this.sources = await this.getSources();
   }
 
-  async getSources(){
-    // const projId = this.route.snapshot.paramMap.get('projId');
-    const projId = '1';
-    let project = await this.databaseService.getProjectById(projId);
-    return await this.databaseService.getSourcesByIds(project.sources);
-  }
+  // async getSources(){
+  //   // const projId = this.route.snapshot.paramMap.get('projId');
+  //   const projId = '1';
+  //   let project = await this.databaseService.getProjectById(projId);
+  //   return await this.databaseService.getSourcesByIds(project.sources);
+  // }
 }

@@ -18,9 +18,9 @@
 
   <mat-sidenav-container class="sidenav-container" style="min-width: 320px;">
     <mat-sidenav #snav
-      [mode]="'over'"
+      [mode]="'side'"
       class="sidenav"
-      [opened]="false"
+      [opened]="!router.url.includes('/network')"
     >
       <mat-nav-list>
         <div>

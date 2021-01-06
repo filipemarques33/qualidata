@@ -15,7 +15,7 @@
           [cpCancelButton]="true"
           [cpOKButton]="true"
           [cpOKButtonClass]= "'primaryButton'"
-          (colorPickerChange)="changeColor($event)"
+          (colorPickerChange)="selectedColor = $event"
         >
           <mat-icon [ngStyle]="{'color': selectedColor}">stop_circle</mat-icon>
         </button>

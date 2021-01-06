@@ -28,13 +28,16 @@ export class CodeRepository extends Repository<Code> {
     });
   }
 
-  async saveToCategories(code: Code, catIds:string[]) {
+  async saveToCategories(code: Code, catIds: string[]) {
+
+    let codeRef = this.firebase.createId()
     let sourceData = {
       'id': code.source.id,
       'range': code.source.range
     }
 
     let dataToSave = {
+      'id': codeRef,
       'name': code.name,
       'content': code.content,
       'color': code.color,
@@ -43,10 +46,10 @@ export class CodeRepository extends Repository<Code> {
       'position': code.position ? code.position : null
     }
 
-    let newDocRef = await this.firebase.collection('codes').add(dataToSave)
-    for (let id in catIds) {
-      await this.firebase.collection('category').doc(id).update({
-        codes: firebase.default.firestore.FieldValue.arrayUnion(newDocRef)
+    await this.firebase.collection('codes').doc(codeRef).set(dataToSave)
+    for (let cat of catIds) {
+      this.firebase.collection('categories').doc(cat).update({
+        'codes': firebase.default.firestore.FieldValue.arrayUnion(codeRef)
       })
     }
   }

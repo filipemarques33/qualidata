@@ -14,10 +14,8 @@
         <span class="ml-3">Create a new project</span>
       </div>
       <div class="projects-list w-100 d-flex flex-column">
-        <span class="project">Project 1</span>
-        <span class="project">Project 2</span>
-        <span class="project">Project 3</span>
-        <span class="project">Project 4</span>
+        <span class="project" *ngFor="let project of projects" >
+          <a *ngFor="let project of projects" routerLink="./{{project.id}}">{{project.name}}</a></span>
       </div>
     </div>
   </div>

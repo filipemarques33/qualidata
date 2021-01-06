@@ -9,16 +9,21 @@ import { SourcesComponent } from './components/sources/sources.component';
 import { CategoriesComponent } from "./components/categories/categories.component";
 
 const routes: Routes = [
-  { path: '', redirectTo: '/projects', pathMatch: 'full' },
-  { path: 'categories', children:[
-    { path: '', pathMatch: 'full', component: CategoriesComponent },
-  ]},
-  { path: 'network', component: NetworkComponent },
-  { path: 'projects', component: ProjectsComponent },
-  { path: 'sources', children: [
-    { path: '', pathMatch: 'full', component: SourcesComponent },
-    { path: ':sourceId/edit', component: EditSourceComponent},
-    { path: 'new', component: ComposeComponent},
+  { path: '', redirectTo: 'projects', pathMatch: 'full' },
+  { path: 'projects', children:[
+    { path: '', pathMatch: 'full', component: ProjectsComponent },
+    { path: ':projId', children:[
+      { path: '', pathMatch: 'full', redirectTo: 'sources' },
+      { path: 'sources', children: [
+        { path: '', pathMatch: 'full', component: SourcesComponent },
+        { path: ':sourceId/edit', component: EditSourceComponent},
+        { path: 'new', component: ComposeComponent},
+      ]},
+      { path: 'categories', children:[
+        { path: '', pathMatch: 'full', component: CategoriesComponent },
+      ]},
+      { path: 'network', component: NetworkComponent },
+    ] },
   ]},
   { path: '**', redirectTo: '/sources' }
 ];

@@ -21,4 +21,8 @@ export class ProjectRepository extends Repository<Project> {
     return this.firebase.collection('projects').doc<Project>(id).valueChanges()
   }
 
+  getAllProjects() {
+    return this.firebase.collection<Project>('projects').valueChanges()
+  }
+
 }

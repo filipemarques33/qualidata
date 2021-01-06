@@ -54,9 +54,9 @@ export class CategoryRepository extends Repository<Category> {
     //   return;
     // }
 
-  saveToProject(instance: Category, projId: string) {
+  async saveToProject(instance: Category, projId: string) {
     var categoryRef = this.firebase.createId()
-    this.firebase.collection('categories').doc(categoryRef).set({
+    await this.firebase.collection('categories').doc(categoryRef).set({
       'id': categoryRef,
       'name': instance.name,
       'color': instance.color,
@@ -64,18 +64,15 @@ export class CategoryRepository extends Repository<Category> {
       'categories' : instance.categories ? instance.categories : [],
       'codes' : instance.codes ? instance.codes : [],
       'position' : instance.position ? instance.position : []
-    }).then(
-      () => {
-        this.firebase.collection('projects').doc(projId).update({
-          categories: firebase.default.firestore.FieldValue.arrayUnion(categoryRef)
-        })
-        if (instance.parent) {
-          this.firebase.collection('categories').doc(instance.parent).update({
-            categories: firebase.default.firestore.FieldValue.arrayUnion(categoryRef)
-          })
-        }
-      }
-    )
+    })
+    await this.firebase.collection('projects').doc(projId).update({
+      categories: firebase.default.firestore.FieldValue.arrayUnion(categoryRef)
+    })
+    if (instance.parent) {
+      await this.firebase.collection('categories').doc(instance.parent).update({
+        categories: firebase.default.firestore.FieldValue.arrayUnion(categoryRef)
+      })
+    }
   }
 
   async updateById(id: string, data: VertexUpdateData) {

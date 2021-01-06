@@ -70,7 +70,7 @@ export class CategoriesComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    let projId = '1'
+    let projId = this.route.snapshot.paramMap.get('projId');
     this.projectSubscription = this.databaseService.getProject(projId).subscribe(
       (project) => this.currentProject = project
     )
@@ -87,7 +87,10 @@ export class CategoriesComponent implements OnInit {
 
   openNewCategoryDialog() {
     this.newCategoryDialog.open(NewCategoryDialogComponent, {
-      autoFocus: false
+      autoFocus: false,
+      data: {
+        projectId: String(this.currentProject.id)
+      }
     })
   }
 }

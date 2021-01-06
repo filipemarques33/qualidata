@@ -83,10 +83,12 @@ export class EditSourceComponent implements OnInit {
   }
 
   tagFragment(){
+    let projectId = this.route.snapshot.paramMap.get('projId');
     this.fragmentDialogRef.open(TaggingDialogComponent,{
       autoFocus: false,
       data: {
-        id: this.currSource.id,
+        projectId: projectId,
+        sourceId: this.currSource.id,
         selection: tinymce.activeEditor.selection
       }
     })

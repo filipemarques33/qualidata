@@ -1,6 +1,8 @@
+import { typeofExpr } from '@angular/compiler/src/output/output_ast';
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import Category from 'src/app/data/Category';
 import Code from 'src/app/data/Code';
@@ -11,7 +13,8 @@ import { EditorSelection } from 'tinymce';
 import { NewCategoryDialogComponent } from '../../categories/new-category-dialog/new-category-dialog.component';
 
 interface DialogData {
-  id: string;
+  projectId: string;
+  sourceId: string;
   selection: EditorSelection;
 }
 
@@ -36,12 +39,13 @@ export class TaggingDialogComponent implements OnInit {
 
   fragmentForm = new FormGroup({
     name: new FormControl("", [Validators.required]),
-    categories: new FormControl("", [Validators.required])
+    categories: new FormControl([], [Validators.required])
   })
-  selectedColor: string;
+  selectedColor: string = "#0000FF";
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
+    public route: ActivatedRoute,
     public dialogRef: MatDialogRef<TaggingDialogComponent>,
     public categoryDialog: MatDialog,
     private databaseService: DatabaseService
@@ -49,7 +53,7 @@ export class TaggingDialogComponent implements OnInit {
 
   ngOnInit(): void {
     // this.getCategories();
-    this.currSource = this.data.id;
+    this.currSource = this.data.sourceId;
     this.selectedFragment = this.data.selection;
     this.fragmentText = this.decodeHtml(this.selectedFragment.getContent());
     this.setupSubscriptions()
@@ -61,49 +65,52 @@ export class TaggingDialogComponent implements OnInit {
     return txt.value;
   }
 
-  async getCategories(){
-    let projId = '1'
-    let project = await this.databaseService.getProjectById(projId)
-    this.availableCategories = await this.databaseService.getCategoriesByIds(project.categories)
-  }
+  // async getCategories(){
+  //   let projId = '1'
+  //   let project = await this.databaseService.getProjectById(projId)
+  //   this.availableCategories = await this.databaseService.getCategoriesByIds(project.categories)
+  // }
 
   setupSubscriptions(){
-    let projId = '1'
-    this.projectSubscription = this.databaseService.getProject(projId).subscribe(
-      (project) => this.currentProject = project
+    this.projectSubscription = this.databaseService.getProject(this.data.projectId).subscribe(
+      project => this.currentProject = project
     )
+
     this.categorySubscription = this.databaseService.getAllCategories().subscribe(
-      (categories: Category[]) => this.availableCategories = categories.filter(category => this.currentProject.categories.includes(category.id))
+      categories => {
+        this.availableCategories = categories.filter(category => this.currentProject.categories.includes(category.id))
+      }
     )
   }
 
   newCategoryDialog() {
     this.categoryDialog.open(NewCategoryDialogComponent, {
       autoFocus: false,
+      data: {
+        projectId: String(this.currentProject.id)
+      }
     })
   }
 
   submit() {
-    let code = new Code(
-      '',
-      this.fragmentForm.get('name').value,
-      this.fragmentText,
-      this.selectedColor,
-      { id: this.currSource,
-        range: this.selectedFragment.getRng() },
-      "black"
-    )
+    if (this.fragmentForm.valid) {
+      let code = new Code(
+        '',
+        this.fragmentForm.get('name').value,
+        this.fragmentText,
+        this.selectedColor,
+        { id: this.currSource,
+          range: null },
+          //range: this.selectedFragment.getRng() },
+        "black"
+      )
+      let categories = this.fragmentForm.get('categories').value
+      this.databaseService.saveCode(code, categories)
+      this.dialogRef.close()
+    } else {
+      this.fragmentForm.markAsDirty()
+    }
 
-    let categories = this.fragmentForm.get('categories').value
-
-    console.log(categories)
-    categories = ["Sy6e4Fokvm7lHuJLUjl1"]
-
-    //console.log(this.selectedFragment.getRng())
-
-    //this.databaseService.saveCode(code, categories)
-
-    this.dialogRef.close()
   }
 
 

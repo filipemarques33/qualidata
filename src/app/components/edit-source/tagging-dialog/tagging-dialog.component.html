@@ -18,7 +18,7 @@
           [cpCancelButton]="true"
           [cpOKButton]="true"
           [cpOKButtonClass]= "'primaryButton'"
-          (colorPickerChange)="this.selectedColor = $event"
+          (colorPickerChange)="selectedColor = $event"
         >
           <mat-icon [ngStyle]="{'color': selectedColor}">stop_circle</mat-icon>
         </button>
@@ -29,14 +29,14 @@
           <mat-option [value]="null" selected disabled hidden>
             Escolha uma categoria
           </mat-option>
-          <mat-option *ngFor="let cat of availableCategories" [(value)]="cat.id">
+          <mat-option *ngFor="let cat of availableCategories" [value]="cat.id">
             {{cat.name}}
           </mat-option>
           <hr>
           <div class="p-2">
-            <button mat-raised-button class="primaryButton" type="button" (click)="newCategoryDialog()">
+            <button class="secondaryButton" mat-raised-button type="button" (click)="newCategoryDialog()">
               <mat-icon>add</mat-icon>
-              Adicionar categoria
+              Nova categoria
             </button>
           </div>
         </mat-select>

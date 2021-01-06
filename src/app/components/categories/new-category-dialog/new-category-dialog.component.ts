@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import Category from 'src/app/data/Category';
 import { DatabaseService } from 'src/app/services/database-service';
 import { CategoryService } from 'src/app/services/category-service';
 import { Subscription } from 'rxjs';
 import Project from 'src/app/data/Project';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-new-category-dialog',
@@ -29,14 +30,15 @@ export class NewCategoryDialogComponent implements OnInit {
   })
 
   constructor(
+    @Inject(MAT_DIALOG_DATA) public data: { projectId: string },
+    public route: ActivatedRoute,
     public databaseService: DatabaseService,
     public dialogRef: MatDialogRef<NewCategoryDialogComponent>,
     public categoryService: CategoryService,
   ) { }
 
   ngOnInit(): void {
-    let projId = '1'
-    this.projectSubscription = this.databaseService.getProject(projId).subscribe(
+    this.projectSubscription = this.databaseService.getProject(this.data.projectId).subscribe(
       project => this.currentProject = project
     )
     this.categorySubscription = this.databaseService.getAllCategories().subscribe(
@@ -48,17 +50,12 @@ export class NewCategoryDialogComponent implements OnInit {
 
   submit() {
     if (this.categoryForm.valid) {
-      const projId = '1'
       const category = new Category('', this.categoryForm.get('name').value, this.selectedColor, 'black', this.categoryForm.get('parent').value);
-      this.databaseService.saveCategory(category, projId);
+      this.databaseService.saveCategory(category, String(this.currentProject.id));
       this.dialogRef.close();
     } else {
       this.categoryForm.markAsDirty();
     }
-  }
-
-  changeColor(newColor: string) {
-    this.selectedColor = newColor
   }
 
   changeParent(parentId) {

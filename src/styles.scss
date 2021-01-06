@@ -59,5 +59,15 @@ button, button:active, button:focus {
 .primaryButton {
   background-color: mat-color($candy-app-primary, darker);
   color: white;
-  border-radius: 8px;
+  border-radius: 10px;
+  min-width: fit-content;
+  line-height: normal;
+}
+
+.secondaryButton {
+  background-color: white;
+  color: mat-color($candy-app-primary, darker);
+  border-radius: 10px;
+  min-width: fit-content;
+  line-height: normal;
 }

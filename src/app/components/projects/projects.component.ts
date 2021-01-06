@@ -1,10 +1,14 @@
 import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { DatabaseQuery } from '@angular/fire/database/interfaces';
 import { Stage, Touch, Tween, Ticker, Ease } from 'createjs-module';
+import { Subscription } from 'rxjs';
 import CanvasCategory from 'src/app/data/Canvas/CanvasCategory';
 import CanvasCode from 'src/app/data/Canvas/CanvasCode';
 import CanvasEdge from 'src/app/data/Canvas/CanvasEdge';
 import CanvasStage from 'src/app/data/Canvas/CanvasStage';
 import Vertex from 'src/app/data/Canvas/Vertex';
+import Project from 'src/app/data/Project';
+import { DatabaseService } from 'src/app/services/database-service';
 import { AuthService } from '../../services/auth-service';
 
 @Component({
@@ -16,6 +20,9 @@ export class ProjectsComponent implements OnInit{
 
   @ViewChild('projectCanvas', {static: true}) canvasRef: ElementRef<HTMLCanvasElement>;
 
+  projects: Project[] = [];
+  projectSubscription: Subscription;
+
   canvas: HTMLCanvasElement;
   canvasStage: CanvasStage;
   stage: Stage;
@@ -23,12 +30,14 @@ export class ProjectsComponent implements OnInit{
   vertices: Vertex[] = [];
 
   constructor(
-    public authService: AuthService
+    public authService: AuthService,
+    private databaseService: DatabaseService,
   ) { }
 
   async ngOnInit() {
     this.setupCanvas();
     this.createAnimation();
+    this.fetchProjects()
   }
 
   @HostListener('window:resize')
@@ -87,6 +96,12 @@ export class ProjectsComponent implements OnInit{
 
     Ticker.framerate = 60;
     Ticker.addEventListener("tick", this.stage);
+  }
+
+  fetchProjects(){
+    this.projectSubscription = this.databaseService.getProjects().subscribe(
+      projects => this.projects = projects
+    )
   }
 
 }

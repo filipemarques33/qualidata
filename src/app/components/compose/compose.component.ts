@@ -32,7 +32,6 @@ export class ComposeComponent implements OnInit {
 
   saveFile(): void {
     var projId = this.route.snapshot.paramMap.get('projId');
-    projId = '1'
     this.databaseService.saveSource(this.currSource, projId).then(
       () => {
         this.snackbar.open('Documento salvo', null, {
