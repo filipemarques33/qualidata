@@ -20,6 +20,7 @@ interface NavItem {
   encapsulation: ViewEncapsulation.None
 })
 export class NavBarComponent implements OnInit {
+  savingNetwork = false;
   routerSidenavOpen = true;
   projectId = '1'
   navItems: NavItem[] = [
@@ -54,7 +55,9 @@ export class NavBarComponent implements OnInit {
     public databaseService: DatabaseService,
     private dialog: MatDialog,
     private canvasNetworkService: CanvasNetworkService
-  ) {}
+  ) {
+    this.canvasNetworkService.savingNetworkEvent.subscribe(isSaving => this.savingNetwork = isSaving);
+  }
 
   async ngOnInit() {
     let loggedInEmail = localStorage.getItem('userEmail');

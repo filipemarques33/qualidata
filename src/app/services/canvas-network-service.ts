@@ -36,6 +36,7 @@ export class CanvasNetworkService {
   private vertexMap: Map<string, VertexCategory> = new Map();
 
   public structuresUpdated: EventEmitter<boolean> = new EventEmitter();
+  public savingNetworkEvent = new EventEmitter<boolean>();
   public network: Network;
 
   public canvasCategories: CanvasCategory[] = [];
@@ -84,10 +85,11 @@ export class CanvasNetworkService {
   }
 
   async saveChanges() {
+    this.savingNetworkEvent.emit(true);
     let updateCategories: Partial<Category>[] = [];
     let updateCodes: Partial<Code>[] = [];
-    let updateRelationships: Relationship[];
-    let updatePositions = new Map<string, {x: number, y: number}>();
+    let updateRelationships: Relationship[] = [];
+    let updatePositions: {[key: string]: {x: number, y: number}} = {};
 
     let uniqueRelationships: CanvasEdge[] = [];
     this.visibleVertices.forEach(vertex => {
@@ -102,14 +104,14 @@ export class CanvasNetworkService {
       } else {
         updateCodes.push(updateData);
       }
-      updatePositions.set(vertex.id, {x: vertex.vertex.x, y: vertex.vertex.y});
+      updatePositions[vertex.id] = {x: vertex.vertex.x, y: vertex.vertex.y};
     });
     [...this.visibleRelationships].forEach(([vertexId, relationships]) => {
       uniqueRelationships.push(...relationships.filter(relationship => relationship.fromVertex.id === vertexId));
     });
     updateRelationships = uniqueRelationships.map(relationship => ({
       title: relationship.title,
-      comment: relationship.comment,
+      comment: relationship.comment ? relationship.comment : '',
       color: relationship.color,
       from: relationship.fromVertex.id,
       to: relationship.toVertex.id,
@@ -119,7 +121,8 @@ export class CanvasNetworkService {
     }));
     if (updateCategories.length) await this.categoryService.updateCategories(updateCategories);
     if (updateCodes.length) await this.codeService.updateCodes(updateCodes);
-    if (updateRelationships) await this.networkService.updateRelationships(this.network.id, updateRelationships);
+    await this.networkService.updateNetworkById(this.network.id, {relationships: updateRelationships, positions: updatePositions});
+    this.savingNetworkEvent.emit(false);
   }
 
   redraw() {

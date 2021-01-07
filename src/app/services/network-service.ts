@@ -79,6 +79,10 @@ export class NetworkService implements OnDestroy {
     await this.networkRepository.updateRelationshipById(networkId, updateRelationships);
   }
 
+  async updateNetworkById(networkId: string, updateData: Partial<Network>) {
+    await this.networkRepository.updateById(networkId, updateData);
+  }
+
   private logoutUser() {
     this.currentNetwork = null;
     this.networksLoaded = false;
