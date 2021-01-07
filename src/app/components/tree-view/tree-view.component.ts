@@ -5,6 +5,10 @@ import { MatTreeNestedDataSource } from '@angular/material/tree';
 import CanvasCategory from '../../data/Canvas/CanvasCategory';
 import { NetworkService } from "../../services/network-service";
 import CanvasCode from 'src/app/data/Canvas/CanvasCode';
+import { CanvasNetworkService } from 'src/app/services/canvas-network-service';
+import { Subscription } from 'rxjs';
+import { CategoryService } from 'src/app/services/category-service';
+import { CodeService } from 'src/app/services/code-service';
 
 interface VertexNode {
   id: string;
@@ -20,7 +24,7 @@ interface VertexNode {
   styleUrls: ['./tree-view.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class TreeView implements OnInit {
+export class TreeView implements OnInit, OnDestroy {
 
   @ViewChild('dragger') draggerRef: ElementRef<HTMLDivElement>;
 
@@ -29,6 +33,9 @@ export class TreeView implements OnInit {
 
   treeControl = new NestedTreeControl<VertexNode>(node => node.children);
   dataSource = new MatTreeNestedDataSource<VertexNode>();
+  updateStructuresSubscription: Subscription;
+  loadingCategoriesSubscription: Subscription;
+  loadingCodesSubscription: Subscription;
 
   sidebarVertexTree: VertexNode[] = [];
   dragImg: HTMLImageElement;
@@ -39,16 +46,41 @@ export class TreeView implements OnInit {
 
   isNetworkLoading = false;
 
-  constructor(public networkService: NetworkService) {}
+  constructor(
+    public networkService: NetworkService,
+    public canvasNetworkService: CanvasNetworkService,
+    public categoryService: CategoryService,
+    public codeService: CodeService
+  ) {}
 
   ngOnInit(): void {
-    this.networkService.structuresUpdated.subscribe(() => {
+    this.updateStructuresSubscription = this.canvasNetworkService.structuresUpdated.subscribe(() => {
       this.isNetworkLoading = true;
       this.setupTree();
       this.isNetworkLoading = false;
     });
+    this.loadingCategoriesSubscription = this.categoryService.loadingCategories.subscribe(isLoading => {
+      this.isNetworkLoading = true;
+      if (!isLoading) {
+        this.setupTree();
+        this.isNetworkLoading = false;
+      }
+    });
+    this.loadingCodesSubscription = this.codeService.loadingCodes.subscribe(isLoading => {
+      this.isNetworkLoading = true;
+      if (!isLoading) {
+        this.setupTree();
+        this.isNetworkLoading = false;
+      }
+    });
     this.dragImg = new Image(0,0);
     this.dragImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  }
+
+  ngOnDestroy() {
+    this.loadingCategoriesSubscription.unsubscribe();
+    this.loadingCodesSubscription.unsubscribe();
+    this.updateStructuresSubscription.unsubscribe();
   }
 
   hasChildren(_: any, node: VertexNode) {return !!node.children && node.children.length > 0}
@@ -78,17 +110,17 @@ export class TreeView implements OnInit {
   hideDragElement(event: DragEvent, node: VertexNode) {
     this.draggerRef.nativeElement.style.display = 'none';
 
-    if (event.x > this.sidenav._getWidth()) this.networkService.renderVertex(node.id, event.x, event.y - 60);
+    if (event.x > this.sidenav._getWidth()) this.canvasNetworkService.renderVertex(node.id, event.x, event.y - 60);
   }
 
   private setupTree() {
     this.sidebarVertexTree = [];
     let remainingCodes: Map<string, CanvasCode> = new Map();
-    this.networkService.canvasCodes.slice().forEach(code => remainingCodes.set(code.id, code));
+    this.canvasNetworkService.canvasCodes.slice().forEach(code => remainingCodes.set(code.id, code));
 
     let builtCategories = new Map<string, {node: VertexNode, parent?: string}>();
 
-    this.networkService.canvasCategories.forEach(canvasCategory => {
+    this.canvasNetworkService.canvasCategories.forEach(canvasCategory => {
       if (!builtCategories.get(canvasCategory.id))
        this.sidebarVertexTree.push(this.getCategoryTree(canvasCategory, remainingCodes, builtCategories));
     });
@@ -113,13 +145,13 @@ export class TreeView implements OnInit {
         return builtCategories.get(subCategoryId).node;
       }
       return this.getCategoryTree(
-        this.networkService.getVertexById(subCategoryId) as CanvasCategory,
+        this.canvasNetworkService.getVertexById(subCategoryId) as CanvasCategory,
         remainingCodes,
         builtCategories
       );
     });
     canvasCategory.codes.forEach(canvasCodeId => {
-      let canvasCode = this.networkService.getVertexById(canvasCodeId);
+      let canvasCode = this.canvasNetworkService.getVertexById(canvasCodeId);
       remainingCodes.delete(canvasCode.id);
       children.push({
         id: canvasCodeId,

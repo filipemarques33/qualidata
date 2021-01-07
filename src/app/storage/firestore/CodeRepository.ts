@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
 import * as firebase from 'firebase/app';
-import { VertexUpdateData } from "src/app/services/database-service";
 
 import Code from '../../data/Code';
 import { Repository } from '../Repository';
@@ -42,8 +41,7 @@ export class CodeRepository extends Repository<Code> {
       'content': code.content,
       'color': code.color,
       'textColor': code.textColor,
-      'source': sourceData,
-      'position': code.position ? code.position : null
+      'source': sourceData
     }
 
     await this.firebase.collection('codes').doc(codeRef).set(dataToSave)
@@ -54,12 +52,11 @@ export class CodeRepository extends Repository<Code> {
     }
   }
 
-  async updateById(id: string, data: VertexUpdateData) {
+  async updateById(id: string, data: Partial<Code>) {
     await this.firebase.doc<Code>(`codes/${id}`).update({
       name: data.name,
       color: data.color,
-      textColor: data.textColor,
-      position: data.position
+      textColor: data.textColor
     });
   }
 }

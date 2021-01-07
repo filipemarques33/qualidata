@@ -1,29 +1,39 @@
-import { Injectable } from "@angular/core";
-import { User } from "../storage/firestore/UserRepository";
-import { DatabaseService } from "./database-service";
-import { NetworkService } from "./network-service";
-
+import { EventEmitter, Injectable, OnInit } from "@angular/core";
+import { User, UserRepository } from "../storage/firestore/UserRepository";
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  user: User;
 
-  constructor (private databaseService: DatabaseService, private networkService: NetworkService) {}
+  public user: User;
+  public userLogEvent: EventEmitter<string> = new EventEmitter();
 
-  async loginUser(email: string) {
-    let users = await this.databaseService.getUserByEmail(email);
-    if (users.length) {
+  constructor (
+    private userRepository: UserRepository
+  ) {}
+
+  async getUsersByEmail(email: string) {
+    return (await this.userRepository.getByProperty('email', email));
+  }
+
+  async loginUser(email: string, storeEmail: boolean = true) {
+    let users = await this.getUsersByEmail(email);
+    if (users.length === 0) {
+      this.user = await this.createUser(email);
+    } else {
       this.user = users[0];
-      let project = await this.databaseService.getProjectById(this.user.projectIds[0]);
-      let network = await this.databaseService.getNetworkById(project.networks[0]);
-      let categories = await this.databaseService.getCategoriesByIds(network.categories);
-      let codes = await this.databaseService.getCodesByIds(network.codes);
-      this.networkService.setupStructures(network, categories, codes);
-    };
+    }
+    if (storeEmail) localStorage.setItem('userEmail', email);
+    this.userLogEvent.emit('login');
   }
 
   logoutUser() {
     this.user = null;
+    localStorage.removeItem('userEmail');
+    this.userLogEvent.emit('logout');
+  }
+
+  private async createUser(email: string) {
+    return this.userRepository.createByEmail(email);
   }
 }

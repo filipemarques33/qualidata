@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { DatabaseService } from 'src/app/services/database-service';
 import Source from 'src/app/data/Source';
 import { Subscription } from 'rxjs';
+import { ProjectService } from 'src/app/services/project-service';
 
 @Component({
   selector: 'app-sources',
@@ -20,12 +21,13 @@ export class SourcesComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private databaseService: DatabaseService
+    private databaseService: DatabaseService,
+    private projectService: ProjectService
   ) {}
 
   ngOnInit() {
     let projId = this.route.snapshot.paramMap.get('projId')
-    this.projectSubscription = this.databaseService.getProject(projId).subscribe(
+    this.projectSubscription = this.projectService.getProject(projId).subscribe(
       project => this.currentProject = project
     )
     this.sourceSubscription = this.databaseService.getAllSources().subscribe(

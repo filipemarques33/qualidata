@@ -6,8 +6,7 @@ export default class Category {
     public textColor: string,
     public parent?: string,
     public categories?: string[],
-    public codes?: string[],
-    public position?: { x: number, y: number }
+    public codes?: string[]
   ) {
   }
 

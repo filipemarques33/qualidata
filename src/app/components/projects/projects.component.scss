@@ -1,9 +1,14 @@
+.projects-wrapper .header-wrapper {
+  width: 100%;
+  box-shadow: 3px 0 3px #666;
+}
+
 .projects-wrapper .header-wrapper .logo {
-  width: 40px;
+  width: 30px;
 }
 
 .projects-wrapper .header-wrapper .logo-name {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   line-height: normal;
 }
 
@@ -23,7 +28,8 @@
 
 .projects-wrapper .projects-content-wrapper .add-projects-wrapper {
   width: 350px;
-  height: 70vh;
+  min-height: 30vh;
+  max-height: 70vh;
   border-radius: 10px;
   box-shadow: 4px 4px 4px #ccc;
   background: #F5F5F5;
@@ -33,7 +39,7 @@
 }
 
 .projects-wrapper .projects-content-wrapper .add-projects-wrapper .add-projects {
-  position: absolute;
+  position: relative;
   width: 350px;
   height: 50px;
   border-radius: 10px;
@@ -43,6 +49,7 @@
   left: 10px;
   cursor: pointer;
   transition: all 150ms ease-in-out;
+  left: 15px;
 
   &:hover {
     box-shadow: 4px 4px 4px #ccc;
@@ -53,6 +60,13 @@
   }
 }
 
+.projects-wrapper .projects-content-wrapper .add-projects-wrapper .projects-list .empty-project {
+  padding: 15px;
+  font-size: 1.3rem;
+  text-decoration: none;
+  user-select: none;
+}
+
 .projects-wrapper .projects-content-wrapper .add-projects-wrapper .projects-list .project {
   border-bottom: 1px solid #999;
   cursor: pointer;
@@ -60,10 +74,6 @@
   padding: 15px;
   font-size: 1.3rem;
   text-decoration: none;
-
-  &:first-child {
-    margin-top: calc(1rem + 50px);
-  }
 
   &:hover {
     background: #EDEDED;

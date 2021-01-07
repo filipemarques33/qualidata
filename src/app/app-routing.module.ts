@@ -11,9 +11,7 @@ import { CategoriesComponent } from "./components/categories/categories.componen
 const routes: Routes = [
   { path: '', redirectTo: 'projects', pathMatch: 'full' },
   { path: 'projects', children:[
-    { path: '', pathMatch: 'full', component: ProjectsComponent },
     { path: ':projId', children:[
-      { path: '', pathMatch: 'full', redirectTo: 'sources' },
       { path: 'sources', children: [
         { path: '', pathMatch: 'full', component: SourcesComponent },
         { path: ':sourceId/edit', component: EditSourceComponent},
@@ -22,10 +20,13 @@ const routes: Routes = [
       { path: 'categories', children:[
         { path: '', pathMatch: 'full', component: CategoriesComponent },
       ]},
-      { path: 'network', component: NetworkComponent },
+      { path: 'networks', component: NetworkComponent },
+      { path: '', pathMatch: 'full', redirectTo: '/sources' },
+      { path: '**', redirectTo: '/projects' },
     ] },
+    { path: '**', component: ProjectsComponent },
   ]},
-  { path: '**', redirectTo: '/sources' }
+  { path: '**', redirectTo: 'projects' }
 ];
 
 @NgModule({

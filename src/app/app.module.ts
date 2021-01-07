@@ -7,7 +7,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
-import { ColorPickerModule, ColorPickerDirective } from 'ngx-color-picker';
+import { ColorPickerModule } from 'ngx-color-picker';
 
 import { ImportsModule } from 'src/app/common/imports.module';
 import { AppRoutingModule } from './app-routing.module';
@@ -22,10 +22,13 @@ import { TreeView } from "./components/tree-view/tree-view.component";
 import { UserLoginDialog } from './components/user-login/user-login.component';
 import { ProjectsComponent } from './components/projects/projects.component';
 
-import { NetworkService } from './services/network-service';
-import { DatabaseService } from './services/database-service';
+import { NetworkService } from './services/network-service';;
+import { ProjectService } from './services/project-service';
 import { CategoryService } from './services/category-service';
+import { CodeService } from './services/code-service';
 import { AuthService } from './services/auth-service';
+import { CanvasNetworkService } from './services/canvas-network-service'
+import { ManagerService } from './services/manager-service'
 
 import { environment } from 'src/environments/environment';
 import { SourcesComponent } from './components/sources/sources.component';
@@ -49,7 +52,7 @@ import { TaggingDialogComponent } from './components/edit-source/tagging-dialog/
     EditSourceComponent,
     CategoriesComponent,
     NewCategoryDialogComponent,
-    TaggingDialogComponent,
+    TaggingDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -67,9 +70,12 @@ import { TaggingDialogComponent } from './components/edit-source/tagging-dialog/
   providers: [
     {provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js'},
     NetworkService,
-    DatabaseService,
+    ProjectService,
     CategoryService,
-    AuthService
+    CodeService,
+    AuthService,
+    CanvasNetworkService,
+    ManagerService
   ],
   bootstrap: [AppComponent]
 })

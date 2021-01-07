@@ -1,6 +1,6 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-import { DatabaseQuery } from '@angular/fire/database/interfaces';
-import { Stage, Touch, Tween, Ticker, Ease } from 'createjs-module';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
+import { Ease, Stage, Ticker, Touch, Tween } from 'createjs-module';
 import { Subscription } from 'rxjs';
 import CanvasCategory from 'src/app/data/Canvas/CanvasCategory';
 import CanvasCode from 'src/app/data/Canvas/CanvasCode';
@@ -8,7 +8,7 @@ import CanvasEdge from 'src/app/data/Canvas/CanvasEdge';
 import CanvasStage from 'src/app/data/Canvas/CanvasStage';
 import Vertex from 'src/app/data/Canvas/Vertex';
 import Project from 'src/app/data/Project';
-import { DatabaseService } from 'src/app/services/database-service';
+import { ProjectService } from 'src/app/services/project-service';
 import { AuthService } from '../../services/auth-service';
 
 @Component({
@@ -16,12 +16,14 @@ import { AuthService } from '../../services/auth-service';
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss']
 })
-export class ProjectsComponent implements OnInit{
+export class ProjectsComponent implements OnInit, OnDestroy {
 
   @ViewChild('projectCanvas', {static: true}) canvasRef: ElementRef<HTMLCanvasElement>;
 
-  projects: Project[] = [];
+  emailControl = new FormControl('', [Validators.required, Validators.email]);
+
   projectSubscription: Subscription;
+  projects: Project[] = [];
 
   canvas: HTMLCanvasElement;
   canvasStage: CanvasStage;
@@ -29,20 +31,50 @@ export class ProjectsComponent implements OnInit{
   devicePixelRatio: number;
   vertices: Vertex[] = [];
 
+  loadingUser = false;
+  loadingProjects = false;
+
   constructor(
     public authService: AuthService,
-    private databaseService: DatabaseService,
-  ) { }
+    public projectService: ProjectService,
+  ) {
+    this.projectSubscription = this.projectService.loadingUserProjects.subscribe((isLoading: boolean) => {
+      this.loadingProjects = isLoading;
+      console.log(isLoading);
+      if (!isLoading) this.projects = this.projectService.projects;
+    });
+  }
 
   async ngOnInit() {
     this.setupCanvas();
     this.createAnimation();
-    this.fetchProjects()
+    if (this.authService.user && this.projectService.projects) {
+      this.projects = this.projectService.projects;
+    }
+  }
+
+  ngOnDestroy() {
+    this.projectSubscription.unsubscribe();
   }
 
   @HostListener('window:resize')
   onResize() {
     this.canvasStage.redraw();
+  }
+
+  async loginUser() {
+    if (this.emailControl.valid) {
+      this.loadingUser = true;
+      await this.authService.loginUser(this.emailControl.value, true);
+      this.loadingUser = false;
+    } else {
+      this.emailControl.markAsDirty();
+    }
+  }
+
+  async logoutUser() {
+    this.projects = [];
+    this.authService.logoutUser();
   }
 
   private setupCanvas() {
@@ -98,10 +130,10 @@ export class ProjectsComponent implements OnInit{
     Ticker.addEventListener("tick", this.stage);
   }
 
-  fetchProjects(){
-    this.projectSubscription = this.databaseService.getProjects().subscribe(
-      projects => this.projects = projects
-    )
-  }
+  // fetchProjects(){
+  //   this.projectSubscription = this.projectService.getProjects().subscribe(
+  //     projects => this.projects = projects
+  //   )
+  // }
 
 }

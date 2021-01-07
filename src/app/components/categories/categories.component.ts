@@ -48,6 +48,8 @@ import Category from 'src/app/data/Category';
 import { MatDialog } from '@angular/material/dialog';
 import { NewCategoryDialogComponent } from 'src/app/components/categories/new-category-dialog/new-category-dialog.component'
 import { Subscription } from 'rxjs';
+import { CategoryService } from 'src/app/services/category-service';
+import { ProjectService } from 'src/app/services/project-service';
 
 @Component({
   selector: 'app-categories',
@@ -65,24 +67,25 @@ export class CategoriesComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private databaseService: DatabaseService,
+    private projectService: ProjectService,
+    private categoryService: CategoryService,
     private newCategoryDialog: MatDialog
   ) { }
 
   ngOnInit(): void {
     let projId = this.route.snapshot.paramMap.get('projId');
-    this.projectSubscription = this.databaseService.getProject(projId).subscribe(
+    this.projectSubscription = this.projectService.getProject(projId).subscribe(
       (project) => this.currentProject = project
     )
-    this.categorySubscription = this.databaseService.getAllCategories().subscribe(
+    this.categorySubscription = this.categoryService.getAllCategories().subscribe(
       (categories: Category[]) => this.categories = categories.filter(category => this.currentProject.categories.includes(category.id))
     )
   }
 
   async getCategories(){
     const projId = '1';
-    this.currentProject = await this.databaseService.getProjectById(projId);
-    this.categories = await this.databaseService.getCategoriesByIds(this.currentProject.categories);
+    this.currentProject = await this.projectService.getProjectById(projId);
+    this.categories = await this.categoryService.getCategoriesByIds(this.currentProject.categories);
   }
 
   openNewCategoryDialog() {

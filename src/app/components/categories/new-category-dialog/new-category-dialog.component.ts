@@ -7,6 +7,7 @@ import { CategoryService } from 'src/app/services/category-service';
 import { Subscription } from 'rxjs';
 import Project from 'src/app/data/Project';
 import { ActivatedRoute } from '@angular/router';
+import { ProjectService } from 'src/app/services/project-service';
 
 @Component({
   selector: 'app-new-category-dialog',
@@ -35,13 +36,14 @@ export class NewCategoryDialogComponent implements OnInit {
     public databaseService: DatabaseService,
     public dialogRef: MatDialogRef<NewCategoryDialogComponent>,
     public categoryService: CategoryService,
+    public projectService: ProjectService
   ) { }
 
   ngOnInit(): void {
-    this.projectSubscription = this.databaseService.getProject(this.data.projectId).subscribe(
+    this.projectSubscription = this.projectService.getProject(this.data.projectId).subscribe(
       project => this.currentProject = project
     )
-    this.categorySubscription = this.databaseService.getAllCategories().subscribe(
+    this.categorySubscription = this.categoryService.getAllCategories().subscribe(
       categories => {
         this.availableCategories = categories.filter(category => this.currentProject.categories.includes(category.id) && category.parent == null)
       }
@@ -51,7 +53,7 @@ export class NewCategoryDialogComponent implements OnInit {
   submit() {
     if (this.categoryForm.valid) {
       const category = new Category('', this.categoryForm.get('name').value, this.selectedColor, 'black', this.categoryForm.get('parent').value);
-      this.databaseService.saveCategory(category, String(this.currentProject.id));
+      this.categoryService.saveCategory(category, String(this.currentProject.id));
       this.dialogRef.close();
     } else {
       this.categoryForm.markAsDirty();
@@ -64,8 +66,8 @@ export class NewCategoryDialogComponent implements OnInit {
 
   async getTopLevelCategories(){
     const projId = '1'
-    let project = await this.databaseService.getProjectById(projId)
-    this.availableCategories = this.categoryService.getParentcategories(await this.databaseService.getCategoriesByIds(project.categories))
+    let project = await this.projectService.getProjectById(projId)
+    this.availableCategories = this.categoryService.getParentcategories(await this.categoryService.getCategoriesByIds(project.categories))
   }
 
 }

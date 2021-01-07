@@ -17,6 +17,11 @@ export class UserRepository extends Repository<User> {
     super();
   }
 
+  async createByEmail(email: string) {
+    let user = await this.firebase.collection<User>('users').add({email: email, projectIds: []});
+    return (await user.get()).data();
+  }
+
   async getByProperty(property: string, match: string) {
     let user = await this.firebase.collection<User>('users').ref.where(property, '==', match).get();
     return user.docs.map(doc => doc.data());

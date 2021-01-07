@@ -5,6 +5,7 @@ export default class Project {
     public description: string,
     public networks?: string[],
     public sources?: string[],
-    public categories?: string[]
+    public categories?: string[],
+    public codes?: string[]
   ) {}
 }

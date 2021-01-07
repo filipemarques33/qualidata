@@ -1,4 +1,3 @@
-import { typeofExpr } from '@angular/compiler/src/output/output_ast';
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
@@ -8,7 +7,8 @@ import Category from 'src/app/data/Category';
 import Code from 'src/app/data/Code';
 import Project from 'src/app/data/Project';
 import { CategoryService } from 'src/app/services/category-service';
-import { DatabaseService } from 'src/app/services/database-service';
+import { CodeService } from 'src/app/services/code-service';
+import { ProjectService } from 'src/app/services/project-service';
 import { EditorSelection } from 'tinymce';
 import { NewCategoryDialogComponent } from '../../categories/new-category-dialog/new-category-dialog.component';
 
@@ -48,7 +48,9 @@ export class TaggingDialogComponent implements OnInit {
     public route: ActivatedRoute,
     public dialogRef: MatDialogRef<TaggingDialogComponent>,
     public categoryDialog: MatDialog,
-    private databaseService: DatabaseService
+    private projectService: ProjectService,
+    private codeService: CodeService,
+    private categoryService: CategoryService
   ) { }
 
   ngOnInit(): void {
@@ -72,11 +74,11 @@ export class TaggingDialogComponent implements OnInit {
   // }
 
   setupSubscriptions(){
-    this.projectSubscription = this.databaseService.getProject(this.data.projectId).subscribe(
+    this.projectSubscription = this.projectService.getProject(this.data.projectId).subscribe(
       project => this.currentProject = project
     )
 
-    this.categorySubscription = this.databaseService.getAllCategories().subscribe(
+    this.categorySubscription = this.categoryService.getAllCategories().subscribe(
       categories => {
         this.availableCategories = categories.filter(category => this.currentProject.categories.includes(category.id))
       }
@@ -105,7 +107,7 @@ export class TaggingDialogComponent implements OnInit {
         "black"
       )
       let categories = this.fragmentForm.get('categories').value
-      this.databaseService.saveCode(code, categories)
+      this.codeService.saveCode(code, categories)
       this.dialogRef.close()
     } else {
       this.fragmentForm.markAsDirty()

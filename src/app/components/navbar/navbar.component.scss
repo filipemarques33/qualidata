@@ -14,12 +14,12 @@
   position: sticky;
   top: 0;
   height: 60px;
+  z-index: 10;
+  box-shadow: 0 1px 4px #999;
 }
 
-.content-wrapper .navbar .logo {
+.content-wrapper .navbar .logo-wrapper .logo {
   width: 30px;
-  filter: invert(1);
-
 }
 
 .content-wrapper .navbar .username {
@@ -32,7 +32,7 @@
   border-radius: 8px;
 
   &:hover {
-    background: rgba(mat-color($candy-app-primary, darker), 0.6);
+    background: #e5e5e5;
   }
 
   &:focus {
@@ -41,7 +41,7 @@
   }
 
   &:active {
-    background: mat-color($candy-app-primary, darker);
+    background: gray;
   }
 }
 
@@ -94,11 +94,11 @@
 }
 
 .menuButton{
-  color: white;
+  color: #333;
   text-decoration: none;
 
   &:hover {
-    background: rgba(mat-color($candy-app-primary, darker), 0.6);
+    background: rgba(mat-color($app-primary, darker), 0.6);
   }
 
   &:focus {
@@ -107,6 +107,6 @@
   }
 
   &:active {
-    background: mat-color($candy-app-primary, darker);
+    background: mat-color($app-primary, darker);
   }
 }

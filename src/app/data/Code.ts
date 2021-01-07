@@ -9,7 +9,6 @@ export default class Code {
       id: string,
       range: Range
     },
-    public textColor: string,
-    public position?: {x: number, y: number}
+    public textColor: string
   ) {}
 }

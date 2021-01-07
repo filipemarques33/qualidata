@@ -6,9 +6,9 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import VertexCategory from 'src/app/data/Canvas/VertexCategory';
 import CanvasEdge from 'src/app/data/Canvas/CanvasEdge';
-import { NetworkService } from "../../services/network-service";
 import { RelationshipDialog } from './relationship-dialog/relationship-dialog.component';
 import { DatabaseService } from 'src/app/services/database-service';
+import { CanvasNetworkService } from 'src/app/services/canvas-network-service';
 
 interface VertexNode {
   id: number;
@@ -50,14 +50,14 @@ export class NetworkComponent implements OnInit, OnDestroy {
   private onContextMenu;
 
   constructor(
-    public networkService: NetworkService,
+    public canvasNetworkService: CanvasNetworkService,
     public databaseService: DatabaseService,
     public relationshipDialog: MatDialog,
   ) {}
 
   async ngOnInit() {
     this.canvas = this.canvasRef.nativeElement;
-    this.networkService.setupCanvasStage(this.canvas,
+    this.canvasNetworkService.setupCanvasStage(this.canvas,
       (event: MouseEvent, vertex: VertexCategory) => this.openDetailsMenu(event, vertex),
       (event: MouseEvent, edge: CanvasEdge) => this.openEdgeMenu(event, edge));
     this.onContextMenu = (event: MouseEvent) => {
@@ -107,16 +107,16 @@ export class NetworkComponent implements OnInit, OnDestroy {
   }
 
   removeVertex() {
-    this.networkService.removeVertex(this.focusedDetailsNode);
+    this.canvasNetworkService.unrenderVertex(this.focusedDetailsNode);
   }
 
   filteredVertices(currentVertex: VertexCategory) {
-    return this.networkService.visibleVertices.filter(vertex => vertex.id !== currentVertex.id);
+    return this.canvasNetworkService.visibleVertices.filter(vertex => vertex.id !== currentVertex.id);
   }
 
   @HostListener('window:resize')
   onResize() {
-    this.networkService.redraw();
+    this.canvasNetworkService.redraw();
   }
 
 }

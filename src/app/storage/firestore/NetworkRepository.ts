@@ -30,7 +30,6 @@ export class NetworkRepository extends Repository<Network> {
   }
 
   async updateRelationshipById(id: string, relationships: Relationship[]) {
-    console.log(relationships);
     await this.firebase.doc<Network>(`networks/${id}`).update({relationships: relationships});
   }
 }

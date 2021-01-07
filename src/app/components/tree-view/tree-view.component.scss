@@ -12,7 +12,9 @@
   color: white;
   font-size: 12px;
   transition: opacity, filter 250ms;
-  white-space: nowrap;
+  width: 110px;
+  text-align: center;
+  line-height: normal;
 }
 
 .tree-view .mat-expansion-panel {
