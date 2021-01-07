@@ -5,14 +5,14 @@
 export const environment = {
   production: false,
   firebaseConfig: {
-    apiKey: "AIzaSyAYEK5miud6gBwBtalnGhpoBlKbg0EYWTA",
-    authDomain: "pipocaqda.firebaseapp.com",
-    databaseURL: "https://pipocaqda-default-rtdb.firebaseio.com",
-    projectId: "pipocaqda",
-    storageBucket: "pipocaqda.appspot.com",
-    messagingSenderId: "1014990876843",
-    appId: "1:1014990876843:web:301c2369ca396dd9f287ee",
-    measurementId: "G-B2M6W47SF9"
+    apiKey: "AIzaSyAG06xok0EN7KtFNHG9dj8uYG7y7YwQKJc",
+    authDomain: "qualidata-62edd.firebaseapp.com",
+    databaseURL: "https://qualidata-62edd.firebaseio.com",
+    projectId: "qualidata-62edd",
+    storageBucket: "qualidata-62edd.appspot.com",
+    messagingSenderId: "361088287936",
+    appId: "1:361088287936:web:89441a619ed90896cb1925",
+    measurementId: "G-7JVM235X2K"
   }
 };
 
