@@ -4,8 +4,7 @@ import Source from 'src/app/data/Source';
 
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Content } from '@angular/compiler/src/render3/r3_ast';
-import { NetworkService } from 'src/app/services/network-service';
-import { DatabaseService } from 'src/app/services/database-service';
+import { SourceService } from 'src/app/services/source-service';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common'
 
@@ -16,13 +15,13 @@ import { Location } from '@angular/common'
 })
 export class ComposeComponent implements OnInit {
 
-  currSource = new Source('', '', '');
+  currSource = new Source('', '', '', []);
   tinyMceConfig: any;
 
   constructor(
     private route: ActivatedRoute,
     private snackbar: MatSnackBar,
-    private databaseService: DatabaseService,
+    private sourceService: SourceService,
     private location: Location
   ) { }
 
@@ -32,7 +31,7 @@ export class ComposeComponent implements OnInit {
 
   saveFile(): void {
     var projId = this.route.snapshot.paramMap.get('projId');
-    this.databaseService.saveSource(this.currSource, projId).then(
+    this.sourceService.saveSource(this.currSource, projId).then(
       () => {
         this.snackbar.open('Documento salvo', null, {
           duration: 2000,

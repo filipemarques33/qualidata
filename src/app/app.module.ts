@@ -36,6 +36,7 @@ import { EditSourceComponent } from './components/edit-source/edit-source.compon
 import { CategoriesComponent } from './components/categories/categories.component';
 import { NewCategoryDialogComponent } from './components/categories/new-category-dialog/new-category-dialog.component';
 import { TaggingDialogComponent } from './components/edit-source/tagging-dialog/tagging-dialog.component';
+import { NewCodeDialogComponent } from './components/edit-source/new-code-dialog/new-code-dialog.component';
 
 @NgModule({
   declarations: [
@@ -52,7 +53,8 @@ import { TaggingDialogComponent } from './components/edit-source/tagging-dialog/
     EditSourceComponent,
     CategoriesComponent,
     NewCategoryDialogComponent,
-    TaggingDialogComponent
+    TaggingDialogComponent,
+    NewCodeDialogComponent
   ],
   imports: [
     BrowserModule,

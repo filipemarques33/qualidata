@@ -1,21 +1,20 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, Inject, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog'
-import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import Category from 'src/app/data/Category';
 import Code from 'src/app/data/Code';
+import Fragment from 'src/app/data/Fragment'
 import Project from 'src/app/data/Project';
+import Source from 'src/app/data/Source';
 import { CategoryService } from 'src/app/services/category-service';
 import { CodeService } from 'src/app/services/code-service';
+import { FragmentService } from 'src/app/services/fragment-service';
 import { ProjectService } from 'src/app/services/project-service';
-import { EditorSelection } from 'tinymce';
-import { NewCategoryDialogComponent } from '../../categories/new-category-dialog/new-category-dialog.component';
+import { NewCodeDialogComponent } from '../new-code-dialog/new-code-dialog.component';
 
 interface DialogData {
-  projectId: string;
-  sourceId: string;
-  selection: EditorSelection;
+  source: Source;
+  fragment: Fragment;
 }
 
 @Component({
@@ -26,93 +25,64 @@ interface DialogData {
 
 export class TaggingDialogComponent implements OnInit {
 
-  selectedFragment: EditorSelection;
-  fragmentText: string;
-  currSource: string;
+  selectedFragment: Fragment;
+  currentSource: Source;
 
-  availableCategories: Category[] = []
-  categorySubscription: Subscription
+  availableCodes: Code[] = []
+  codeSubscription: Subscription
 
   currentProject: Project
   projectSubscription: Subscription
 
+  taggingForm = new FormControl([], [Validators.required])
 
-  fragmentForm = new FormGroup({
-    name: new FormControl("", [Validators.required]),
-    categories: new FormControl([], [Validators.required])
-  })
-  selectedColor: string = "#0000FF";
+  @ViewChild('optionList') private optionList: ElementRef;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
-    public route: ActivatedRoute,
     public dialogRef: MatDialogRef<TaggingDialogComponent>,
-    public categoryDialog: MatDialog,
+    public codeDialog: MatDialog,
     private projectService: ProjectService,
     private codeService: CodeService,
-    private categoryService: CategoryService
+    private fragmentService: FragmentService
   ) { }
 
-  ngOnInit(): void {
-    // this.getCategories();
-    this.currSource = this.data.sourceId;
-    this.selectedFragment = this.data.selection;
-    this.fragmentText = this.decodeHtml(this.selectedFragment.getContent());
-    this.setupSubscriptions()
+  async ngOnInit() {
+    this.currentSource = this.data.source;
+    this.selectedFragment = this.data.fragment
+    this.currentProject = this.projectService.currentProject
+    this.availableCodes = this.codeService.codes
   }
 
-  decodeHtml(html) {
-    var txt = document.createElement("textarea");
-    txt.innerHTML = html;
-    return txt.value;
-  }
-
-  // async getCategories(){
-  //   let projId = '1'
-  //   let project = await this.databaseService.getProjectById(projId)
-  //   this.availableCategories = await this.databaseService.getCategoriesByIds(project.categories)
-  // }
-
-  setupSubscriptions(){
-    this.projectSubscription = this.projectService.getProject(this.data.projectId).subscribe(
-      project => this.currentProject = project
-    )
-
-    this.categorySubscription = this.categoryService.getAllCategories().subscribe(
-      categories => {
-        this.availableCategories = categories.filter(category => this.currentProject.categories.includes(category.id))
+  newCodeDialog() {
+    this.codeDialog.open(
+      NewCodeDialogComponent
+    ).afterClosed().subscribe(
+      (newCode: Code) => {
+        if (newCode)
+          this.availableCodes.push(newCode)
+          // this.optionList.nativeElement.scroll({ top: this.optionList.nativeElement.scrollHeight, behavior: 'smooth' })
       }
     )
-  }
-
-  newCategoryDialog() {
-    this.categoryDialog.open(NewCategoryDialogComponent, {
-      autoFocus: false,
-      data: {
-        projectId: String(this.currentProject.id)
-      }
-    })
   }
 
   submit() {
-    if (this.fragmentForm.valid) {
-      let code = new Code(
-        '',
-        this.fragmentForm.get('name').value,
-        this.fragmentText,
-        this.selectedColor,
-        { id: this.currSource,
-          range: null },
-          //range: this.selectedFragment.getRng() },
-        "black"
-      )
-      let categories = this.fragmentForm.get('categories').value
-      this.codeService.saveCode(code, categories)
+    if (this.taggingForm.valid) {
+      this.saveFragment()
       this.dialogRef.close()
     } else {
-      this.fragmentForm.markAsDirty()
+      this.taggingForm.markAsDirty()
     }
+  }
 
+  saveFragment(){
+    let codes = this.taggingForm.value
+    this.fragmentService.saveFragment(
+      this.selectedFragment,
+      this.currentProject,
+      this.currentSource,
+      codes
+    )
   }
 
 

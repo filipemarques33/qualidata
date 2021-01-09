@@ -1,13 +1,16 @@
 import { Component, Directive, OnInit } from '@angular/core';
 import Source from 'src/app/data/Source';
+import Fragment from 'src/app/data/Fragment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Content } from '@angular/compiler/src/render3/r3_ast';
 import { NetworkService } from 'src/app/services/network-service';
-import { DatabaseService } from 'src/app/services/database-service';
+import { SourceService } from 'src/app/services/source-service';
+import { FragmentService } from 'src/app/services/fragment-service';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { TaggingDialogComponent } from './tagging-dialog/tagging-dialog.component';
 import tinymce from 'tinymce';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-edit-source',
@@ -16,43 +19,49 @@ import tinymce from 'tinymce';
 })
 export class EditSourceComponent implements OnInit {
 
-  currSource = new Source('', '', '');
+  currentProjectId: string = ''
+
+  currentSourceId: string = ''
+  currentSource: Source = new Source('', '', '', []);
+  fragments: Fragment[]
+
+  fragmentSubscription: Subscription
+
   tinyMceConfig: any;
 
   constructor(
     private route: ActivatedRoute,
     private snackbar: MatSnackBar,
-    private databaseService: DatabaseService,
-    private fragmentDialogRef: MatDialog
+    private sourceService: SourceService,
+    private fragmentService: FragmentService,
+    private taggingDialogRef: MatDialog,
   ) { }
 
   ngOnInit(): void {
+    this.currentProjectId = this.route.snapshot.paramMap.get('projId');
     this.getSourceContent();
     this.configureEditor();
+    this.currentSourceId = this.route.snapshot.paramMap.get('sourceId');
+    this.fragmentSubscription = this.fragmentService.subscribeToAll().subscribe(
+      fragments => {
+        this.fragments = fragments.filter(fragment => fragment.sourceId == this.currentSourceId)
+      }
+    )
+
+  }
+
+  ngOnDestroy() {
+    this.fragmentSubscription.unsubscribe()
   }
 
   async getSourceContent() {
     const sourceId = this.route.snapshot.paramMap.get('sourceId');
-    let source = await this.databaseService.getSourceById(sourceId);
-    this.currSource = new Source(sourceId, source.title, source.content);
+    this.currentSource = await this.sourceService.getSourceById(sourceId);
   }
 
-  updateFile(): void {
-    this.databaseService.updateSource(this.currSource).then(
-      () => {
-        this.snackbar.open('Documento atualizado', null, {
-          duration: 2000,
-        })
-      }
-    )
-  }
-
-  verifyFields() {
-    return (this.currSource.title && this.currSource.content)
-  }
 
   configureEditor(){
-    const component = this
+    let component = this
     this.tinyMceConfig = {
       base_url: '/tinymce',
       suffix: '.min',
@@ -82,16 +91,45 @@ export class EditSourceComponent implements OnInit {
     }
   }
 
-  tagFragment(){
-    let projectId = this.route.snapshot.paramMap.get('projId');
-    this.fragmentDialogRef.open(TaggingDialogComponent,{
-      autoFocus: false,
-      data: {
-        projectId: projectId,
-        sourceId: this.currSource.id,
-        selection: tinymce.activeEditor.selection
+  updateFile(): void {
+    this.sourceService.updateContent(this.currentSource).then(
+      () => {
+        this.snackbar.open('Documento atualizado', null, {
+          duration: 2000,
+        })
       }
-    })
+    )
+  }
+
+  verifyFields() {
+    return (this.currentSource.content)
+  }
+
+  tagFragment() {
+    if (tinymce.activeEditor.selection.getContent() != '') {
+      var fragment = this.fragmentService.buildFragment(tinymce.activeEditor, this.currentSource.id)
+      this.taggingDialogRef.open(
+        TaggingDialogComponent, {
+          data: {
+            source: this.currentSource,
+            fragment: fragment
+          },
+          autoFocus: false
+        }
+      )
+    } else {
+      alert('Selecione um trecho de texto para continuar')
+    }
+  }
+
+  showSelection(fragment: Fragment) {
+    let document = tinymce.activeEditor.getDoc()
+    let range = this.fragmentService.restoreFragmentRange(document, fragment)
+
+    var selection = tinymce.activeEditor.selection.getSel();
+    selection.removeAllRanges();
+
+    selection.addRange(range);
   }
 
 }

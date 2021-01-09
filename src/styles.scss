@@ -87,6 +87,18 @@ a {
   line-height: normal;
 }
 
+.primaryButtonLabelIcon {
+  background-color: mat-color($app-primary, darker);
+  color: white;
+  border-radius: 10px;
+  min-width: fit-content;
+  line-height: normal;
+  padding: 2em 0 2em 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .secondaryButton {
   background-color: white;
   color: mat-color($app-primary, darker);

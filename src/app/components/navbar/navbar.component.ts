@@ -6,6 +6,8 @@ import { UserLoginDialog } from '../user-login/user-login.component';
 import { MatSidenav } from '@angular/material/sidenav';
 import { DatabaseService } from 'src/app/services/database-service';
 import { CanvasNetworkService } from 'src/app/services/canvas-network-service';
+import { ProjectService } from 'src/app/services/project-service';
+import Project from 'src/app/data/Project'
 
 interface NavItem {
   text: string;
@@ -20,6 +22,7 @@ interface NavItem {
   encapsulation: ViewEncapsulation.None
 })
 export class NavBarComponent implements OnInit {
+
   routerSidenavOpen = true;
   projectId = '1'
   navItems: NavItem[] = [
@@ -53,7 +56,8 @@ export class NavBarComponent implements OnInit {
     public authService: AuthService,
     public databaseService: DatabaseService,
     private dialog: MatDialog,
-    private canvasNetworkService: CanvasNetworkService
+    private canvasNetworkService: CanvasNetworkService,
+    private projectService: ProjectService
   ) {}
 
   async ngOnInit() {

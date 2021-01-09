@@ -23,11 +23,7 @@ export class SourceRepository extends Repository<Source> {
 
   async getByIds(ids: string[]) {
     let sources = await this.firebase.collection<Source>('sources').ref.where(firebase.default.firestore.FieldPath.documentId(), 'in', ids).get();
-    return sources.docs.map(doc => {
-      let category = doc.data()
-      category.id = doc.id;
-      return category;
-    });
+    return sources.docs.map(doc => doc.data());
   }
 
   getAllSources() {
@@ -47,10 +43,17 @@ export class SourceRepository extends Repository<Source> {
     return;
   }
 
-  async update(instance: Source) {
+  async updateContent(instance: Source) {
     this.firebase.collection('sources').doc(instance.id).update({
       'content': instance.content
     })
   }
+
+  async addFragment(id: string, fragmentId: string) {
+    await this.firebase.collection('sources').doc(id).update({
+      fragments: firebase.default.firestore.FieldValue.arrayUnion(fragmentId)
+    })
+  }
+
 }
 

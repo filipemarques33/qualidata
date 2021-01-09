@@ -1,13 +1,18 @@
 <div class="container py-3 px-4 h-100">
   <div class="jumbotron py-5">
-    <h1 class="headline">{{currSource.title}}</h1>
-    <button class="primaryButton" mat-flat-button (click)="tagFragment()">Tag</button>
+    <h1 class="headline">{{currentSource.title}}</h1>
+
+    <button class="primaryButtonLabelIcon" mat-flat-button
+    (click)="tagFragment()">
+     <mat-icon class="mr-1">highlight_alt</mat-icon>
+     <span class="mr-1" style="line-height: normal;">Tag</span>
+    </button>
   </div>
   <div class="panel panel-primary">
     <div class="panel-body">
       <editor
         [init]="tinyMceConfig"
-        [(ngModel)]="currSource.content"
+        [(ngModel)]="currentSource.content"
       >
       </editor>
     </div>

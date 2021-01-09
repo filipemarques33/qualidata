@@ -38,7 +38,11 @@ export class CodeService {
     return await this.codeRepository.getByIds(ids);
   }
 
-  async saveCode(code: Code, catIds: string[]) {
+  async saveCode(code: Code, projId: string) {
+    return await this.codeRepository.saveToProject(code, projId);
+  }
+
+  async saveToCategories(code: Code, catIds: string[]) {
     await this.codeRepository.saveToCategories(code, catIds);
   }
 
@@ -46,6 +50,10 @@ export class CodeService {
     for (let data of updateData) {
       await this.codeRepository.updateById(data.id, data);
     }
+  }
+
+  async addFragment(code: Code, fragmentId: string) {
+    await this.codeRepository.addFragment(code.id, fragmentId);
   }
 
   private logoutUser() {

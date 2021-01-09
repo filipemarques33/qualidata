@@ -1,14 +1,10 @@
 export default class Code {
-
   constructor(
     public id: string,
     public name: string,
-    public content: string,
+    public description: string,
+    public fragments: string[],
     public color: string,
-    public source: {
-      id: string,
-      range: Range
-    },
-    public textColor: string
+    public textColor: string = 'black'
   ) {}
 }

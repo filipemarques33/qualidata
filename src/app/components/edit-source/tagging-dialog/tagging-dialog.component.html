@@ -2,48 +2,33 @@
   <h1 mat-dialog-title>Salvar fragmento</h1>
   <div mat-dialog-content class="d-flex flex-column">
     <div class='fragmentContainer flex-grow-1'>
-        <p>{{fragmentText}}</p>
+        <p>{{selectedFragment.content}}</p>
     </div>
-    <form [formGroup]="fragmentForm" class="d-flex flex-column" (ngSubmit)="submit()">
-      <span class="my-2 d-flex flex-row align-items-center">
-        <mat-form-field class='flex-grow-1' appearance="fill">
-          <mat-label>Nome</mat-label>
-          <input formControlName="name" matInput>
-          <mat-error *ngIf="fragmentForm.get('name').invalid">Escreva um nome</mat-error>
-        </mat-form-field>
-        <button mat-icon-button
-          type="button"
-          class='ml-2'
-          [(colorPicker)]="selectedColor"
-          [cpCancelButton]="true"
-          [cpOKButton]="true"
-          [cpOKButtonClass]= "'primaryButton'"
-          (colorPickerChange)="selectedColor = $event"
-        >
-          <mat-icon [ngStyle]="{'color': selectedColor}">stop_circle</mat-icon>
-        </button>
-      </span>
-      <mat-form-field class='flex-grow-1' appearance="fill">
-        <mat-label>Salvar nas categorias</mat-label>
-        <mat-select formControlName="categories" multiple>
-          <mat-option [value]="null" selected disabled hidden>
-            Escolha uma categoria
-          </mat-option>
-          <mat-option *ngFor="let cat of availableCategories" [value]="cat.id">
-            {{cat.name}}
-          </mat-option>
-          <hr>
-          <div class="p-2">
-            <button class="secondaryButton" mat-raised-button type="button" (click)="newCategoryDialog()">
-              <mat-icon>add</mat-icon>
-              Nova categoria
-            </button>
+    <form class="d-flex flex-column" (ngSubmit)="submit()">
+      <mat-form-field class='mt-2 flex-grow-1' appearance="fill">
+        <mat-label>Salvar nos códigos</mat-label>
+        <mat-select [formControl]="taggingForm" multiple>
+          <div class="optionsPanel">
+            <div #optionList class="optionsList">
+              <mat-option [value]="null" selected disabled hidden>
+                Escolha uma categoria
+              </mat-option>
+              <mat-option *ngFor="let code of availableCodes" [value]="code">
+                {{code.name}}
+              </mat-option>
+            </div>
+            <footer class="optionsFooter mb-0">
+              <button class="secondaryButton" mat-raised-button type="button" (click)="newCodeDialog()">
+                <mat-icon >add</mat-icon>
+                <span class="mr-1">Novo código</span>
+              </button>
+            </footer>
           </div>
         </mat-select>
       </mat-form-field>
     </form>
   </div>
-  <mat-dialog-actions class="mb-2">
+  <mat-dialog-actions class="mb-0">
     <button mat-flat-button (click)="dialogRef.close()">Cancelar</button>
     <button class="primaryButton" mat-raised-button (click)="submit()">Salvar</button>
   </mat-dialog-actions>
