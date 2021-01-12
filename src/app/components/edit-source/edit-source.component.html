@@ -26,13 +26,6 @@
       <button class="primaryButton" mat-flat-button type='button' [disabled]='!verifyFields()' (click)='updateFile()'>Salvar documento</button>
     </div>
   </div>
-  <div>
-    <mat-list>
-      <mat-list-item *ngFor="let fragment of fragments" (click)='syncScrolls()'>
-        {{fragment.id}}
-      </mat-list-item>
-    </mat-list>
-  </div>
 </div>
 
 

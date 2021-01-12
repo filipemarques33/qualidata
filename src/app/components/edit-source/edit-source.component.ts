@@ -54,7 +54,7 @@ export class EditSourceComponent implements OnInit, OnDestroy {
   async getPageContent() {
     const sourceId = this.route.snapshot.paramMap.get('sourceId');
     this.currentSource = await this.sourceService.getSourceById(sourceId);
-    await this.setupFragments()
+    await this.setupFragmentPanel()
   }
 
   configureEditor(){
@@ -114,10 +114,9 @@ export class EditSourceComponent implements OnInit, OnDestroy {
           autoFocus: false
         }
       ).afterClosed().subscribe(
-        async (message) => {
-          if (message == 'tagged') {
-            console.log('called function here')
-            await this.setupFragments()
+        async (success) => {
+          if (success) {
+            await this.setupFragmentPanel()
           }
         }
       )
@@ -126,27 +125,20 @@ export class EditSourceComponent implements OnInit, OnDestroy {
     }
   }
 
-  async setupFragments() {
+  async setupFragmentPanel() {
     this.fragments = await this.fragmentService.getFragmentsByIds(this.currentSource.fragments)
+    console.log(this.fragments)
     let container = document.getElementById("fragmentlist")
     container.style.height = tinymce.activeEditor.getBody().scrollHeight + "px"
     this.fragmentService.drawFragments(tinymce.activeEditor, container, this.fragments)
-    // this.syncScrolls()
+    this.syncScrolls()
   }
 
-
-
-  // syncScrolls() {
-  //   var leftDiv = tinymce.editors[0].getBody()
-  //   var rightDiv = document.getElementById("sidepanel");
-
-  //   leftDiv.onscroll = function() {
-  //     console.log('left')
-  //     rightDiv.scrollTop = leftDiv.scrollTop;
-  //   }
-  //   rightDiv.onscroll = function() {
-  //     console.log('right')
-  //     leftDiv.scrollTop = rightDiv.scrollTop;
-  //   }
-  // }
+  syncScrolls() {
+    var leftDiv = tinymce.editors[0].getWin()
+    var rightDiv = document.getElementById("sidepanel");
+    leftDiv.onscroll = function() {
+      rightDiv.scrollTop = leftDiv.scrollY
+    }
+  }
 }

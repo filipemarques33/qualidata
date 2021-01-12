@@ -65,18 +65,18 @@ export class TaggingDialogComponent implements OnInit {
     )
   }
 
-  submit() {
+  async submit() {
     if (this.taggingForm.valid) {
-      this.saveFragment()
-      this.dialogRef.close('tagged')
+      await this.saveFragment()
+      this.dialogRef.close(true)
     } else {
       this.taggingForm.markAsDirty()
     }
   }
 
-  saveFragment(){
+  async saveFragment(){
     let codes = this.taggingForm.value
-    this.fragmentService.saveFragment(
+    await this.fragmentService.saveFragment(
       this.selectedFragment,
       this.currentProject,
       this.currentSource,
