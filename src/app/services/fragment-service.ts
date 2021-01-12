@@ -8,7 +8,8 @@ import { AuthService } from "./auth-service";
 import { ProjectService } from "./project-service";
 import { SourceService } from "./source-service";
 import { CodeService } from "./code-service";
-import { Editor } from "tinymce/tinymce";
+import tinymce, { Editor } from "tinymce/tinymce";
+import { CategoryService } from "./category-service";
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,7 @@ export class FragmentService {
   constructor (
     private fragmentRepository: FragmentRepository,
     private authService: AuthService,
-    private projectService: ProjectService,
+    private categoryService: CategoryService,
     private sourceService: SourceService,
     private codeService: CodeService
   ) {
@@ -109,6 +110,75 @@ export class FragmentService {
   private logoutUser() {
     this.areFragmentsLoaded = false;
     this.fragments = [];
+  }
+
+  drawFragments(editor: Editor, container: HTMLElement, fragments: Fragment[]){
+    let doc = editor.getDoc()
+    this.removeAllChildren(container)
+
+    fragments = fragments.map(
+      fragment => {
+        fragment.rangeObject = this.restoreFragmentRange(doc, fragment)
+        fragment.boundingBox = fragment.rangeObject.getBoundingClientRect()
+        fragment.boundingBox.x = 16
+        fragment.boundingBox.width = 16
+        return fragment
+      }).sort((a, b) => b.boundingBox.height - a.boundingBox.height)
+
+    var placedFragments: Fragment[] = []
+
+    for (let fragment of fragments) {
+      for (let placed of placedFragments) {
+        if (this.overlaps(fragment.boundingBox, placed.boundingBox)) {
+          fragment.boundingBox.x += 24
+        }
+      }
+
+      let rect = fragment.boundingBox
+      var iDiv = document.createElement('div');
+      container.appendChild(iDiv)
+
+      iDiv.style.position = 'absolute'
+      iDiv.style.backgroundColor = '#0000FF25'
+      iDiv.style.borderRadius = '8px'
+      iDiv.style.top = rect.y + 'px'
+      iDiv.style.left = rect.x + 'px';
+      iDiv.style.height = rect.height + 'px'
+      iDiv.style.width = rect.width + 'px';
+      iDiv.style.visibility = 'visible';
+
+      let service = this
+      iDiv.addEventListener('mouseover', function(event) {
+        service.showSelection(editor, fragment)
+      })
+      iDiv.addEventListener('mouseout', function(event) {
+        editor.selection.getSel().removeRange(fragment.rangeObject)
+      })
+      iDiv.addEventListener('click', function(event) {
+        console.log('click')
+      })
+      placedFragments.push(fragment)
+    }
+  }
+
+  showSelection(editor: Editor, fragment: Fragment) {
+    //fragment.rangeObject = this.restoreFragmentRange(tinymce.activeEditor.getDoc(), fragment)
+    var selection = editor.selection.getSel();
+    selection.removeAllRanges();
+    selection.addRange(fragment.rangeObject);
+  }
+
+  //auxiliary methods
+  removeAllChildren(parent: Node){
+    while (parent.firstChild) {
+      parent.removeChild(parent.firstChild)
+    }
+  }
+
+  overlaps(rect1: DOMRect, rect2: DOMRect) {
+    let horizontalBounds = rect1.x < rect2.x + rect2.width && rect1.x + rect1.width > rect2.x;
+    let verticalBounds = rect1.y < rect2.y + rect2.height && rect1.y + rect1.height > rect2.y;
+    return horizontalBounds && verticalBounds
   }
 
 }

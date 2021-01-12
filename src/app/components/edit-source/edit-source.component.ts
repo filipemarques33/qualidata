@@ -1,9 +1,7 @@
-import { Component, Directive, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, OnDestroy, OnInit } from '@angular/core';
 import Source from 'src/app/data/Source';
 import Fragment from 'src/app/data/Fragment';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Content } from '@angular/compiler/src/render3/r3_ast';
-import { NetworkService } from 'src/app/services/network-service';
 import { SourceService } from 'src/app/services/source-service';
 import { FragmentService } from 'src/app/services/fragment-service';
 import { ActivatedRoute } from '@angular/router';
@@ -11,13 +9,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { TaggingDialogComponent } from './tagging-dialog/tagging-dialog.component';
 import tinymce from 'tinymce';
 import { Subscription } from 'rxjs';
+import { ThisReceiver } from '@angular/compiler';
 
 @Component({
   selector: 'app-edit-source',
   templateUrl: './edit-source.component.html',
   styleUrls: ['./edit-source.component.scss']
 })
-export class EditSourceComponent implements OnInit {
+export class EditSourceComponent implements OnInit, OnDestroy {
 
   currentProjectId: string = ''
 
@@ -37,28 +36,26 @@ export class EditSourceComponent implements OnInit {
     private taggingDialogRef: MatDialog,
   ) { }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.currentProjectId = this.route.snapshot.paramMap.get('projId');
-    this.getSourceContent();
+    this.getPageContent();
     this.configureEditor();
-    this.currentSourceId = this.route.snapshot.paramMap.get('sourceId');
-    this.fragmentSubscription = this.fragmentService.subscribeToAll().subscribe(
-      fragments => {
-        this.fragments = fragments.filter(fragment => fragment.sourceId == this.currentSourceId)
-      }
-    )
-
   }
 
   ngOnDestroy() {
-    this.fragmentSubscription.unsubscribe()
+    //this.fragmentSubscription.unsubscribe()
   }
 
-  async getSourceContent() {
+  // ngAfterViewChecked() {
+  //   console.log(tinymce.activeEditor)
+  //   this.syncScrolls()
+  // }
+
+  async getPageContent() {
     const sourceId = this.route.snapshot.paramMap.get('sourceId');
     this.currentSource = await this.sourceService.getSourceById(sourceId);
+    await this.setupFragments()
   }
-
 
   configureEditor(){
     let component = this
@@ -116,20 +113,40 @@ export class EditSourceComponent implements OnInit {
           },
           autoFocus: false
         }
+      ).afterClosed().subscribe(
+        async (message) => {
+          if (message == 'tagged') {
+            console.log('called function here')
+            await this.setupFragments()
+          }
+        }
       )
     } else {
       alert('Selecione um trecho de texto para continuar')
     }
   }
 
-  showSelection(fragment: Fragment) {
-    let document = tinymce.activeEditor.getDoc()
-    let range = this.fragmentService.restoreFragmentRange(document, fragment)
-
-    var selection = tinymce.activeEditor.selection.getSel();
-    selection.removeAllRanges();
-
-    selection.addRange(range);
+  async setupFragments() {
+    this.fragments = await this.fragmentService.getFragmentsByIds(this.currentSource.fragments)
+    let container = document.getElementById("fragmentlist")
+    container.style.height = tinymce.activeEditor.getBody().scrollHeight + "px"
+    this.fragmentService.drawFragments(tinymce.activeEditor, container, this.fragments)
+    // this.syncScrolls()
   }
 
+
+
+  // syncScrolls() {
+  //   var leftDiv = tinymce.editors[0].getBody()
+  //   var rightDiv = document.getElementById("sidepanel");
+
+  //   leftDiv.onscroll = function() {
+  //     console.log('left')
+  //     rightDiv.scrollTop = leftDiv.scrollTop;
+  //   }
+  //   rightDiv.onscroll = function() {
+  //     console.log('right')
+  //     leftDiv.scrollTop = rightDiv.scrollTop;
+  //   }
+  // }
 }

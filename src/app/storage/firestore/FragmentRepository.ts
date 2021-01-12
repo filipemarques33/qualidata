@@ -18,9 +18,23 @@ export class FragmentRepository extends Repository<Fragment> {
     super();
   }
 
+  // async getByIds(ids: string[]) {
+  //   let codesRef = await this.firebase.collection<Fragment>('fragments').ref.where(firebase.default.firestore.FieldPath.documentId(), 'in', ids).get();
+  //   return codesRef.docs.map(doc => doc.data());
+  // }
+
   async getByIds(ids: string[]) {
-    let codesRef = await this.firebase.collection<Fragment>('fragments').ref.where(firebase.default.firestore.FieldPath.documentId(), 'in', ids).get();
-    return codesRef.docs.map(doc => doc.data());
+    let fragments = [];
+    for (let i = 0; i < ids.length; i+=10) {
+      let queryArray = ids.slice(i, i+10);
+      let fragmentsRef = await this.firebase.collection<Fragment>('fragments').ref.where(firebase.default.firestore.FieldPath.documentId(), 'in', queryArray).get();
+      fragmentsRef.docs.forEach(doc => {
+        let fragment = doc.data();
+        fragment.id = doc.id;
+        fragments.push(fragment);
+      });
+    }
+    return fragments;
   }
 
   subscribeToAll() {
@@ -51,53 +65,4 @@ export class FragmentRepository extends Repository<Fragment> {
     return fragRef
 
   }
-
-  // async saveToProject(code: Code, projectId: string) {
-
-  //   let codeRef = this.firebase.createId()
-  //   let dataToSave = {
-  //     'id': codeRef,
-  //     'name': code.name,
-  //     'description': code.description,
-  //     'fragments': null,
-  //     'color': code.color,
-  //     'textColor': code.textColor,
-  //   }
-
-  //   await this.firebase.collection('codes').doc(codeRef).set(dataToSave)
-
-  //   await this.firebase.collection('projects').doc(projectId).update({
-  //     categories: firebase.default.firestore.FieldValue.arrayUnion(codeRef)
-  //   })
-
-  // }
-
-  // async saveToCategories(code: Code, catIds: string[]) {
-
-  //   let codeRef = this.firebase.createId()
-
-  //   let dataToSave = {
-  //     'id': codeRef,
-  //     'name': code.name,
-  //     'description': code.description,
-  //     'fragments': null,
-  //     'color': code.color,
-  //     'textColor': code.textColor,
-  //   }
-
-  //   await this.firebase.collection('codes').doc(codeRef).set(dataToSave)
-  //   for (let cat of catIds) {
-  //     this.firebase.collection('categories').doc(cat).update({
-  //       'codes': firebase.default.firestore.FieldValue.arrayUnion(codeRef)
-  //     })
-  //   }
-  // }
-
-  // async updateById(id: string, data: Partial<Code>) {
-  //   await this.firebase.doc<Code>(`codes/${id}`).update({
-  //     name: data.name,
-  //     color: data.color,
-  //     textColor: data.textColor
-  //   });
-  // }
 }

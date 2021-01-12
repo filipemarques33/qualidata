@@ -61,7 +61,6 @@ export class TaggingDialogComponent implements OnInit {
       (newCode: Code) => {
         if (newCode)
           this.availableCodes.push(newCode)
-          // this.optionList.nativeElement.scroll({ top: this.optionList.nativeElement.scrollHeight, behavior: 'smooth' })
       }
     )
   }
@@ -69,7 +68,7 @@ export class TaggingDialogComponent implements OnInit {
   submit() {
     if (this.taggingForm.valid) {
       this.saveFragment()
-      this.dialogRef.close()
+      this.dialogRef.close('tagged')
     } else {
       this.taggingForm.markAsDirty()
     }

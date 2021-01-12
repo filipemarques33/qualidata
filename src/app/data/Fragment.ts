@@ -8,6 +8,7 @@ interface FragmentRange {
 export default class Fragment {
 
   rangeObject: Range
+  boundingBox: DOMRect
 
   constructor(
     public id: string,
@@ -15,7 +16,7 @@ export default class Fragment {
     public range: FragmentRange,
     public content: string,
     public codes: string[],
-  ) {}
+  ) {  }
 
 
 }

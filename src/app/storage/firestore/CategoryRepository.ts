@@ -30,7 +30,6 @@ export class CategoryRepository extends Repository<Category> {
         categories.push(category);
       });
     }
-
     return categories;
   }
 

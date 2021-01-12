@@ -1,0 +1,24 @@
+.sidepanel{
+  position: relative;
+  width: 150px;
+  height: 500px;
+  padding: 40px 16px 38px 16px;
+  background-color: white;
+  border-style: solid;
+  border-width: thin thin thin 0;
+  border-color: #c6c6c6;
+  // overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+.fragmentlist {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.panel-body {
+  flex-grow: 1;
+}
+
