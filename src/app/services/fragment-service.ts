@@ -120,31 +120,36 @@ export class FragmentService {
       fragment => {
         fragment.rangeObject = this.restoreFragmentRange(doc, fragment)
         fragment.boundingBox = fragment.rangeObject.getBoundingClientRect()
-        fragment.boundingBox.x = 16
-        fragment.boundingBox.width = 16
         return fragment
       }).sort((a, b) => b.boundingBox.height - a.boundingBox.height)
 
-    var placedFragments: Fragment[] = []
+    var placedFragments: DOMRect[] = []
 
     for (let fragment of fragments) {
+      let fragmentBox = fragment.boundingBox
+      let fragmentRect = new DOMRect(
+        16,
+        editor.getWin().pageYOffset + fragmentBox.y,
+        16,
+        fragmentBox.height
+      )
+
       for (let placed of placedFragments) {
-        if (this.overlaps(fragment.boundingBox, placed.boundingBox)) {
-          fragment.boundingBox.x += 24
+        if (this.overlaps(fragmentRect, placed)) {
+          fragmentRect.x += 24
         }
       }
 
-      let rect = fragment.boundingBox
       var iDiv = document.createElement('div');
       container.appendChild(iDiv)
 
       iDiv.style.position = 'absolute'
       iDiv.style.backgroundColor = '#0000FF25'
       iDiv.style.borderRadius = '8px'
-      iDiv.style.top = rect.y + 'px'
-      iDiv.style.left = rect.x + 'px';
-      iDiv.style.height = rect.height + 'px'
-      iDiv.style.width = rect.width + 'px';
+      iDiv.style.top = fragmentRect.y + 'px'
+      iDiv.style.left = fragmentRect.x + 'px';
+      iDiv.style.height = fragmentRect.height + 'px'
+      iDiv.style.width = fragmentRect.width + 'px';
       iDiv.style.visibility = 'visible';
 
       let service = this
@@ -157,7 +162,7 @@ export class FragmentService {
       iDiv.addEventListener('click', function(event) {
         console.log('click')
       })
-      placedFragments.push(fragment)
+      placedFragments.push(fragmentRect)
     }
   }
 

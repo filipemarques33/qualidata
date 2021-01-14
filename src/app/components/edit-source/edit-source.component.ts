@@ -1,4 +1,4 @@
-import { AfterViewChecked, Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import Source from 'src/app/data/Source';
 import Fragment from 'src/app/data/Fragment';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -46,15 +46,11 @@ export class EditSourceComponent implements OnInit, OnDestroy {
     //this.fragmentSubscription.unsubscribe()
   }
 
-  // ngAfterViewChecked() {
-  //   console.log(tinymce.activeEditor)
-  //   this.syncScrolls()
-  // }
-
   async getPageContent() {
     const sourceId = this.route.snapshot.paramMap.get('sourceId');
     this.currentSource = await this.sourceService.getSourceById(sourceId);
-    await this.setupFragmentPanel()
+    this.fragments = await this.fragmentService.getFragmentsByIds(this.currentSource.fragments)
+    await this.drawFragmentsPanel()
   }
 
   configureEditor(){
@@ -69,13 +65,11 @@ export class EditSourceComponent implements OnInit, OnDestroy {
         'advlist autolink lists link image charmap print',
         'preview anchor searchreplace visualblocks code',
         'fullscreen insertdatetime media table paste',
-        'help wordcount'
+        'help wordcount quickbars'
       ],
-      toolbar:[
-        'undo redo | formatselect | bold italic | \
-        alignleft aligncenter alignright alignjustify \
-        bullist numlist outdent indent | help | tagging',
-      ],
+      toolbar: false,
+      quickbars_selection_toolbar: 'bold italic underline | formatselect | blockquote quicklink | tagging',
+      contextmenu: 'undo redo | inserttable | cell row column deletetable | help',
       setup: function(editor) {
         editor.ui.registry.addButton('tagging', {
           icon: 'permanent-pen',
@@ -116,7 +110,8 @@ export class EditSourceComponent implements OnInit, OnDestroy {
       ).afterClosed().subscribe(
         async (success) => {
           if (success) {
-            await this.setupFragmentPanel()
+            this.fragments = await this.fragmentService.getFragmentsByIds(this.currentSource.fragments)
+            this.drawFragmentsPanel()
           }
         }
       )
@@ -125,8 +120,7 @@ export class EditSourceComponent implements OnInit, OnDestroy {
     }
   }
 
-  async setupFragmentPanel() {
-    this.fragments = await this.fragmentService.getFragmentsByIds(this.currentSource.fragments)
+  drawFragmentsPanel() {
     console.log(this.fragments)
     let container = document.getElementById("fragmentlist")
     container.style.height = tinymce.activeEditor.getBody().scrollHeight + "px"
@@ -141,4 +135,10 @@ export class EditSourceComponent implements OnInit, OnDestroy {
       rightDiv.scrollTop = leftDiv.scrollY
     }
   }
+
+  @HostListener('window:resize')
+  onResize() {
+    this.drawFragmentsPanel();
+  }
+
 }
