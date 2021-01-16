@@ -5,8 +5,8 @@
       <span class="my-2 d-flex flex-row align-items-center">
         <mat-form-field class='flex-grow-1' appearance="fill">
           <mat-label>Título</mat-label>
-          <input matInput formControlName="title">
-          <mat-error *ngIf="codeForm.get('title').invalid">Escreva o título de seu código</mat-error>
+          <input matInput formControlName="name">
+          <mat-error *ngIf="codeForm.get('name').invalid">Escreva o título de seu código</mat-error>
         </mat-form-field>
         <button mat-icon-button
           type="button"
@@ -26,9 +26,26 @@
         <textarea matInput class="formArea" formControlName="description"></textarea>
         <mat-error  *ngIf="codeForm.get('description').invalid">Escreva a descrição de seu código</mat-error>
       </mat-form-field>
+
+      <mat-form-field class='flex-grow-1' appearance="fill">
+        <mat-label>Categoria pai</mat-label>
+        <mat-select formControlName="parent" (valueChange)="changeParent($event)">
+          <mat-option>Nenhuma</mat-option>
+          <mat-option appearance="fill" *ngFor="let cat of availableCategories" [(value)]="cat.id">
+            <mat-icon [ngStyle]="{'color': cat.color}">stop_circle</mat-icon>
+            {{cat.name}}
+          </mat-option>
+          <mat-select-trigger>
+            <span *ngIf="selectedParent" class="d-flex align-items-center">
+              <mat-icon class="mr-2" [ngStyle]="{'color': selectedParent.color}">stop_circle</mat-icon>
+              {{selectedParent.name}}
+            </span>
+          </mat-select-trigger>
+        </mat-select>
+      </mat-form-field>
       <mat-dialog-actions class="mb-0">
-        <button mat-flat-button (click)="dialogRef.close()">Cancelar</button>
-        <button class="primaryButton" mat-raised-button type="submit" value="Submit">Criar código</button>
+        <button mat-flat-button type='button' (click)="dialogRef.close()">Cancelar</button>
+        <button class="primaryButton" mat-raised-button type="submit" value="Submit">Salvar código</button>
       </mat-dialog-actions>
     </form>
   </div>

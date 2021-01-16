@@ -112,7 +112,7 @@ export class FragmentService {
     this.fragments = [];
   }
 
-  drawFragments(editor: Editor, container: HTMLElement, fragments: Fragment[]){
+  drawFragments(editor: Editor, container: HTMLElement, fragments: Fragment[], codes: Code[]){
     let doc = editor.getDoc()
     this.removeAllChildren(container)
 
@@ -130,21 +130,23 @@ export class FragmentService {
       let fragmentRect = new DOMRect(
         16,
         editor.getWin().pageYOffset + fragmentBox.y,
-        16,
+        12,
         fragmentBox.height
       )
 
       for (let placed of placedFragments) {
         if (this.overlaps(fragmentRect, placed)) {
-          fragmentRect.x += 24
+          fragmentRect.x += 20
         }
       }
+
+      let firstCode = codes.find(code => code.id == fragment.codes[0])
 
       var iDiv = document.createElement('div');
       container.appendChild(iDiv)
 
       iDiv.style.position = 'absolute'
-      iDiv.style.backgroundColor = '#0000FF25'
+      iDiv.style.backgroundColor = firstCode.color
       iDiv.style.borderRadius = '8px'
       iDiv.style.top = fragmentRect.y + 'px'
       iDiv.style.left = fragmentRect.x + 'px';
@@ -161,6 +163,7 @@ export class FragmentService {
       })
       iDiv.addEventListener('click', function(event) {
         console.log('click')
+        console.log(fragment)
       })
       placedFragments.push(fragmentRect)
     }

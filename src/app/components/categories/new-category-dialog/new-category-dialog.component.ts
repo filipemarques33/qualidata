@@ -9,6 +9,11 @@ import Project from 'src/app/data/Project';
 import { ActivatedRoute } from '@angular/router';
 import { ProjectService } from 'src/app/services/project-service';
 
+interface DialogData {
+  projectId: string;
+  category?: Category;
+}
+
 @Component({
   selector: 'app-new-category-dialog',
   templateUrl: './new-category-dialog.component.html',
@@ -16,22 +21,21 @@ import { ProjectService } from 'src/app/services/project-service';
 })
 export class NewCategoryDialogComponent implements OnInit {
 
-  currentProject: Project;
-  projectSubscription: Subscription;
-
   availableCategories: Category[];
-  categorySubscription: Subscription;
 
   selectedParent: Category;
   selectedColor = "#0000FF";
 
+  editMode: boolean = false
+
   categoryForm = new FormGroup({
     name: new FormControl ('', [Validators.required]),
+    description: new FormControl ('', [Validators.required]),
     parent: new FormControl (null)
   })
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { projectId: string },
+    @Inject(MAT_DIALOG_DATA) public data: DialogData,
     public route: ActivatedRoute,
     public databaseService: DatabaseService,
     public dialogRef: MatDialogRef<NewCategoryDialogComponent>,
@@ -40,21 +44,21 @@ export class NewCategoryDialogComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.projectSubscription = this.projectService.getProject(this.data.projectId).subscribe(
-      project => this.currentProject = project
-    )
-    this.categorySubscription = this.categoryService.getAllCategories().subscribe(
-      categories => {
-        this.availableCategories = categories.filter(category => this.currentProject.categories.includes(category.id) && category.parent == null)
-      }
-    )
+    this.availableCategories = this.categoryService.categories.sort((a,b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+    if (this.data.category != null) {
+      this.editMode = true
+      this.categoryForm.get('name').setValue(this.data.category.name)
+      this.categoryForm.get('description').setValue(this.data.category.description)
+      this.categoryForm.get('parent').setValue(this.data.category.parent)
+      this.selectedColor = this.data.category.color
+      this.changeParent(this.data.category.parent)
+    }
+    console.log(this.editMode)
   }
 
   submit() {
     if (this.categoryForm.valid) {
-      const category = new Category('', this.categoryForm.get('name').value, this.selectedColor, 'black', this.categoryForm.get('parent').value);
-      this.categoryService.saveCategory(category, String(this.currentProject.id));
-      this.dialogRef.close();
+      this.editMode ? this.updateCategory() : this.saveCategory()
     } else {
       this.categoryForm.markAsDirty();
     }
@@ -64,10 +68,25 @@ export class NewCategoryDialogComponent implements OnInit {
     this.selectedParent = parentId ? this.availableCategories.find(category => category.id == parentId) : null
   }
 
-  async getTopLevelCategories(){
-    const projId = '1'
-    let project = await this.projectService.getProjectById(projId)
-    this.availableCategories = this.categoryService.getParentcategories(await this.categoryService.getCategoriesByIds(project.categories))
+  saveCategory() {
+    let name = this.categoryForm.get('name').value
+    let description = this.categoryForm.get('description').value
+    let parent = this.categoryForm.get('parent').value
+
+    let category = new Category('', name, description, this.selectedColor, 'black', parent);
+    this.categoryService.saveCategory(category, String(this.data.projectId));
+    this.dialogRef.close();
   }
+
+  updateCategory() {
+    let name = this.categoryForm.get('name').value
+    let description = this.categoryForm.get('description').value
+    let parent = this.categoryForm.get('parent').value
+
+    let categoryInfo: Partial<Category>  = { name: name, description: description, parent: parent, color: this.selectedColor }
+    this.categoryService.updateCategoryContent(this.data.category, categoryInfo)
+    this.dialogRef.close();
+  }
+
 
 }

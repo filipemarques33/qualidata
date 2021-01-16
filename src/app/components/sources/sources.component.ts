@@ -25,18 +25,14 @@ export class SourcesComponent implements OnInit, OnDestroy {
     private projectService: ProjectService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     let projId = this.route.snapshot.paramMap.get('projId')
-    this.projectSubscription = this.projectService.getProject(projId).subscribe(
-      project => this.currentProject = project
-    )
-    this.sourceSubscription = this.sourceService.getAllSources().subscribe(
-      sources => this.sources = sources.filter(source => this.currentProject.sources.includes(source.id))
-    )
+    this.currentProject = await this.projectService.getProjectById(projId)
+    this.sources = await this.sourceService.getSourcesByIds(this.currentProject.sources)
   }
 
   ngOnDestroy() {
-    this.projectSubscription.unsubscribe()
-    this.sourceSubscription.unsubscribe()
+    //this.projectSubscription.unsubscribe()
+    // this.sourceSubscription.unsubscribe()
   }
 }

@@ -52,8 +52,16 @@ export class CategoryService {
     }
   }
 
+  async updateCategoryContent(category: Category, updateData: Partial<Category>){
+    await this.categoryRepository.updateContent(category, updateData);
+  }
+
   getAllCategories() {
     return this.categoryRepository.getAllCategories();
+  }
+
+  subscribeToCategories(ids: string[]){
+    return this.categoryRepository.subscribeToCategories(ids)
   }
 
   getParentcategories(categories: Category[]){

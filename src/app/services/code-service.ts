@@ -38,6 +38,10 @@ export class CodeService {
     return await this.codeRepository.getByIds(ids);
   }
 
+  subscribeToCategories(ids: string[]){
+    return this.codeRepository.subscribeToCodes(ids)
+  }
+
   async saveCode(code: Code, projId: string) {
     return await this.codeRepository.saveToProject(code, projId);
   }
@@ -50,6 +54,10 @@ export class CodeService {
     for (let data of updateData) {
       await this.codeRepository.updateById(data.id, data);
     }
+  }
+
+  async updateCodeContent(code: Code, updateData: Partial<Code>){
+    await this.codeRepository.updateContent(code, updateData);
   }
 
   async addFragment(code: Code, fragmentId: string) {

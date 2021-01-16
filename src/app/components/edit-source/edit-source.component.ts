@@ -10,6 +10,9 @@ import { TaggingDialogComponent } from './tagging-dialog/tagging-dialog.componen
 import tinymce from 'tinymce';
 import { Subscription } from 'rxjs';
 import { ThisReceiver } from '@angular/compiler';
+import { CodeService } from 'src/app/services/code-service';
+import { ProjectService } from 'src/app/services/project-service';
+import Code from 'src/app/data/Code';
 
 @Component({
   selector: 'app-edit-source',
@@ -24,7 +27,8 @@ export class EditSourceComponent implements OnInit, OnDestroy {
   currentSource: Source = new Source('', '', '', []);
   fragments: Fragment[]
 
-  fragmentSubscription: Subscription
+  availableCodes: Code[] = []
+  codeSubscription: Subscription
 
   tinyMceConfig: any;
 
@@ -33,6 +37,8 @@ export class EditSourceComponent implements OnInit, OnDestroy {
     private snackbar: MatSnackBar,
     private sourceService: SourceService,
     private fragmentService: FragmentService,
+    private codeService: CodeService,
+    private projectService: ProjectService,
     private taggingDialogRef: MatDialog,
   ) { }
 
@@ -50,7 +56,9 @@ export class EditSourceComponent implements OnInit, OnDestroy {
     const sourceId = this.route.snapshot.paramMap.get('sourceId');
     this.currentSource = await this.sourceService.getSourceById(sourceId);
     this.fragments = await this.fragmentService.getFragmentsByIds(this.currentSource.fragments)
-    await this.drawFragmentsPanel()
+    await this.codeService.loadUserCodes()
+    this.availableCodes = this.codeService.codes
+    this.drawFragmentsPanel()
   }
 
   configureEditor(){
@@ -110,8 +118,7 @@ export class EditSourceComponent implements OnInit, OnDestroy {
       ).afterClosed().subscribe(
         async (success) => {
           if (success) {
-            this.fragments = await this.fragmentService.getFragmentsByIds(this.currentSource.fragments)
-            this.drawFragmentsPanel()
+            this.getPageContent()
           }
         }
       )
@@ -121,10 +128,9 @@ export class EditSourceComponent implements OnInit, OnDestroy {
   }
 
   drawFragmentsPanel() {
-    console.log(this.fragments)
     let container = document.getElementById("fragmentlist")
     container.style.height = tinymce.activeEditor.getBody().scrollHeight + "px"
-    this.fragmentService.drawFragments(tinymce.activeEditor, container, this.fragments)
+    this.fragmentService.drawFragments(tinymce.activeEditor, container, this.fragments, this.availableCodes)
     this.syncScrolls()
   }
 

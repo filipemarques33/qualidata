@@ -37,7 +37,7 @@ export class NavBarComponent implements OnInit {
       icon: 'description',
     },
     {
-      text: 'Categorias',
+      text: 'Codebook',
       route: '/projects/'+ this.projectId +'/categories',
       icon: 'format_list_bulleted',
     },

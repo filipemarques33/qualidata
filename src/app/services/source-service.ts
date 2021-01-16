@@ -46,6 +46,10 @@ export class SourceService {
     return this.sourceRepository.getAllSources()
   }
 
+  subscribeToSources(ids: string[]) {
+    return this.sourceRepository.subscribeToSources(ids)
+  }
+
   async saveSource(source: Source, projId: string) {
     await this.sourceRepository.saveToProject(source, projId);
   };

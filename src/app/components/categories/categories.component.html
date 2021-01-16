@@ -1,8 +1,8 @@
 <div class="container py-3 px-0 h-100">
   <div class="jumbotron py-5">
     <div>
-      <h1 class="headline">Categorias</h1>
-      <p class="description">Organize e analise sua pesquisa em categorias compreensíveis.</p>
+      <h1 class="headline">Codebook</h1>
+      <p class="description">Organize e analise sua pesquisa em códigos e categorias compreensíveis.</p>
     </div>
     <button class='primaryButton py-2 d-flex justify-content-center align-items-center' mat-flat-button type='button' (click)="openNewCategoryDialog()">
       <mat-icon class="mr-1">add</mat-icon>
@@ -16,7 +16,14 @@
           <button class="listButton" [ngStyle]="{'color': cat.color}" mat-icon-button><mat-icon>stop_circle</mat-icon></button>
           {{cat.name}}
         </span>
-        <button mat-icon-button><mat-icon>delete</mat-icon></button>
+        <button mat-icon-button (click)="editCategory(cat)"><mat-icon>edit</mat-icon></button>
+      </mat-list-item>
+      <mat-list-item *ngFor="let code of codes">
+        <span class="w-100">
+          <button class="listButton" [ngStyle]="{'color': code.color}" mat-icon-button><mat-icon>stop_circle</mat-icon></button>
+          {{code.name}}
+        </span>
+        <button mat-icon-button (click)="editCode(code)"><mat-icon>edit</mat-icon></button>
       </mat-list-item>
     </mat-nav-list>
   </div>

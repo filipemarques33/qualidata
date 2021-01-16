@@ -5,6 +5,7 @@ export default class Code {
     public description: string,
     public fragments: string[],
     public color: string,
-    public textColor: string = 'black'
+    public parent?: string,
+    public textColor: string = 'black',
   ) {}
 }

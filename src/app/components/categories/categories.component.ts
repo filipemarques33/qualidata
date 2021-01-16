@@ -5,9 +5,12 @@ import { DatabaseService } from 'src/app/services/database-service';
 import Category from 'src/app/data/Category';
 import { MatDialog } from '@angular/material/dialog';
 import { NewCategoryDialogComponent } from 'src/app/components/categories/new-category-dialog/new-category-dialog.component'
+import { NewCodeDialogComponent } from 'src/app/components/edit-source/new-code-dialog/new-code-dialog.component'
 import { Subscription } from 'rxjs';
 import { CategoryService } from 'src/app/services/category-service';
 import { ProjectService } from 'src/app/services/project-service';
+import { CodeService } from 'src/app/services/code-service';
+import Code from 'src/app/data/Code';
 
 @Component({
   selector: 'app-categories',
@@ -22,40 +25,53 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   categories: Category[];
   categorySubscription: Subscription;
 
+  codes: Code[];
+  codeSubscription: Subscription;
 
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
     private categoryService: CategoryService,
+    private codeService: CodeService,
     private newCategoryDialog: MatDialog
   ) { }
 
-  ngOnInit(): void {
-    let projId = this.route.snapshot.paramMap.get('projId');
-    this.projectSubscription = this.projectService.getProject(projId).subscribe(
-      (project) => this.currentProject = project
-    )
-    this.categorySubscription = this.categoryService.getAllCategories().subscribe(
-      (categories: Category[]) => this.categories = categories.filter(category => this.currentProject.categories.includes(category.id))
-    )
+  async ngOnInit() {
+    let projId = this.route.snapshot.paramMap.get('projId')
+    this.currentProject = await this.projectService.getProjectById(projId)
+    this.categories = await this.categoryService.getCategoriesByIds(this.currentProject.categories)
+    this.codes = await this.codeService.getCodesByIds(this.currentProject.codes)
   }
 
   ngOnDestroy() {
-    this.projectSubscription.unsubscribe()
-    this.categorySubscription.unsubscribe()
-  }
 
-  async getCategories(){
-    const projId = '1';
-    this.currentProject = await this.projectService.getProjectById(projId);
-    this.categories = await this.categoryService.getCategoriesByIds(this.currentProject.categories);
   }
 
   openNewCategoryDialog() {
     this.newCategoryDialog.open(NewCategoryDialogComponent, {
       autoFocus: false,
       data: {
-        projectId: String(this.currentProject.id)
+        projectId: String(this.currentProject.id),
+        category: null
+      }
+    })
+  }
+
+  editCategory(category: Category) {
+    this.newCategoryDialog.open(NewCategoryDialogComponent, {
+      autoFocus: false,
+      data: {
+        projectId: String(this.currentProject.id),
+        category: category
+      }
+    })
+  }
+
+  editCode(code: Code) {
+    this.newCategoryDialog.open(NewCodeDialogComponent, {
+      autoFocus: false,
+      data: {
+        code: code
       }
     })
   }

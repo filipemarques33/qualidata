@@ -36,8 +36,6 @@ export class TaggingDialogComponent implements OnInit {
 
   taggingForm = new FormControl([], [Validators.required])
 
-  @ViewChild('optionList') private optionList: ElementRef;
-
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
     public dialogRef: MatDialogRef<TaggingDialogComponent>,
