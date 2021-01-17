@@ -7,22 +7,29 @@
     <form class="d-flex flex-column" (ngSubmit)="submit()">
       <mat-form-field class='mt-2 flex-grow-1' appearance="fill">
         <mat-label>Salvar nos códigos</mat-label>
-        <mat-select [formControl]="taggingForm" multiple>
+        <mat-select [formControl]="taggingForm" multiple #multiSelect>
           <div class="optionsPanel">
-            <div #optionList class="optionsList">
+            <mat-option>
+              <ngx-mat-select-search
+                [formControl]="codeFilter"
+                placeholderLabel="Procure um código"
+                noEntriesFoundLabel="'Nenhum código encontrado'">
+              </ngx-mat-select-search>
+            </mat-option>
+            <div class="optionsList py-1">
               <mat-option [value]="null" selected disabled hidden>
                 Escolha uma categoria
               </mat-option>
-              <mat-option *ngFor="let code of availableCodes" [value]="code">
+              <mat-option *ngFor="let code of filteredCodes | async" [value]="code">
                 {{code.name}}
               </mat-option>
             </div>
-            <footer class="optionsFooter mb-0">
+            <div class="optionsFooter mb-0">
               <button class="secondaryButton" mat-raised-button type="button" (click)="newCodeDialog()">
                 <mat-icon >add</mat-icon>
                 <span class="mr-1">Novo código</span>
               </button>
-            </footer>
+            </div>
           </div>
         </mat-select>
       </mat-form-field>

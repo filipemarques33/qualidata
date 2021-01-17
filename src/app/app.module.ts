@@ -8,6 +8,9 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { ColorPickerModule } from 'ngx-color-picker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
 import { ImportsModule } from 'src/app/common/imports.module';
 import { AppRoutingModule } from './app-routing.module';
@@ -37,6 +40,7 @@ import { CategoriesComponent } from './components/categories/categories.componen
 import { NewCategoryDialogComponent } from './components/categories/new-category-dialog/new-category-dialog.component';
 import { TaggingDialogComponent } from './components/edit-source/tagging-dialog/tagging-dialog.component';
 import { NewCodeDialogComponent } from './components/edit-source/new-code-dialog/new-code-dialog.component';
+import { CodeSidebarComponent } from './components/categories/code-sidebar/code-sidebar.component';
 
 @NgModule({
   declarations: [
@@ -54,7 +58,8 @@ import { NewCodeDialogComponent } from './components/edit-source/new-code-dialog
     CategoriesComponent,
     NewCategoryDialogComponent,
     TaggingDialogComponent,
-    NewCodeDialogComponent
+    NewCodeDialogComponent,
+    CodeSidebarComponent,
   ],
   imports: [
     BrowserModule,
@@ -67,7 +72,10 @@ import { NewCodeDialogComponent } from './components/edit-source/new-code-dialog
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireDatabaseModule,
     AngularFirestoreModule,
-    ColorPickerModule
+    ColorPickerModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    NgxMatSelectSearchModule
   ],
   providers: [
     {provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js'},
