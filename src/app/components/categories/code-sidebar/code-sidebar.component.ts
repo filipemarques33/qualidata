@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import Code from 'src/app/data/Code';
 
 @Component({
   selector: 'app-code-sidebar',
@@ -6,6 +7,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./code-sidebar.component.scss']
 })
 export class CodeSidebarComponent implements OnInit {
+
+  @Input() public selectedCode: Code
 
   constructor() { }
 

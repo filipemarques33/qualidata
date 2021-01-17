@@ -1,30 +1,50 @@
-<div class="container py-3 px-0 h-100">
-  <div class="jumbotron py-5">
-    <div>
-      <h1 class="headline">Codebook</h1>
-      <p class="description">Organize e analise sua pesquisa em códigos e categorias compreensíveis.</p>
+<mat-sidenav-container class="wrapper h-100">
+  <mat-sidenav-content class="content">
+    <div class="container py-3 px-0 h-100">
+      <div class="jumbotron py-5">
+        <div>
+          <h1 class="headline">Codebook</h1>
+          <p class="description">Organize e analise sua pesquisa em códigos e categorias compreensíveis.</p>
+        </div>
+        <button class='primaryButton py-2 d-flex justify-content-center align-items-center' mat-flat-button type='button' (click)="openNewCategoryDialog()">
+          <mat-icon class="mr-1">add</mat-icon>
+          <span class="mr-1" style="line-height: normal;">Nova categoria</span>
+        </button>
+      </div>
+      <div>
+        <mat-nav-list>
+          <mat-list-item *ngFor="let cat of categories">
+            <span class="w-100">
+              <button class="listButton" [ngStyle]="{'color': cat.color}" mat-icon-button><mat-icon>stop_circle</mat-icon></button>
+              {{cat.name}}
+            </span>
+            <button mat-icon-button (click)="editCategory(cat)"><mat-icon>edit</mat-icon></button>
+          </mat-list-item>
+          <mat-list-item *ngFor="let code of codes" (click)="openSidenav(code)">
+            <span class="w-100">
+              <button class="listButton" [ngStyle]="{'color': code.color}" mat-icon-button><mat-icon>stop_circle</mat-icon></button>
+              {{code.name}}
+            </span>
+            <button mat-icon-button (click)="editCode(code)"><mat-icon>edit</mat-icon></button>
+          </mat-list-item>
+        </mat-nav-list>
+      </div>
     </div>
-    <button class='primaryButton py-2 d-flex justify-content-center align-items-center' mat-flat-button type='button' (click)="openNewCategoryDialog()">
-      <mat-icon class="mr-1">add</mat-icon>
-      <span class="mr-1" style="line-height: normal;">Nova categoria</span>
-    </button>
-  </div>
-  <div>
-    <mat-nav-list>
-      <mat-list-item *ngFor="let cat of categories">
-        <span class="w-100">
-          <button class="listButton" [ngStyle]="{'color': cat.color}" mat-icon-button><mat-icon>stop_circle</mat-icon></button>
-          {{cat.name}}
-        </span>
-        <button mat-icon-button (click)="editCategory(cat)"><mat-icon>edit</mat-icon></button>
-      </mat-list-item>
-      <mat-list-item *ngFor="let code of codes">
-        <span class="w-100">
-          <button class="listButton" [ngStyle]="{'color': code.color}" mat-icon-button><mat-icon>stop_circle</mat-icon></button>
-          {{code.name}}
-        </span>
-        <button mat-icon-button (click)="editCode(code)"><mat-icon>edit</mat-icon></button>
-      </mat-list-item>
-    </mat-nav-list>
-  </div>
-</div>
+  </mat-sidenav-content>
+
+  <mat-sidenav #codeDetails class="sidenav" position="end" mode="side">
+    <div class="close-button position-absolute" (click)="codeDetails.close()" >
+      <mat-icon>close</mat-icon>
+    </div>
+    <div class="sidenavContainer" *ngIf="selectedCode">
+      <h2 class="my-3">{{selectedCode.name}}</h2>
+      <p class="mb-3">{{selectedCode.description}}</p>
+      <mat-spinner *ngIf="isLoadingFragments" [diameter]="40" class="mt-3"></mat-spinner>
+      <mat-nav-list class="fragmentList" *ngIf="!isLoadingFragments">
+        <mat-list-item *ngFor="let fragment of fragments" routerLink="/projects/{{currentProject.id}}/sources/{{fragment.sourceId}}/edit">
+        <p>{{fragment.content}}</p>
+        </mat-list-item>
+      </mat-nav-list>
+    </div>
+  </mat-sidenav>
+</mat-sidenav-container>

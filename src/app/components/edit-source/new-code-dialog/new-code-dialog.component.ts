@@ -68,14 +68,14 @@ export class NewCodeDialogComponent implements OnInit {
     this.dialogRef.close(code)
   }
 
-  updateCode() {
+  async updateCode() {
     let name = this.codeForm.get('name').value
     let description = this.codeForm.get('description').value
     let parent = this.codeForm.get('parent').value
 
     let codeInfo: Partial<Code>  = { name: name, description: description, parent: parent, color: this.selectedColor }
-    this.codeService.updateCodeContent(this.data.code, codeInfo)
-    this.dialogRef.close();
+    await this.codeService.updateCodeContent(this.data.code, codeInfo)
+    this.dialogRef.close(true);
   }
 
 }

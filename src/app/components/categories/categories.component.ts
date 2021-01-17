@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import Project from 'src/app/data/Project';
 import { ActivatedRoute } from '@angular/router';
 import { DatabaseService } from 'src/app/services/database-service';
@@ -11,13 +11,16 @@ import { CategoryService } from 'src/app/services/category-service';
 import { ProjectService } from 'src/app/services/project-service';
 import { CodeService } from 'src/app/services/code-service';
 import Code from 'src/app/data/Code';
+import { MatSidenav } from '@angular/material/sidenav';
+import Fragment from 'src/app/data/Fragment';
+import { FragmentService } from 'src/app/services/fragment-service';
 
 @Component({
   selector: 'app-categories',
   templateUrl: './categories.component.html',
   styleUrls: ['./categories.component.scss']
 })
-export class CategoriesComponent implements OnInit, OnDestroy {
+export class CategoriesComponent implements OnInit {
 
   currentProject: Project;
   projectSubscription: Subscription;
@@ -28,11 +31,17 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   codes: Code[];
   codeSubscription: Subscription;
 
+  @ViewChild('codeDetails') codeDetailsRef: MatSidenav;
+  selectedCode: Code = null
+  isLoadingFragments: boolean = false
+  fragments: Fragment[] = []
+
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
     private categoryService: CategoryService,
     private codeService: CodeService,
+    private fragmentService: FragmentService,
     private newCategoryDialog: MatDialog
   ) { }
 
@@ -41,10 +50,6 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     this.currentProject = await this.projectService.getProjectById(projId)
     this.categories = await this.categoryService.getCategoriesByIds(this.currentProject.categories)
     this.codes = await this.codeService.getCodesByIds(this.currentProject.codes)
-  }
-
-  ngOnDestroy() {
-
   }
 
   openNewCategoryDialog() {
@@ -74,5 +79,13 @@ export class CategoriesComponent implements OnInit, OnDestroy {
         code: code
       }
     })
+  }
+
+  async openSidenav(code: Code) {
+    this.selectedCode = code
+    this.codeDetailsRef.open()
+    this.isLoadingFragments = true
+    this.fragments = await this.fragmentService.getFragmentsByIds(code.fragments)
+    this.isLoadingFragments = false
   }
 }
