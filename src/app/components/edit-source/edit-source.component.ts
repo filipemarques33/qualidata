@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import Source from 'src/app/data/Source';
 import Fragment from 'src/app/data/Fragment';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -29,6 +29,8 @@ export class EditSourceComponent implements OnInit, OnDestroy {
 
   availableCodes: Code[] = []
   codeSubscription: Subscription
+
+  @ViewChild ('fragmentBuilder', { read: ViewContainerRef }) fragmentListRef: ViewContainerRef
 
   tinyMceConfig: any;
 
@@ -129,8 +131,9 @@ export class EditSourceComponent implements OnInit, OnDestroy {
 
   drawFragmentsPanel() {
     let container = document.getElementById("fragmentlist")
+    this.removeAllChildren(container)
     container.style.height = tinymce.activeEditor.getBody().scrollHeight + "px"
-    this.fragmentService.drawFragments(tinymce.activeEditor, container, this.fragments, this.availableCodes)
+    this.fragmentService.drawFragments(tinymce.activeEditor, this.fragmentListRef, this.fragments, this.availableCodes)
     this.syncScrolls()
   }
 
@@ -140,6 +143,13 @@ export class EditSourceComponent implements OnInit, OnDestroy {
     leftDiv.onscroll = function() {
       rightDiv.scrollTop = leftDiv.scrollY
     }
+  }
+
+  removeAllChildren(parent: Node){
+    let fragmentElement = this.fragmentListRef.element.nativeElement
+    parent.childNodes.forEach(
+      node => node != fragmentElement ? parent.removeChild(node) : ""
+    )
   }
 
   @HostListener('window:resize')

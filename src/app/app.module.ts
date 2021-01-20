@@ -41,6 +41,7 @@ import { NewCategoryDialogComponent } from './components/categories/new-category
 import { TaggingDialogComponent } from './components/edit-source/tagging-dialog/tagging-dialog.component';
 import { NewCodeDialogComponent } from './components/edit-source/new-code-dialog/new-code-dialog.component';
 import { CodeSidebarComponent } from './components/categories/code-sidebar/code-sidebar.component';
+import { TagElementComponent } from './components/edit-source/tag-element/tag-element.component';
 
 @NgModule({
   declarations: [
@@ -60,6 +61,7 @@ import { CodeSidebarComponent } from './components/categories/code-sidebar/code-
     TaggingDialogComponent,
     NewCodeDialogComponent,
     CodeSidebarComponent,
+    TagElementComponent,
   ],
   imports: [
     BrowserModule,

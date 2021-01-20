@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable } from "@angular/core";
+import { ComponentFactoryResolver, EventEmitter, Injectable, ViewContainerRef } from "@angular/core";
 import { FragmentRepository } from '../storage/firestore/FragmentRepository';
 import Project from "../data/Project";
 import Source from "../data/Source";
@@ -10,6 +10,7 @@ import { SourceService } from "./source-service";
 import { CodeService } from "./code-service";
 import tinymce, { Editor } from "tinymce/tinymce";
 import { CategoryService } from "./category-service";
+import { TagElementComponent } from "../components/edit-source/tag-element/tag-element.component";
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +26,8 @@ export class FragmentService {
     private authService: AuthService,
     private categoryService: CategoryService,
     private sourceService: SourceService,
-    private codeService: CodeService
+    private codeService: CodeService,
+    private componentFactoryResolver: ComponentFactoryResolver
   ) {
     this.authService.userLogEvent.subscribe(eventType => {
       if (eventType === 'logout') {
@@ -112,9 +114,9 @@ export class FragmentService {
     this.fragments = [];
   }
 
-  drawFragments(editor: Editor, container: HTMLElement, fragments: Fragment[], codes: Code[]){
+  drawFragments(editor: Editor, container: ViewContainerRef, fragments: Fragment[], codes: Code[]){
     let doc = editor.getDoc()
-    this.removeAllChildren(container)
+    const factory = this.componentFactoryResolver.resolveComponentFactory(TagElementComponent);
 
     fragments = fragments.map(
       fragment => {
@@ -136,34 +138,27 @@ export class FragmentService {
 
       for (let placed of placedFragments) {
         if (this.overlaps(fragmentRect, placed)) {
-          fragmentRect.x += 20
+          fragmentRect.x += 16
         }
       }
 
-      let firstCode = codes.find(code => code.id == fragment.codes[0])
+      let fragCodes = codes.filter(code => fragment.codes.includes(code.id))
+      let fragDiv = container.createComponent(factory);
 
-      var iDiv = document.createElement('div');
-      container.appendChild(iDiv)
+      fragDiv.instance.codes = fragCodes
+      fragDiv.instance.fragment = fragment
+      fragDiv.instance.divStyle = {
+        'position': 'absolute',
+        'top': fragmentRect.y + 'px',
+        'left': fragmentRect.x + 'px',
+        'visibility': 'visible'
+      }
 
-      iDiv.style.position = 'absolute'
-      iDiv.style.backgroundColor = firstCode.color
-      iDiv.style.borderRadius = '8px'
-      iDiv.style.top = fragmentRect.y + 'px'
-      iDiv.style.left = fragmentRect.x + 'px';
-      iDiv.style.height = fragmentRect.height + 'px'
-      iDiv.style.width = fragmentRect.width + 'px';
-      iDiv.style.visibility = 'visible';
-
-      let service = this
-      iDiv.addEventListener('mouseover', function(event) {
-        service.showSelection(editor, fragment)
+      fragDiv.instance.mouseover.subscribe(() => {
+        this.showSelection(editor, fragment)
       })
-      iDiv.addEventListener('mouseout', function(event) {
+      fragDiv.instance.mouseout.subscribe(() => {
         editor.selection.getSel().removeRange(fragment.rangeObject)
-      })
-      iDiv.addEventListener('click', function(event) {
-        console.log('click')
-        console.log(fragment)
       })
       placedFragments.push(fragmentRect)
     }
