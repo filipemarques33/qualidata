@@ -19,7 +19,7 @@ export class CategoryRepository extends Repository<Category> {
     super();
   }
 
-  async getByIds(ids: string[]) {
+  async getByIds(ids: string[]): Promise<Category[]> {
     let categories = [];
     for (let i = 0; i < ids.length; i+=10) {
       let queryArray = ids.slice(i, i+10);

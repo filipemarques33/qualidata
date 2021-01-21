@@ -18,7 +18,7 @@ export class CodeRepository extends Repository<Code> {
     super();
   }
 
-  async getByIds(ids: string[]) {
+  async getByIds(ids: string[]): Promise<Code[]> {
     let codes = [];
     for (let i = 0; i < ids.length; i+=10) {
       let queryArray = ids.slice(i, i+10);
