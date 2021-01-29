@@ -1,15 +1,15 @@
 import { Component, Inject, OnInit } from '@angular/core';
+
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import Category from 'src/app/data/Category';
-import { DatabaseService } from 'src/app/services/database-service';
-import { CategoryService } from 'src/app/services/category-service';
 import { Subscription } from 'rxjs';
 import Project from 'src/app/data/Project';
 import { ActivatedRoute } from '@angular/router';
-import { ProjectService } from 'src/app/services/project-service';
+import { UserService } from 'src/app/services/user-service';
+import { CategoryService } from 'src/app/services/category-service';
 
-interface DialogData {
+export interface DialogData {
   projectId: string;
   category?: Category;
 }
@@ -21,42 +21,50 @@ interface DialogData {
 })
 export class NewCategoryDialogComponent implements OnInit {
 
-  availableCategories: Category[];
+  currentProject: Project;
+  projectSubscription: Subscription;
 
-  selectedParent: Category;
+  availableCategories: Category[];
+  loadingCategories = false;
+
+  selectedParent: Category = null;
   selectedColor = "#0000FF";
 
-  editMode: boolean = false
+  editMode: boolean = false;
 
   categoryForm = new FormGroup({
     name: new FormControl ('', [Validators.required]),
     description: new FormControl ('', [Validators.required]),
-    parent: new FormControl (null)
-  })
+    parent: new FormControl (null),
+    useParentColor: new FormControl({value: false, disabled: true})
+  }, {})
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
     public route: ActivatedRoute,
-    public databaseService: DatabaseService,
     public dialogRef: MatDialogRef<NewCategoryDialogComponent>,
-    public categoryService: CategoryService,
-    public projectService: ProjectService
+    public userService: UserService,
+    public categoryService: CategoryService
   ) { }
 
-  ngOnInit(): void {
-    this.availableCategories = this.categoryService.categories.sort((a,b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
-    if (this.data.category != null) {
-      this.editMode = true
-      this.categoryForm.get('name').setValue(this.data.category.name)
-      this.categoryForm.get('description').setValue(this.data.category.description)
-      this.categoryForm.get('parent').setValue(this.data.category.parent)
-      this.selectedColor = this.data.category.color
-      this.changeParent(this.data.category.parent)
+  async ngOnInit() {
+    if (!this.userService.categories || this.userService.categories.length === 0) {
+      this.loadingCategories = true;
+      await this.userService.loadUserCategories();
+      this.loadingCategories = false;
     }
-    console.log(this.editMode)
+    this.availableCategories = this.userService.categories;
+    if (this.data.category != null) {
+      this.editMode = true;
+      this.categoryForm.get('name').setValue(this.data.category.name);
+      this.categoryForm.get('description').setValue(this.data.category.description);
+      this.categoryForm.get('parent').setValue(this.data.category.parent);
+      this.selectedColor = this.data.category.color;
+      this.changeParent(this.data.category.parent);
+    }
   }
 
-  submit() {
+  async submit() {
     if (this.categoryForm.valid) {
       this.editMode ? this.updateCategory() : this.saveCategory()
     } else {
@@ -65,7 +73,9 @@ export class NewCategoryDialogComponent implements OnInit {
   }
 
   changeParent(parentId) {
-    this.selectedParent = parentId ? this.availableCategories.find(category => category.id == parentId) : null
+    this.selectedParent = parentId ? this.availableCategories.find(category => category.id == parentId) : null;
+    if (this.selectedParent) this.categoryForm.controls.useParentColor.enable();
+    else this.categoryForm.controls.useParentColor.disable();
   }
 
   saveCategory() {
@@ -73,7 +83,7 @@ export class NewCategoryDialogComponent implements OnInit {
     let description = this.categoryForm.get('description').value
     let parent = this.categoryForm.get('parent').value
 
-    let category = new Category('', name, description, this.selectedColor, 'black', parent);
+    let category = new Category('', name, description, this.selectedColor, 'black', parent, [], []);
     this.categoryService.saveCategory(category, String(this.data.projectId));
     this.dialogRef.close();
   }
@@ -87,6 +97,5 @@ export class NewCategoryDialogComponent implements OnInit {
     this.categoryService.updateCategoryContent(this.data.category, categoryInfo)
     this.dialogRef.close();
   }
-
 
 }

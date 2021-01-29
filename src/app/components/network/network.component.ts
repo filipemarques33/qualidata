@@ -5,10 +5,13 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { MatSidenav } from '@angular/material/sidenav';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import VertexCategory from 'src/app/data/Canvas/VertexCategory';
-import CanvasEdge from 'src/app/data/Canvas/CanvasEdge';
 import { RelationshipDialog } from './relationship-dialog/relationship-dialog.component';
-import { DatabaseService } from 'src/app/services/database-service';
 import { CanvasNetworkService } from 'src/app/services/canvas-network-service';
+import { NetworkService } from 'src/app/services/network-service';
+import { UserService } from 'src/app/services/user-service';
+import { NetworkDialog } from './network-dialog/network-dialog.component';
+import { Edge } from 'src/app/data/Canvas/Edge';
+import { Router } from '@angular/router';
 
 interface VertexNode {
   id: number;
@@ -41,25 +44,31 @@ export class NetworkComponent implements OnInit, OnDestroy {
   canvasContext: CanvasRenderingContext2D;
   focusedDetailsNode: VertexCategory;
   selectedDetailsNode: VertexCategory;
-  focusedEdge: CanvasEdge;
-  selectedEdge: CanvasEdge;
+  focusedEdge: Edge;
+  selectedEdge: Edge;
 
   sidenavHover = false;
   isOpeningMenu = false;
 
-  private onContextMenu;
+  private onContextMenu: { (event: MouseEvent): void; (this: Document, ev: MouseEvent): any; (this: Document, ev: MouseEvent): any; };
+  private onScroll: { (event: WheelEvent): void; (this: Document, ev: WheelEvent): any; (this: Document, ev: WheelEvent): any; };
 
   constructor(
+    private router: Router,
     public canvasNetworkService: CanvasNetworkService,
-    public databaseService: DatabaseService,
-    public relationshipDialog: MatDialog,
+    public networkService: NetworkService,
+    public userService: UserService,
+    public matDialog: MatDialog,
   ) {}
 
   async ngOnInit() {
+    if (!this.userService.currentProject) {
+      this.router.navigate(['projects']);
+      return;
+    }
+
     this.canvas = this.canvasRef.nativeElement;
-    this.canvasNetworkService.setupCanvasStage(this.canvas,
-      (event: MouseEvent, vertex: VertexCategory) => this.openDetailsMenu(event, vertex),
-      (event: MouseEvent, edge: CanvasEdge) => this.openEdgeMenu(event, edge));
+
     this.onContextMenu = (event: MouseEvent) => {
       if (!this.isOpeningMenu) {
         (event.target as HTMLDivElement).click();
@@ -67,11 +76,45 @@ export class NetworkComponent implements OnInit, OnDestroy {
       this.isOpeningMenu = false;
       event.preventDefault();
     }
+    this.onScroll = (event: WheelEvent) => {
+      if (event.target !== this.canvas) return;
+      if (event.ctrlKey) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.deltaY) this.canvasNetworkService.changeScaleByAmount(event.deltaY < 0 ? 0.02 : -0.02);
+      } else {
+        let x = event.shiftKey ? -event.deltaY%100 : -event.deltaX%100;
+        let y = event.shiftKey ? -event.deltaX%100 : -event.deltaY%100;
+        this.canvasNetworkService.changeOffset(x, y);
+      }
+    }
+
     document.addEventListener("contextmenu", this.onContextMenu, false);
+    document.addEventListener("wheel", this.onScroll, {passive: false});
+
+    if (!this.userService.currentNetwork) {
+      await this.userService.loadUserNetworksData();
+    }
+
+    this.canvasNetworkService.setupCanvasStage(this.canvas,
+      (event: MouseEvent, vertex: VertexCategory) => this.openDetailsMenu(event, vertex),
+      (event: MouseEvent, edge: Edge) => this.openEdgeMenu(event, edge));
   }
 
   ngOnDestroy(): void {
     document.removeEventListener("contextmenu", this.onContextMenu, false);
+    document.removeEventListener("wheel", this.onScroll);
+    this.canvasNetworkService.areStructuresSetup = false;
+  }
+
+  openDescriptionSidebar() {
+    if (!this.detailsRef.opened) {
+      this.detailsRef.open();
+    } else if (!this.selectedDetailsNode && !this.selectedEdge) {
+      this.detailsRef.close();
+    }
+    this.selectedDetailsNode = null;
+    this.selectedEdge = null;
   }
 
   openDetailsMenu(event: MouseEvent, vertex: VertexCategory) {
@@ -83,7 +126,7 @@ export class NetworkComponent implements OnInit, OnDestroy {
     this.matTrigger.openMenu();
   }
 
-  openEdgeMenu(event: MouseEvent, edge: CanvasEdge) {
+  openEdgeMenu(event: MouseEvent, edge: Edge) {
     this.isOpeningMenu = true;
     this.focusedDetailsNode = null;
     this.focusedEdge = edge;
@@ -92,18 +135,22 @@ export class NetworkComponent implements OnInit, OnDestroy {
     this.matTrigger.openMenu();
   }
 
-  openDetailsSidenav() {
+  openDetailsSidebar() {
     this.selectedDetailsNode = this.focusedDetailsNode;
     this.selectedEdge = this.focusedEdge;
     this.detailsRef.open();
   }
 
   openRelationshipDialog() {
-    this.relationshipDialog.open(RelationshipDialog, {
+    this.matDialog.open(RelationshipDialog, {
       data: {
         vertex: this.focusedDetailsNode
       }
-    })
+    });
+  }
+
+  openNetworkDialog() {
+    this.matDialog.open(NetworkDialog);
   }
 
   removeVertex() {

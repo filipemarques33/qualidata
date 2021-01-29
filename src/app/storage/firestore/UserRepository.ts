@@ -1,13 +1,8 @@
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
-import Code from "src/app/data/Code";
+import User from "src/app/data/User";
 
 import { Repository } from '../Repository';
-
-export interface User {
-  email: string;
-  projectIds: string[];
-}
 
 @Injectable({
   providedIn: 'root'
@@ -17,13 +12,23 @@ export class UserRepository extends Repository<User> {
     super();
   }
 
-  async createByEmail(email: string) {
-    let user = await this.firebase.collection<User>('users').add({email: email, projectIds: []});
-    return (await user.get()).data();
+  async createByUsername(username: string) {
+    let userRef = await this.firebase.collection<Partial<User>>('users').add({username: username, projectsIds: []});
+    let user = (await userRef.get()).data();
+    user.id = userRef.id;
+    return new User(user.id, user.username, user.projectsIds);
+  }
+
+  async updateById(id: string, userData: Partial<User>) {
+    await this.firebase.collection('users').doc<User>(id).update(userData);
   }
 
   async getByProperty(property: string, match: string) {
     let user = await this.firebase.collection<User>('users').ref.where(property, '==', match).get();
-    return user.docs.map(doc => doc.data());
+    return user.docs.map(doc => {
+      let userData = doc.data();
+      userData.id = doc.id;
+      return userData;
+    });
   }
 }

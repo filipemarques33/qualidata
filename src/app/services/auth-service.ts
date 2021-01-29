@@ -1,39 +1,39 @@
-import { EventEmitter, Injectable, OnInit } from "@angular/core";
-import { User, UserRepository } from "../storage/firestore/UserRepository";
+import { Injectable } from "@angular/core";
+
+import { UserRepository } from "../storage/firestore/UserRepository";
+import { AppError } from '../errors/app-error';
+import User from '../data/User';
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  public user: User;
-  public userLogEvent: EventEmitter<string> = new EventEmitter();
-
   constructor (
     private userRepository: UserRepository
   ) {}
 
-  async getUsersByEmail(email: string) {
-    return (await this.userRepository.getByProperty('email', email));
+  async getUsersByUsername(username: string) {
+    return (await this.userRepository.getByProperty('username', username));
   }
 
-  async loginUser(email: string, storeEmail: boolean = true) {
-    let users = await this.getUsersByEmail(email);
-    if (users.length === 0) {
-      this.user = await this.createUser(email);
-    } else {
-      this.user = users[0];
+  async signupUser(username: string) {
+    let users: User[];
+    try {
+      users = await this.getUsersByUsername(username);
+    } catch (error) {
+      throw new AppError('Login error', 'Error getting users');
     }
-    if (storeEmail) localStorage.setItem('userEmail', email);
-    this.userLogEvent.emit('login');
+    if (users.length !== 0) throw new AppError('Singup error', 'User already exists');
+    return await this.userRepository.createByUsername(username);
   }
 
-  logoutUser() {
-    this.user = null;
-    localStorage.removeItem('userEmail');
-    this.userLogEvent.emit('logout');
-  }
-
-  private async createUser(email: string) {
-    return this.userRepository.createByEmail(email);
+  async loginUser(username: string) {
+    let users: User[];
+    try {
+      users = await this.getUsersByUsername(username);
+    } catch (error) {
+      throw new AppError('Login error', 'Error getting users');
+    }
+    return users[0];
   }
 }

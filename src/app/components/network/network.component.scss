@@ -5,9 +5,41 @@ app-network .network-wrapper {
   z-index: 11;
 }
 
+app-network .network-comment-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 100;
+  display: flex;
+  border-radius: 5px;
+  background: white;
+  padding: 5px;
+  cursor: pointer;
+  transition: all 200ms ease-in-out;
+  user-select: none;
+
+  &.opened {
+    right: 260px;
+  }
+
+  &:hover {
+    box-shadow: 1px 1px 4px #999;
+  }
+
+  mat-icon {
+    color: gray;
+    user-select: none;
+  }
+}
+
+.network-wrapper .tree-sidenav .mat-drawer-inner-container {
+  display: flex;
+  flex-flow: column;
+}
+
 .network-wrapper .mat-sidenav {
   min-width: 140px;
-  max-width: 250px;
+  max-width: 300px;
   z-index: 10;
   overflow: visible;
   visibility: visible !important;
@@ -32,7 +64,8 @@ app-network .network-wrapper {
 }
 
 .network-wrapper .details-sidebar {
-  width: 220px;
+  width: 250px;
+  overflow-x: visible;
 }
 
 .cdk-overlay-container .mat-menu-wrapper {

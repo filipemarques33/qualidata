@@ -1,15 +1,12 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+import { NgModule, OnInit } from '@angular/core';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { EditorModule, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AngularFireModule } from '@angular/fire';
-import { AngularFireDatabaseModule } from '@angular/fire/database';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { ColorPickerModule } from 'ngx-color-picker';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
 import { ImportsModule } from 'src/app/common/imports.module';
@@ -24,6 +21,8 @@ import { DetailsSidebar } from "./components/details-sidebar/details-sidebar.com
 import { TreeView } from "./components/tree-view/tree-view.component";
 import { UserLoginDialog } from './components/user-login/user-login.component';
 import { ProjectsComponent } from './components/projects/projects.component';
+import { CreationDialog } from './components/projects/creation-dialog/creation-dialog.component';
+import { CodeSidebarComponent } from './components/categories/code-sidebar/code-sidebar.component';
 
 import { NetworkService } from './services/network-service';;
 import { ProjectService } from './services/project-service';
@@ -31,7 +30,8 @@ import { CategoryService } from './services/category-service';
 import { CodeService } from './services/code-service';
 import { AuthService } from './services/auth-service';
 import { CanvasNetworkService } from './services/canvas-network-service'
-import { ManagerService } from './services/manager-service'
+import { UserService } from './services/user-service'
+import { SourceService } from './services/source-service';
 
 import { environment } from 'src/environments/environment';
 import { SourcesComponent } from './components/sources/sources.component';
@@ -39,9 +39,11 @@ import { EditSourceComponent } from './components/edit-source/edit-source.compon
 import { CategoriesComponent } from './components/categories/categories.component';
 import { NewCategoryDialogComponent } from './components/categories/new-category-dialog/new-category-dialog.component';
 import { TaggingDialogComponent } from './components/edit-source/tagging-dialog/tagging-dialog.component';
+import { NetworkDialog } from './components/network/network-dialog/network-dialog.component';
 import { NewCodeDialogComponent } from './components/edit-source/new-code-dialog/new-code-dialog.component';
-import { CodeSidebarComponent } from './components/categories/code-sidebar/code-sidebar.component';
 import { TagElementComponent } from './components/edit-source/tag-element/tag-element.component';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @NgModule({
   declarations: [
@@ -50,6 +52,7 @@ import { TagElementComponent } from './components/edit-source/tag-element/tag-el
     NavBarComponent,
     NetworkComponent,
     RelationshipDialog,
+    NetworkDialog,
     DetailsSidebar,
     TreeView,
     UserLoginDialog,
@@ -60,8 +63,9 @@ import { TagElementComponent } from './components/edit-source/tag-element/tag-el
     NewCategoryDialogComponent,
     TaggingDialogComponent,
     NewCodeDialogComponent,
-    CodeSidebarComponent,
     TagElementComponent,
+    CreationDialog,
+    CodeSidebarComponent
   ],
   imports: [
     BrowserModule,
@@ -72,7 +76,6 @@ import { TagElementComponent } from './components/edit-source/tag-element/tag-el
     ImportsModule,
     NgbModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
-    AngularFireDatabaseModule,
     AngularFirestoreModule,
     ColorPickerModule,
     MatSelectModule,
@@ -87,8 +90,10 @@ import { TagElementComponent } from './components/edit-source/tag-element/tag-el
     CodeService,
     AuthService,
     CanvasNetworkService,
-    ManagerService
+    UserService,
+    SourceService
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

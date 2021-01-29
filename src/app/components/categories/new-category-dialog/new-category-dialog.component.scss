@@ -3,6 +3,14 @@
   width: 600px;
 }
 
+.formDialog .category-color {
+  margin-bottom: 1.34375em;
+
+  &.disabled {
+    cursor: default;
+  }
+}
+
 .formArea {
   min-height: 100px;
 }

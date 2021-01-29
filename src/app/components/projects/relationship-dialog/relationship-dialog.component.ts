@@ -1,9 +1,8 @@
 import { Component, Inject } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import VertexCategory from 'src/app/data/Canvas/VertexCategory';
-import { CanvasNetworkService } from 'src/app/services/canvas-network-service';
-import { NetworkService } from 'src/app/services/network-service';
+import VertexCategory from '../../../data/Canvas/VertexCategory';
+import { CanvasNetworkService } from '../../../services/canvas-network-service';
 
 export interface RelationshipDialogData {
   vertex: VertexCategory;

@@ -22,7 +22,11 @@ export class NetworkRepository extends Repository<Network> {
 
   async getByIds(ids: string[]) {
     let networksRefs = await this.firebase.collection<Network>('networks').ref.where('__name__', 'in', ids).get();
-    return networksRefs.docs.map(doc => doc.data());
+    return networksRefs.docs.map(doc => {
+      let network = doc.data();
+      network.id = doc.id;
+      return network;
+    });
   }
 
   async saveById(id: string, network: Network) {
@@ -31,5 +35,16 @@ export class NetworkRepository extends Repository<Network> {
 
   async updateRelationshipById(id: string, relationships: Relationship[]) {
     await this.firebase.doc<Network>(`networks/${id}`).update({relationships: relationships});
+  }
+
+  async updateById(id: string, updateData: Partial<Network>) {
+    await this.firebase.doc<Network>(`networks/${id}`).update(updateData);
+  }
+
+  async create(network: Network) {
+    let {id, ...networkWithoutId} = network;
+    let networkRef = await this.firebase.collection<Partial<Network>>('networks').add(networkWithoutId);
+    network.id = networkRef.id;
+    return network;
   }
 }
