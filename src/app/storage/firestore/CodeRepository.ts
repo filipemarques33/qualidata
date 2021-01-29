@@ -1,14 +1,11 @@
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
-import * as firebase from 'firebase/app';
+import firebase from 'firebase/app';
+import 'firebase/firestore';
+import Category from "src/app/data/Category";
 
 import Code from '../../data/Code';
 import { Repository } from '../Repository';
-
-export interface User {
-  email: string;
-  projectIds: string[];
-}
 
 @Injectable({
   providedIn: 'root'
@@ -18,23 +15,44 @@ export class CodeRepository extends Repository<Code> {
     super();
   }
 
-  async getByIds(ids: string[]): Promise<Code[]> {
-    let codes = [];
-    for (let i = 0; i < ids.length; i+=10) {
-      let queryArray = ids.slice(i, i+10);
-      let fragmentsRef = await this.firebase.collection<Code>('codes').ref.where(firebase.default.firestore.FieldPath.documentId(), 'in', queryArray).get();
-      fragmentsRef.docs.forEach(doc => {
-        let code = doc.data();
-        code.id = doc.id;
-        codes.push(code);
-      });
-    }
-    return codes;
-  }
-
   subscribeToCodes(ids: string[]){
     let codes = this.firebase.collection<Code>('codes', ref => ref.where('id', 'in', ids)).valueChanges()
     return codes
+  }
+
+  async getByIds(ids: string[]) {
+    let codesRef = await this.firebase.collection<Code>('codes').ref.where(firebase.firestore.FieldPath.documentId(), 'in', ids).get();
+    return codesRef.docs.map(doc => {
+      let code = doc.data();
+      code.id = doc.id;
+      let newCode = new Code(code.id, code.name, code.description, code.fragments, code.color, code.parent, code.textColor);
+      return newCode;
+    });
+  }
+
+  async saveToCategory(code: Code, parentCategory: Category) {
+
+    let codeRef = this.firebase.createId();
+
+    let dataToSave = {
+      'id': codeRef,
+      'name': code.name,
+      'description': code.description,
+      'fragments': null,
+      'color': code.color,
+      'textColor': code.textColor,
+    };
+
+    await this.firebase.collection('codes').doc(codeRef).set(dataToSave);
+
+    if (parentCategory) {
+      await this.firebase.collection('categories').doc(parentCategory.id).update({
+        'codes': firebase.firestore.FieldValue.arrayUnion(codeRef)
+      });
+    }
+
+    code.id = codeRef;
+    return code;
   }
 
   async saveToProject(code: Code, projectId: string) {
@@ -53,16 +71,18 @@ export class CodeRepository extends Repository<Code> {
     await this.firebase.collection('codes').doc(codeRef).set(dataToSave)
 
     await this.firebase.collection('projects').doc(projectId).update({
-      codes: firebase.default.firestore.FieldValue.arrayUnion(codeRef)
+      codes: firebase.firestore.FieldValue.arrayUnion(codeRef)
     })
 
     if (code.parent) {
       await this.firebase.collection('categories').doc(code.parent).update({
-        codes: firebase.default.firestore.FieldValue.arrayUnion(codeRef)
+        codes: firebase.firestore.FieldValue.arrayUnion(codeRef)
       })
     }
 
-    return codeRef
+    code.id = codeRef;
+
+    return code;
 
   }
 
@@ -82,7 +102,7 @@ export class CodeRepository extends Repository<Code> {
     await this.firebase.collection('codes').doc(codeRef).set(dataToSave)
     for (let cat of catIds) {
       this.firebase.collection('categories').doc(cat).update({
-        'codes': firebase.default.firestore.FieldValue.arrayUnion(codeRef)
+        'codes': firebase.firestore.FieldValue.arrayUnion(codeRef)
       })
     }
   }
@@ -95,23 +115,22 @@ export class CodeRepository extends Repository<Code> {
     });
   }
 
-
   async addFragment(id: string, fragmentId: string) {
     await this.firebase.collection('codes').doc(id).update({
-      fragments: firebase.default.firestore.FieldValue.arrayUnion(fragmentId)
+      fragments: firebase.firestore.FieldValue.arrayUnion(fragmentId)
     })
   }
 
   async updateContent(code: Code, data: Partial<Code>) {
     if (code.parent != data.parent) {
       if (data.parent) {
-        this.firebase.collection('codes').doc(data.parent).update({
-          categories: firebase.default.firestore.FieldValue.arrayUnion(code.id)
+        this.firebase.collection('categories').doc(data.parent).update({
+          codes: firebase.firestore.FieldValue.arrayUnion(code.id)
         })
       }
       if (code.parent) {
         this.firebase.collection('categories').doc(code.parent).update({
-          categories: firebase.default.firestore.FieldValue.arrayRemove(code.id)
+          codes: firebase.firestore.FieldValue.arrayRemove(code.id)
         })
       }
     }
@@ -123,5 +142,4 @@ export class CodeRepository extends Repository<Code> {
       color: data.color
     });
   }
-
 }

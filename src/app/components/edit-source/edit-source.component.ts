@@ -1,17 +1,14 @@
-import { Component, HostListener, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { AfterContentInit, AfterViewInit, Component, HostListener, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import Source from 'src/app/data/Source';
-import Fragment from 'src/app/data/Fragment';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { SourceService } from 'src/app/services/source-service';
-import { FragmentService } from 'src/app/services/fragment-service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { TaggingDialogComponent } from './tagging-dialog/tagging-dialog.component';
 import tinymce from 'tinymce';
-import { Subscription } from 'rxjs';
-import { ThisReceiver } from '@angular/compiler';
-import { CodeService } from 'src/app/services/code-service';
-import { ProjectService } from 'src/app/services/project-service';
+import { UserService } from 'src/app/services/user-service';
+import { SourceService } from 'src/app/services/source-service';
+import { FragmentService } from 'src/app/services/fragment-service';
+import Fragment from 'src/app/data/Fragment';
 import Code from 'src/app/data/Code';
 
 @Component({
@@ -19,48 +16,61 @@ import Code from 'src/app/data/Code';
   templateUrl: './edit-source.component.html',
   styleUrls: ['./edit-source.component.scss']
 })
-export class EditSourceComponent implements OnInit, OnDestroy {
-
-  currentProjectId: string = ''
-
-  currentSourceId: string = ''
-  currentSource: Source = new Source('', '', '', []);
-  fragments: Fragment[]
-
-  availableCodes: Code[] = []
-  codeSubscription: Subscription
-
-  @ViewChild ('fragmentBuilder', { read: ViewContainerRef }) fragmentListRef: ViewContainerRef
+export class EditSourceComponent implements OnInit, AfterContentInit {
+  @ViewChild('fragmentBuilder', { read: ViewContainerRef }) fragmentListRef: ViewContainerRef;
 
   tinyMceConfig: any;
 
+  currentProjectId: string = '';
+
+  currentSourceId: string = '';
+  currentSource: Source = new Source('', '', '', []);
+  fragments: Fragment[];
+
+  availableCodes: Code[] = [];
+
+  editorConfigured = false;
+
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private snackbar: MatSnackBar,
+    private userService: UserService,
     private sourceService: SourceService,
     private fragmentService: FragmentService,
-    private codeService: CodeService,
-    private projectService: ProjectService,
-    private taggingDialogRef: MatDialog,
+    private taggingDialogRef: MatDialog
   ) { }
 
-  ngOnInit() {
-    this.currentProjectId = this.route.snapshot.paramMap.get('projId');
-    this.getPageContent();
-    this.configureEditor();
+  async ngOnInit() {
+    if (!this.userService.currentProject) {
+      this.router.navigate(['projects']);
+      return;
+    }
+
+    await this.getPageContent();
   }
 
-  ngOnDestroy() {
-    //this.fragmentSubscription.unsubscribe()
+  async ngAfterContentInit() {
+    this.configureEditor();
+    this.editorConfigured = true;
+    this.drawFragmentsPanel();
+  }
+
+  async updateFile(){
+    await this.sourceService.updateContent(this.currentSource);
+    this.snackbar.open('Document updated', null, {
+      duration: 2000,
+    });
   }
 
   async getPageContent() {
     const sourceId = this.route.snapshot.paramMap.get('sourceId');
     this.currentSource = await this.sourceService.getSourceById(sourceId);
-    this.fragments = await this.fragmentService.getFragmentsByIds(this.currentSource.fragments)
-    await this.codeService.loadUserCodes()
-    this.availableCodes = this.codeService.codes
-    this.drawFragmentsPanel()
+    if (this.currentSource && this.currentSource.fragments)
+      this.fragments = await this.fragmentService.getFragmentsByIds(this.currentSource.fragments);
+    await this.userService.loadUserCodes();
+    this.availableCodes = this.userService.codes;
+    if (this.editorConfigured) this.drawFragmentsPanel();
   }
 
   configureEditor(){
@@ -70,7 +80,7 @@ export class EditSourceComponent implements OnInit, OnDestroy {
       suffix: '.min',
       height: 500,
       menubar: false,
-      placeholder: 'Comece a escrever seu documento aqui',
+      placeholder: 'Wait for your documento to load',
       plugins: [
         'advlist autolink lists link image charmap print',
         'preview anchor searchreplace visualblocks code',
@@ -84,22 +94,10 @@ export class EditSourceComponent implements OnInit, OnDestroy {
         editor.ui.registry.addButton('tagging', {
           icon: 'permanent-pen',
           text: 'Tag fragment',
-          onAction: function (_) {
-            component.tagFragment()
-          }
+          onAction: () => component.tagFragment()
         });
       }
     }
-  }
-
-  updateFile(): void {
-    this.sourceService.updateContent(this.currentSource).then(
-      () => {
-        this.snackbar.open('Documento atualizado', null, {
-          duration: 2000,
-        })
-      }
-    )
   }
 
   verifyFields() {
@@ -120,28 +118,31 @@ export class EditSourceComponent implements OnInit, OnDestroy {
       ).afterClosed().subscribe(
         async (success) => {
           if (success) {
-            this.getPageContent()
+            this.getPageContent();
           }
         }
       )
     } else {
-      alert('Selecione um trecho de texto para continuar')
+      alert('Select a fragment of text to continue')
     }
   }
 
   drawFragmentsPanel() {
-    let container = document.getElementById("fragmentlist")
-    this.removeAllChildren(container)
-    container.style.height = tinymce.activeEditor.getBody().scrollHeight + "px"
-    this.fragmentService.drawFragments(tinymce.activeEditor, this.fragmentListRef, this.fragments, this.availableCodes)
-    this.syncScrolls()
+    if (this.currentSource.id !== '') {
+      let container = document.getElementById("fragmentlist");
+      this.removeAllChildren(container);
+      this.fragmentService.drawFragments(tinymce.activeEditor, this.fragmentListRef, this.fragments, this.availableCodes);
+      if (tinymce.activeEditor.getBody())
+        container.style.height = tinymce.activeEditor.getBody().scrollHeight + "px";
+      this.syncScrolls();
+    }
   }
 
   syncScrolls() {
-    var leftDiv = tinymce.editors[0].getWin()
+    var leftDiv = tinymce.editors[0].getWin();
     var rightDiv = document.getElementById("sidepanel");
     leftDiv.onscroll = function() {
-      rightDiv.scrollTop = leftDiv.scrollY
+      rightDiv.scrollTop = leftDiv.scrollY;
     }
   }
 

@@ -9,12 +9,10 @@ import Category from "../data/Category";
 import Code from "../data/Code";
 import Relationship from "../data/Relationship";
 import CanvasEdge from "../data/Canvas/CanvasEdge";
-import { NetworkService } from "./network-service";
-import { CategoryService } from "./category-service";
-import { CodeService } from "./code-service";
-import { AuthService } from "./auth-service";
 import CanvasCode from "../data/Canvas/CanvasCode";
-import { ManagerService } from "./manager-service";
+import { UserService } from "./user-service";
+import Vertex from "../data/Canvas/Vertex";
+import { Edge } from "../data/Canvas/Edge";
 
 interface ConnectionOptions {
   title?: string;
@@ -29,15 +27,21 @@ interface ConnectionOptions {
 export class CanvasNetworkService {
 
   private canvasStage: CanvasStage;
-  private detailsCallback: Function;
-  private edgeCallback: Function;
+  private detailsCallback: (event: MouseEvent, vertex: VertexCategory) => void;
+  private edgeCallback: (event: MouseEvent, edge: Edge) => void;
   private codes: Map<string, Code> = new Map();
   private categories: Map<string, Category> = new Map();
   private vertexMap: Map<string, VertexCategory> = new Map();
 
   public structuresUpdated: EventEmitter<boolean> = new EventEmitter();
+  public savingNetworkEvent = new EventEmitter<boolean>();
   public network: Network;
+  public scale: number = 1;
 
+  public offset = {
+    x: 0,
+    y: 0
+  };
   public canvasCategories: CanvasCategory[] = [];
   public canvasCodes: CanvasCode[] = [];
   public quotations: string[];
@@ -46,23 +50,19 @@ export class CanvasNetworkService {
   public areStructuresSetup = false;
 
   constructor(
-    private networkService: NetworkService,
-    private categoryService: CategoryService,
-    private codeService: CodeService,
-    private authService: AuthService,
-    private managerService: ManagerService
+    private userService: UserService
   ) {
-    this.authService.userLogEvent.subscribe((eventType: string) => {
-      if (eventType === 'logout') {
-        this.logoutUser();
-      }
+    this.userService.userFullyLoaded.subscribe(() => {
+      if (this.canvasStage)
+        this.setupStructures();
     });
-    this.managerService.userFullyLoaded.subscribe(() => {
-      this.setupStructures();
-    });
+    this.userService.networkSelected.subscribe(() => {
+      if (this.canvasStage)
+        this.setupStructures();
+    })
   }
 
-  async setupCanvasStage(canvasRef: HTMLCanvasElement, detailCallback: Function, edgeCallback: Function) {
+  async setupCanvasStage(canvasRef: HTMLCanvasElement, detailCallback: (event: MouseEvent, vertex: VertexCategory) => void, edgeCallback: (event: MouseEvent, edge: Edge) => void) {
     this.detailsCallback = detailCallback;
     this.edgeCallback = edgeCallback;
     this.canvasStage = new CanvasStage(canvasRef);
@@ -74,26 +74,25 @@ export class CanvasNetworkService {
       this.canvasStage?.stage.update();
     });
 
-    if (this.authService.user && !this.areStructuresSetup) {
-      await this.categoryService.loadUserCategories();
-      await this.codeService.loadUserCodes();
-      await this.networkService.loadUserNetworks();
-      this.network = this.networkService.currentNetwork;
+    if (this.userService.user && this.userService.currentNetwork && !this.areStructuresSetup) {
+      this.network = this.userService.currentNetwork;
       this.setupStructures();
     }
   }
 
   async saveChanges() {
+    this.savingNetworkEvent.emit(true);
     let updateCategories: Partial<Category>[] = [];
     let updateCodes: Partial<Code>[] = [];
-    let updateRelationships: Relationship[];
-    let updatePositions = new Map<string, {x: number, y: number}>();
+    let updateRelationships: Relationship[] = [];
+    let updatePositions: {[key: string]: {x: number, y: number}} = {};
 
     let uniqueRelationships: CanvasEdge[] = [];
     this.visibleVertices.forEach(vertex => {
-      let updateData = {
+      let updateData: Partial<Code> = {
         id: vertex.id,
         name: vertex.name,
+        description: vertex.description,
         color: vertex.color,
         textColor: vertex.textColor
       };
@@ -102,24 +101,26 @@ export class CanvasNetworkService {
       } else {
         updateCodes.push(updateData);
       }
-      updatePositions.set(vertex.id, {x: vertex.vertex.x, y: vertex.vertex.y});
+      updatePositions[vertex.id] = {x: vertex.vertex.x + this.offset.x, y: vertex.vertex.y + this.offset.y};
     });
     [...this.visibleRelationships].forEach(([vertexId, relationships]) => {
       uniqueRelationships.push(...relationships.filter(relationship => relationship.fromVertex.id === vertexId));
     });
     updateRelationships = uniqueRelationships.map(relationship => ({
-      title: relationship.title,
-      comment: relationship.comment,
-      color: relationship.color,
+      title: relationship.edge.title,
+      comment: relationship.edge.comment ? relationship.edge.comment : '',
+      color: relationship.edge.color,
       from: relationship.fromVertex.id,
       to: relationship.toVertex.id,
-      arrowFrom: relationship.arrowFrom,
-      arrowTo: relationship.arrowTo,
-      edgeType: relationship.edgeType
+      arrowFrom: relationship.edge.arrowFrom,
+      arrowTo: relationship.edge.arrowTo,
+      edgeType: relationship.edge.edgeType
     }));
-    if (updateCategories.length) await this.categoryService.updateCategories(updateCategories);
-    if (updateCodes.length) await this.codeService.updateCodes(updateCodes);
-    if (updateRelationships) await this.networkService.updateRelationships(this.network.id, updateRelationships);
+
+    let networkData: Partial<Network> = {relationships: updateRelationships, positions: updatePositions, description: this.network.description};
+    await this.userService.updateNetwork(networkData, updateCategories, updateCodes);
+
+    this.savingNetworkEvent.emit(false);
   }
 
   redraw() {
@@ -133,7 +134,7 @@ export class CanvasNetworkService {
   renderVertex(id: string, x: number, y: number) {
     let vertex = this.vertexMap.get(id);
     if (vertex && !vertex.isVertexRendered) {
-      vertex.renderVertex(x, y);
+      vertex.renderVertex(x, y, this.scale);
       this.visibleVertices.push(vertex);
       this.visibleRelationships.set(id, []);
     }
@@ -141,15 +142,17 @@ export class CanvasNetworkService {
 
   unrenderVertex(vertex: VertexCategory) {
     let edges = this.visibleRelationships.get(vertex.id);
-    this.visibleRelationships.get(vertex.id).forEach(relationship => {
-      let differentId = relationship.fromVertex.id === vertex.id ? relationship.toVertex.id : relationship.fromVertex.id;
-      this.visibleRelationships.set(differentId,
-        this.visibleRelationships.get(differentId)
-          .filter(rel => rel.fromVertex.id !== vertex.id && rel.toVertex.id !== vertex.id)
-      );
-    });
-    this.visibleRelationships.delete(vertex.id);
-    edges.forEach(edge => edge.unrenderArc());
+    if (edges) {
+      edges.forEach(relationship => {
+        let differentId = relationship.fromVertex.id === vertex.id ? relationship.toVertex.id : relationship.fromVertex.id;
+        this.visibleRelationships.set(differentId,
+          this.visibleRelationships.get(differentId)
+            .filter(rel => rel.fromVertex.id !== vertex.id && rel.toVertex.id !== vertex.id)
+        );
+      });
+      this.visibleRelationships.delete(vertex.id);
+      edges.forEach(edge => edge.unrenderArc());
+    }
     this.visibleVertices = this.visibleVertices.filter(visibleVertex => visibleVertex.id !== vertex.id);
     vertex.unrenderVertex();
   }
@@ -157,11 +160,11 @@ export class CanvasNetworkService {
   connectVertices(origin: VertexCategory, destination: VertexCategory, options?: ConnectionOptions) {
     let edge = new CanvasEdge(this.canvasStage, options && options.color ? options.color : 'gray', origin, destination, this.edgeCallback);
     if (options) {
-      edge.comment = options.comment;
-      edge.title = options.title != null ? options.title : edge.title;
-      edge.edgeType = options.edgeType != null ? options.edgeType : edge.edgeType;
-      edge.arrowFrom = options.arrowFrom != null ? options.arrowFrom : edge.arrowFrom;
-      edge.arrowTo = options.arrowTo != null ? options.arrowTo : edge.arrowTo;
+      edge.edge.comment = options.comment;
+      edge.edge.title = options.title != null ? options.title : edge.edge.title;
+      edge.edge.edgeType = options.edgeType != null ? options.edgeType : edge.edge.edgeType;
+      edge.edge.arrowFrom = options.arrowFrom != null ? options.arrowFrom : edge.edge.arrowFrom;
+      edge.edge.arrowTo = options.arrowTo != null ? options.arrowTo : edge.edge.arrowTo;
     }
     let originRelationships = this.visibleRelationships.get(origin.id);
     let destRelationships = this.visibleRelationships.get(destination.id);
@@ -170,25 +173,15 @@ export class CanvasNetworkService {
     edge.renderArcAtBeggining();
   }
 
-  private logoutUser() {
-    this.network = null;
-    this.categories = new Map();
-    this.codes = new Map();
-    this.vertexMap = new Map();
-    this.canvasCategories = [];
-    this.canvasCodes = [];
-    this.quotations = [];
-    this.visibleRelationships = new Map();
-    this.visibleVertices = [];
-    this.areStructuresSetup = false;
-  }
-
-  private setupStructures() {
+  setupStructures() {
+    if (!this.userService.currentNetwork) return;
+    this.visibleVertices.slice().forEach(vertex => this.unrenderVertex(vertex));
     this.visibleVertices = [];
     this.visibleRelationships = new Map();
-    this.network = this.networkService.currentNetwork;
-    this.canvasCategories = this.categoryService.categories.map(category => {
-      let canvasCategory = new CanvasCategory(this.canvasStage, category.id, category.name, category.color, this.detailsCallback);
+    this.network = this.userService.currentNetwork;
+    this.changeOffsetFromVertex = this.changeOffsetFromVertex.bind(this);
+    this.canvasCategories = this.userService.categories.map(category => {
+      let canvasCategory = new CanvasCategory(this.canvasStage, category.id, category.name, category.description, category.color, this.scale, this.detailsCallback, this.changeOffsetFromVertex);
       canvasCategory.categories = category.categories;
       canvasCategory.codes = category.codes;
       this.vertexMap.set(category.id, canvasCategory);
@@ -196,19 +189,19 @@ export class CanvasNetworkService {
       this.visibleRelationships.set(category.id, []);
       let categoryPosition = this.network.positions[category.id];
       if (categoryPosition) {
-        canvasCategory.renderVertex(categoryPosition.x, categoryPosition.y);
+        canvasCategory.renderVertex(categoryPosition.x - this.offset.x, categoryPosition.y - this.offset.y, this.scale);
         this.visibleVertices.push(canvasCategory);
       }
       return canvasCategory;
     });
-    this.canvasCodes = this.codeService.codes.map(code => {
-      let canvasCode = new CanvasCode(this.canvasStage, code.id, code.name, { color: code.color }, this.detailsCallback);
+    this.canvasCodes = this.userService.codes.map(code => {
+      let canvasCode = new CanvasCode(this.canvasStage, code.id, code.name, code.description, this.scale, this.detailsCallback, this.changeOffsetFromVertex, { color: code.color });
       this.vertexMap.set(code.id, canvasCode);
       this.codes.set(code.id, code);
       this.visibleRelationships.set(code.id, []);
       let codePosition = this.network.positions[code.id];
       if (codePosition) {
-        canvasCode.renderVertex(codePosition.x, codePosition.y);
+        canvasCode.renderVertex(codePosition.x - this.offset.y, codePosition.y - this.offset.y, this.scale);
         this.visibleVertices.push(canvasCode);
       }
       return canvasCode;
@@ -229,4 +222,43 @@ export class CanvasNetworkService {
     this.areStructuresSetup = true;
     this.structuresUpdated.emit(true);
   }
+
+  changeOffset(x: number, y: number) {
+    this.offset.x += x;
+    this.offset.y += y;
+    this.visibleVertices.forEach(vertex => {
+      vertex.vertex.x += x;
+      vertex.vertex.y += y;
+    });
+  }
+
+  changeOffsetFromVertex(x: number, y: number, inputVertex: Vertex) {
+    this.offset.x += x;
+    this.offset.y += y;
+    this.visibleVertices.forEach(vertex => {
+      if (vertex.vertex !== inputVertex && !this.canvasStage.selectedVertices.get(vertex.vertex.id)) {
+        vertex.vertex.x += x;
+        vertex.vertex.y += y;
+      }
+    })
+  }
+
+  changeScaleByAmount(amount: number) {
+    this.scale += amount;
+    this.canvasStage.changeScaleByAmount(amount);
+  }
+
+  private logoutUser() {
+    this.network = null;
+    this.categories = new Map();
+    this.codes = new Map();
+    this.vertexMap = new Map();
+    this.canvasCategories = [];
+    this.canvasCodes = [];
+    this.quotations = [];
+    this.visibleRelationships = new Map();
+    this.visibleVertices = [];
+    this.areStructuresSetup = false;
+  }
+
 }

@@ -5,6 +5,7 @@ import Category from 'src/app/data/Category';
 import Code from 'src/app/data/Code';
 import { CategoryService } from 'src/app/services/category-service';
 import { CodeService } from 'src/app/services/code-service';
+import { UserService } from 'src/app/services/user-service';
 
 interface DialogData {
   code?: Code
@@ -33,11 +34,12 @@ export class NewCodeDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
     public dialogRef: MatDialogRef<NewCodeDialogComponent>,
     public categoryService: CategoryService,
-    public codeService: CodeService
+    public codeService: CodeService,
+    public userService: UserService
   ) { }
 
   ngOnInit(): void {
-    this.availableCategories = this.categoryService.categories.sort((a,b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+    this.availableCategories = this.userService.categories.sort((a,b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
     if (this.data.code != null) {
       this.editMode = true
       this.codeForm.get('name').setValue(this.data.code.name)
@@ -54,18 +56,19 @@ export class NewCodeDialogComponent implements OnInit {
 
   submit() {
     if (this.codeForm.valid) {
-      this.editMode ? this.updateCode() : this.saveCode()
+      this.editMode ? this.updateCode() : this.saveCode();
     } else {
-      this.codeForm.markAsDirty()
+      this.codeForm.markAsDirty();
     }
   }
 
-  saveCode() {
-    let name = this.codeForm.get('name').value
-    let description = this.codeForm.get('description').value
-    let parent = this.codeForm.get('parent').value
-    let code = new Code('', name, description, [], this.selectedColor, parent)
-    this.dialogRef.close(code)
+  async saveCode() {
+    let name = this.codeForm.get('name').value;
+    let description = this.codeForm.get('description').value;
+    let parent = this.codeForm.get('parent').value;
+    let code = new Code('', name, description, [], this.selectedColor, parent);
+    await this.userService.addCodeToProject(code, null);
+    this.dialogRef.close(code);
   }
 
   async updateCode() {

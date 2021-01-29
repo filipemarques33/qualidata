@@ -1,13 +1,14 @@
 import CanvasStage from './CanvasStage';
 import CanvasCode from './CanvasCode';
 import VertexCategory from './VertexCategory'
+import Vertex from './Vertex';
 
 export default class CanvasCategory extends VertexCategory {
   codes: string[];
   categories: string[];
 
-  constructor(stage: CanvasStage, id: string, name: string, color: string, detailsCallback: Function) {
-    super(stage.stage, id, name, 'Category', color, detailsCallback);
+  constructor(stage: CanvasStage, id: string, name: string, description: string, color: string, scale: number, detailsCallback: Function, offsetCallback: (x: number, y: number, vertex: Vertex) => void) {
+    super(stage, id, name, description, 'Category', color, scale, detailsCallback, offsetCallback);
     this.codes = [];
     this.categories = [];
   }

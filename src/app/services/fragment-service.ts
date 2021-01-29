@@ -4,13 +4,11 @@ import Project from "../data/Project";
 import Source from "../data/Source";
 import Code from "../data/Code";
 import Fragment from "../data/Fragment"
-import { AuthService } from "./auth-service";
-import { ProjectService } from "./project-service";
 import { SourceService } from "./source-service";
 import { CodeService } from "./code-service";
-import tinymce, { Editor } from "tinymce/tinymce";
-import { CategoryService } from "./category-service";
+import { Editor } from "tinymce/tinymce";
 import { TagElementComponent } from "../components/edit-source/tag-element/tag-element.component";
+import { UserService } from "./user-service";
 
 @Injectable({
   providedIn: 'root'
@@ -21,25 +19,18 @@ export class FragmentService {
   public fragments: Fragment[] = [];
   public areFragmentsLoaded = false;
 
-  constructor (
+  constructor(
     private fragmentRepository: FragmentRepository,
-    private authService: AuthService,
-    private categoryService: CategoryService,
+    private userService: UserService,
     private sourceService: SourceService,
     private codeService: CodeService,
     private componentFactoryResolver: ComponentFactoryResolver
-  ) {
-    this.authService.userLogEvent.subscribe(eventType => {
-      if (eventType === 'logout') {
-        this.logoutUser();
-      }
-    });
-  }
+  ) { }
 
   buildFragment(activeEditor: Editor, source: string) {
 
     let document = activeEditor.getDoc()
-    let content = activeEditor.selection.getContent({format: 'text'})
+    let content = activeEditor.selection.getContent({ format: 'text' })
     let selection = activeEditor.selection.getSel()
     let range = selection.getRangeAt(0)
 
@@ -55,7 +46,7 @@ export class FragmentService {
 
   }
 
-  makeXPath (document, node, currentPath) {
+  makeXPath(document, node, currentPath) {
     switch (node.nodeType) {
       case 3:
       case 4:
@@ -79,7 +70,7 @@ export class FragmentService {
 
   async loadFragmentsBySource(source: Source) {
     this.loadingFragments.emit(true);
-    if (this.authService.user && !this.areFragmentsLoaded) {
+    if (this.userService.user && !this.areFragmentsLoaded) {
       this.fragments = await this.getFragmentsByIds(source.fragments);
       this.areFragmentsLoaded = true;
     }
@@ -94,11 +85,11 @@ export class FragmentService {
     return this.fragmentRepository.subscribeToAll()
   }
 
-  async saveFragment(fragment: Fragment, project: Project, source: Source, codes: Code[]){
+  async saveFragment(fragment: Fragment, project: Project, source: Source, codes: Code[]) {
     for (let code of codes) {
       if (code.id === '') {
-        var codeRef = await this.codeService.saveCode(code, project.id)
-        code.id = codeRef
+        var newCode = await this.codeService.saveCode(code, project.id)
+        code.id = newCode.id;
       }
       fragment.codes.push(code.id)
     }
@@ -109,21 +100,15 @@ export class FragmentService {
     }
   }
 
-  private logoutUser() {
-    this.areFragmentsLoaded = false;
-    this.fragments = [];
-  }
-
-  drawFragments(editor: Editor, container: ViewContainerRef, fragments: Fragment[], codes: Code[]){
+  drawFragments(editor: Editor, container: ViewContainerRef, fragments: Fragment[], codes: Code[]) {
     let doc = editor.getDoc()
     const factory = this.componentFactoryResolver.resolveComponentFactory(TagElementComponent);
 
-    fragments = fragments.map(
-      fragment => {
-        fragment.rangeObject = this.restoreFragmentRange(doc, fragment)
-        fragment.boundingBox = fragment.rangeObject.getBoundingClientRect()
-        return fragment
-      }).sort((a, b) => b.boundingBox.height - a.boundingBox.height)
+    fragments = fragments.map(fragment => {
+      fragment.rangeObject = this.restoreFragmentRange(doc, fragment)
+      fragment.boundingBox = fragment.rangeObject.getBoundingClientRect()
+      return fragment
+    }).sort((a, b) => b.boundingBox.height - a.boundingBox.height);
 
     var placedFragments: DOMRect[] = []
 
@@ -172,7 +157,7 @@ export class FragmentService {
   }
 
   //auxiliary methods
-  removeAllChildren(parent: Node){
+  removeAllChildren(parent: Node) {
     while (parent.firstChild) {
       parent.removeChild(parent.firstChild)
     }

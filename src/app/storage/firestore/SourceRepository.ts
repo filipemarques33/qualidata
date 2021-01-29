@@ -1,12 +1,10 @@
 import { Injectable } from "@angular/core";
-import { AngularFirestore, DocumentReference } from "@angular/fire/firestore";
-import * as firebase from 'firebase'
+import { AngularFirestore } from "@angular/fire/firestore";
+import firebase from 'firebase/app'
+import 'firebase/firestore';
 
 import { Repository } from '../Repository';
 import Source from '../../data/Source';
-import { InstantiateExpr } from '@angular/compiler';
-import { updateLanguageServiceSourceFile } from "typescript";
-import { SourceService } from "src/app/services/source-service";
 
 @Injectable({
   providedIn: 'root'
@@ -17,27 +15,22 @@ export class SourceRepository extends Repository<Source> {
     super();
   }
 
-  async getById(id: string) {
-    let source = await this.firebase.collection('sources').doc<Source>(id).get().toPromise();
-    return source.data();
+  getAllSources() {
+    return this.firebase.collection<Source>('sources').valueChanges()
   }
 
-  async getByIds(ids: string[]) {
-    let sources = [];
-    for (let i = 0; i < ids.length; i+=10) {
-      let queryArray = ids.slice(i, i+10);
-      let categoriesRef = await this.firebase.collection<Source>('sources').ref.where(firebase.default.firestore.FieldPath.documentId(), 'in', queryArray).get();
-      categoriesRef.docs.forEach(doc => {
-        let source = doc.data();
-        source.id = doc.id;
-        sources.push(source);
-      });
-    }
+  subscribeToSources(ids: string[]){
+    let sources = this.firebase.collection<Source>('sources', ref => ref.where('id','in', ids )).valueChanges()
     return sources;
   }
 
-  getAllSources() {
-    return this.firebase.collection<Source>('sources').valueChanges()
+  async getByIds(ids: string[]) {
+    let sources = await this.firebase.collection<Source>('sources').ref.where(firebase.firestore.FieldPath.documentId(), 'in', ids).get();
+    return sources.docs.map(doc => {
+      let category = doc.data()
+      category.id = doc.id;
+      return category;
+    });
   }
 
   async saveToProject(instance: Source, projId: string) {
@@ -48,9 +41,21 @@ export class SourceRepository extends Repository<Source> {
       'content': instance.content
     })
     await this.firebase.collection('projects').doc(projId).update({
-        sources: firebase.default.firestore.FieldValue.arrayUnion(sourceRef)
+        sources: firebase.firestore.FieldValue.arrayUnion(sourceRef)
     })
-    return;
+    instance.id = sourceRef;
+    return instance;
+  }
+
+  async update(instance: Source) {
+    this.firebase.collection('sources').doc(instance.id).update({
+      'content': instance.content
+    })
+  }
+
+  async getById(id: string) {
+    let source = await this.firebase.collection('sources').doc<Source>(id).get().toPromise();
+    return source.data();
   }
 
   async updateContent(instance: Source) {
@@ -61,14 +66,8 @@ export class SourceRepository extends Repository<Source> {
 
   async addFragment(id: string, fragmentId: string) {
     await this.firebase.collection('sources').doc(id).update({
-      fragments: firebase.default.firestore.FieldValue.arrayUnion(fragmentId)
+      fragments: firebase.firestore.FieldValue.arrayUnion(fragmentId)
     })
   }
-
-  subscribeToSources(ids: string[]){
-    let sources = this.firebase.collection<Source>('sources', ref => ref.where('id','in', ids )).valueChanges()
-    return sources;
-  }
-
 }
 

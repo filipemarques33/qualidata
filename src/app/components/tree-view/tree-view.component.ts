@@ -1,5 +1,5 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { Component, ViewChild, ElementRef, ViewEncapsulation, HostListener, OnInit, OnDestroy, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, ViewChild, ElementRef, ViewEncapsulation, OnInit, OnDestroy, Input } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import CanvasCategory from '../../data/Canvas/CanvasCategory';
@@ -7,8 +7,7 @@ import { NetworkService } from "../../services/network-service";
 import CanvasCode from 'src/app/data/Canvas/CanvasCode';
 import { CanvasNetworkService } from 'src/app/services/canvas-network-service';
 import { Subscription } from 'rxjs';
-import { CategoryService } from 'src/app/services/category-service';
-import { CodeService } from 'src/app/services/code-service';
+import { UserService } from 'src/app/services/user-service';
 
 interface VertexNode {
   id: string;
@@ -16,6 +15,8 @@ interface VertexNode {
   color: string;
   textColor: string;
   children?: VertexNode[];
+  type: 'Category' | 'Code';
+  isVisible: boolean;
 }
 
 @Component({
@@ -45,12 +46,12 @@ export class TreeView implements OnInit, OnDestroy {
   };
 
   isNetworkLoading = false;
+  selectedNode: VertexNode;
 
   constructor(
     public networkService: NetworkService,
     public canvasNetworkService: CanvasNetworkService,
-    public categoryService: CategoryService,
-    public codeService: CodeService
+    public userService: UserService
   ) {}
 
   ngOnInit(): void {
@@ -59,14 +60,14 @@ export class TreeView implements OnInit, OnDestroy {
       this.setupTree();
       this.isNetworkLoading = false;
     });
-    this.loadingCategoriesSubscription = this.categoryService.loadingCategories.subscribe(isLoading => {
+    this.loadingCategoriesSubscription = this.userService.loadingUserCategories.subscribe(isLoading => {
       this.isNetworkLoading = true;
       if (!isLoading) {
         this.setupTree();
         this.isNetworkLoading = false;
       }
     });
-    this.loadingCodesSubscription = this.codeService.loadingCodes.subscribe(isLoading => {
+    this.loadingCodesSubscription = this.userService.loadingUserCodes.subscribe(isLoading => {
       this.isNetworkLoading = true;
       if (!isLoading) {
         this.setupTree();
@@ -75,6 +76,12 @@ export class TreeView implements OnInit, OnDestroy {
     });
     this.dragImg = new Image(0,0);
     this.dragImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+    if (this.canvasNetworkService.areStructuresSetup) {
+      this.isNetworkLoading = true;
+      this.setupTree();
+      this.isNetworkLoading = false;
+    }
   }
 
   ngOnDestroy() {
@@ -90,10 +97,12 @@ export class TreeView implements OnInit, OnDestroy {
     this.draggerRef.nativeElement.style.background = node.color;
     this.draggerRef.nativeElement.style.color = node.textColor;
     this.draggerRef.nativeElement.innerHTML = node.name;
+    this.selectedNode = node;
   }
 
   changeDragElement(event: DragEvent) {
     event.preventDefault();
+    if (this.selectedNode.isVisible) return;
     if (event.x < this.sidenav._getWidth()) {
       this.draggerRef.nativeElement.style.filter = "brightness(70%)";
       this.draggerRef.nativeElement.style.opacity = "0.6";
@@ -109,8 +118,10 @@ export class TreeView implements OnInit, OnDestroy {
 
   hideDragElement(event: DragEvent, node: VertexNode) {
     this.draggerRef.nativeElement.style.display = 'none';
+    if (this.selectedNode.isVisible) return;
 
     if (event.x > this.sidenav._getWidth()) this.canvasNetworkService.renderVertex(node.id, event.x, event.y - 60);
+    node.isVisible = true;
   }
 
   private setupTree() {
@@ -130,7 +141,9 @@ export class TreeView implements OnInit, OnDestroy {
         id: canvasCode.id,
         name: canvasCode.name,
         color: canvasCode.color,
-        textColor: canvasCode.vertex.textColor
+        textColor: canvasCode.vertex.textColor,
+        type: 'Code',
+        isVisible: canvasCode.isVertexRendered
       });
     });
 
@@ -157,15 +170,19 @@ export class TreeView implements OnInit, OnDestroy {
         id: canvasCodeId,
         name: canvasCode.name,
         color: canvasCode.color,
-        textColor: canvasCode.vertex.textColor
+        textColor: canvasCode.vertex.textColor,
+        type: 'Code',
+        isVisible: canvasCode.isVertexRendered
       });
     });
-    let category = {
+    let category: VertexNode = {
       id: canvasCategory.id,
       name: canvasCategory.name,
       color: canvasCategory.color,
       textColor: canvasCategory.vertex.textColor,
-      children: children
+      children: children,
+      type: 'Category',
+      isVisible: canvasCategory.isVertexRendered
     };
     builtCategories.set(canvasCategory.id, {node: category});
     return category;
